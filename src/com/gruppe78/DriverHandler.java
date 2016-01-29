@@ -9,7 +9,7 @@ import java.sql.Driver;
 public class DriverHandler {
     public native void print();
     static{
-        System.loadLibrary("DriverHandler");
+        System.load("/home/student/Gruppe123/IntellijProjects/libDriverHandler.so");
     }
 
 
