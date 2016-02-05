@@ -4,19 +4,15 @@ package com.gruppe78;
  * DriverHandler works as a bridge between the driver library written in C and the rest of the application.
  * It offers enum types and booleans to ensure that the rest of the application works within bounds of the elevator.
  *
- * Compile name.c file as library: cc -G -I/java/include -I/java/include/linux name.c -o -fPIC libHelloWorld.so
+ * GUIDE TO CREATING JNI:
+ * 1) Make h-header.
+ * 2) Write c-file:
+ * 3) Compile c-file as library: cc -G -I/java/include -I/java/include/linux name.c -o -fPIC libHelloWorld.so
  */
-public class DriverHandler {
-    private static final String LIBRARY_PATH = "/home/student/Gruppe123/IntellijProjects/libDriverHandler.so";
-    static{
-        try{
-            System.load(LIBRARY_PATH);
-            driverInit();
-        }catch (UnsatisfiedLinkError error){
-            System.out.println("Could not locate driver library at: "+LIBRARY_PATH);
-        }
-    }
 
+public class DriverHandler {
+
+    //Type enums:
     public enum MotorDirection{
         UP(1),
         STOP(0),
@@ -32,32 +28,138 @@ public class DriverHandler {
         Button(int index){buttonIndex = index;}
     }
 
-    private static native void driverInit();
+    //Final constants:
+    private static final int MOTOR_SPEED = 2800;
+    public static final int N_FLOORS = 4;
+    public static final int N_BUTTONS = 3;
 
-    private static native void setMotorDirection(int direction);
-    public static void setMotorDirection(MotorDirection direction){
-        setMotorDirection(direction.directionIndex);
+    //Helper method for the public API:
+    //TODO: Replace with floorNotValidException.
+    private static boolean isFloorValid(int floor){
+        if(floor > -1 && floor < N_FLOORS){
+            return true;
+        }else{
+            System.out.println("Floor was not valid: "+floor);
+            return false;
+        }
     }
 
-    private static native void setButtonLamp(int btnIndex, int floor, int value);
-    public static void setButtonLamp(Button button, int floor, boolean lampOn){
-        setButtonLamp(button.buttonIndex, floor, lampOn ? 0 : 1);
+    //Public API:
+    public static void init() {
+        if(!DriverBridge.io_init()){
+            System.out.println("Could not initialize IO");
+            return;
+        }
+
+        for (int floor = 0; floor < N_FLOORS; floor++) {
+            for(Button b : Button.values()){
+                setButtonLamp(b, floor, false);
+            }
+        }
+
+        setStopLamp(false);
+        setDoorOpenLamp(false);
+        setFloorIndicator(0);
     }
 
-    public static native void setFloorLamp(int floor);
-
-    private static native void setDoorOpenLamp(boolean lampOn);
-
-    private static native void setStopLamp(boolean lampOn);
-
-    private static native int getButtonSignal(int buttonIndex, int floor);
-    public static boolean getButtonSignal(Button button, int floor){
-        return getButtonSignal(button.buttonIndex,floor) == 1;
+    public static void setMotorDirection(MotorDirection direction) {
+        switch (direction){
+            case STOP:
+                DriverBridge.io_write_analog(DriverChannels.MOTOR, 0);
+                return;
+            case DOWN:
+                System.out.println("Setting motor direction to down");
+                DriverBridge.io_set_bit(DriverChannels.MOTORDIR);
+                DriverBridge.io_write_analog(DriverChannels.MOTOR, MOTOR_SPEED);
+                return;
+            case UP:
+                DriverBridge.io_clear_bit(DriverChannels.MOTORDIR);
+                DriverBridge.io_write_analog(DriverChannels.MOTOR,MOTOR_SPEED);
+        }
     }
 
-    public static native int getElevatorFloorSignal(); //Returns -1 if not at floor.
 
-    private static native boolean isStopPressed();
+    public static void setButtonLamp(Button button, int floor, boolean turnOn) {
+        if(!isFloorValid(floor)){
+            return;
+        }
 
-    private static native boolean isElevatorObstructed();
+        if (turnOn) {
+            DriverBridge.io_set_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor][button.buttonIndex]);
+        } else {
+            DriverBridge.io_clear_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor][button.buttonIndex]);
+        }
+    }
+
+
+    public static void setFloorIndicator(int floor) {
+        if(!isFloorValid(floor)){
+            return;
+        }
+
+        // Binary encoding. One light must always be on.
+        if ((floor & 0x02) == 2) {
+            DriverBridge.io_set_bit(DriverChannels.LIGHT_FLOOR_IND1);
+        } else {
+            DriverBridge.io_clear_bit(DriverChannels.LIGHT_FLOOR_IND1);
+        }
+
+        if ((floor & 0x01) == 1) {
+            DriverBridge.io_set_bit(DriverChannels.LIGHT_FLOOR_IND2);
+        } else {
+            DriverBridge.io_clear_bit(DriverChannels.LIGHT_FLOOR_IND2);
+        }
+    }
+
+
+    public static void setDoorOpenLamp(boolean turnOn) {
+        if (turnOn) {
+            DriverBridge.io_set_bit(DriverChannels.LIGHT_DOOR_OPEN);
+        } else {
+            DriverBridge.io_clear_bit(DriverChannels.LIGHT_DOOR_OPEN);
+        }
+    }
+
+
+    public static void setStopLamp(boolean turnOn) {
+        if (turnOn) {
+            DriverBridge.io_set_bit(DriverChannels.LIGHT_STOP);
+        } else {
+            DriverBridge.io_clear_bit(DriverChannels.LIGHT_STOP);
+        }
+    }
+
+
+
+    public static boolean isButtonPressed(Button button, int floor) {
+        if(!isFloorValid(floor)){
+            return false;
+        }
+
+        return DriverBridge.io_read_bit(DriverChannels.BUTTON_CHANNEL_MATRIX[floor][button.buttonIndex]) == 1;
+    }
+
+    public static int getElevatorFloor() {
+        if (DriverBridge.io_read_bit(DriverChannels.SENSOR_FLOOR1) == 1) {
+            return 0;
+        } else if (DriverBridge.io_read_bit(DriverChannels.SENSOR_FLOOR2) == 1) {
+            return 1;
+        } else if (DriverBridge.io_read_bit(DriverChannels.SENSOR_FLOOR3) == 1) {
+            return 2;
+        } else if (DriverBridge.io_read_bit(DriverChannels.SENSOR_FLOOR4) == 1) {
+            return 3;
+        } else {
+            return -1;
+        }
+    }
+
+
+    public static boolean isStopPressed() {
+        return DriverBridge.io_read_bit(DriverChannels.STOP) == 1;
+    }
+
+    public static boolean isObstructionPressed() {
+        return DriverBridge.io_read_bit(DriverChannels.OBSTRUCTION) == 1;
+    }
+
 }

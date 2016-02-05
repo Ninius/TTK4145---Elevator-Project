@@ -1,10 +1,24 @@
 #include <comedilib.h>
 
 #include "io.h"
-#include "channels.h"
 
 
 static comedi_t *it_g = NULL;
+
+#define PORT_1_SUBDEVICE        2;
+#define PORT_2_SUBDEVICE        3;
+#define PORT_3_SUBDEVICE        3;
+#define PORT_4_SUBDEVICE        3;
+
+#define PORT_1_CHANNEL_OFFSET   0;
+#define PORT_2_CHANNEL_OFFSET   0;
+#define PORT_3_CHANNEL_OFFSET   8;
+#define PORT_4_CHANNEL_OFFSET   16;
+
+#define PORT_1_DIRECTION        COMEDI_INPUT;
+#define PORT_2_DIRECTION        COMEDI_OUTPUT;
+#define PORT_3_DIRECTION        COMEDI_OUTPUT
+#define PORT_4_DIRECTION        COMEDI_INPUT;
 
 
 int io_init(void) {
