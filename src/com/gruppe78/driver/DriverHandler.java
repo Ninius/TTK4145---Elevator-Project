@@ -1,4 +1,4 @@
-package com.gruppe78;
+package com.gruppe78.driver;
 
 /**
  * DriverHandler works as a bridge between the driver library written in C and the rest of the application.
@@ -17,14 +17,14 @@ public class DriverHandler {
         UP(1),
         STOP(0),
         DOWN(-1);
-        private final int directionIndex;
+        public final int directionIndex;
         MotorDirection(int index){directionIndex = index;}
     }
     public enum Button{
         OUTSIDE_UP(0),
         OUTSIDE_DOWN(1),
         INTERNAL(2);
-        private final int buttonIndex;
+        public final int buttonIndex;
         Button(int index){buttonIndex = index;}
     }
 
@@ -45,36 +45,37 @@ public class DriverHandler {
     }
 
     //Public API:
-    public static void init() {
-        if(!DriverBridge.io_init()){
+    public static boolean init() {
+        if(!Driver.io_init()){
             System.out.println("Could not initialize IO");
-            return;
+            return false;
         }
-
+        /*
         for (int floor = 0; floor < N_FLOORS; floor++) {
             for(Button b : Button.values()){
                 setButtonLamp(b, floor, false);
             }
         }
-
+        */
         setStopLamp(false);
         setDoorOpenLamp(false);
         setFloorIndicator(0);
+        return true;
     }
 
     public static void setMotorDirection(MotorDirection direction) {
         switch (direction){
             case STOP:
-                DriverBridge.io_write_analog(DriverChannels.MOTOR, 0);
+                Driver.io_write_analog(DriverChannels.MOTOR, 0);
                 return;
             case DOWN:
                 System.out.println("Setting motor direction to down");
-                DriverBridge.io_set_bit(DriverChannels.MOTORDIR);
-                DriverBridge.io_write_analog(DriverChannels.MOTOR, MOTOR_SPEED);
+                Driver.io_set_bit(DriverChannels.MOTORDIR);
+                Driver.io_write_analog(DriverChannels.MOTOR, MOTOR_SPEED);
                 return;
             case UP:
-                DriverBridge.io_clear_bit(DriverChannels.MOTORDIR);
-                DriverBridge.io_write_analog(DriverChannels.MOTOR,MOTOR_SPEED);
+                Driver.io_clear_bit(DriverChannels.MOTORDIR);
+                Driver.io_write_analog(DriverChannels.MOTOR,MOTOR_SPEED);
         }
     }
 
@@ -85,9 +86,9 @@ public class DriverHandler {
         }
 
         if (turnOn) {
-            DriverBridge.io_set_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor][button.buttonIndex]);
+            Driver.io_set_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor][button.buttonIndex]);
         } else {
-            DriverBridge.io_clear_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor][button.buttonIndex]);
+            Driver.io_clear_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor][button.buttonIndex]);
         }
     }
 
@@ -99,54 +100,52 @@ public class DriverHandler {
 
         // Binary encoding. One light must always be on.
         if ((floor & 0x02) == 2) {
-            DriverBridge.io_set_bit(DriverChannels.LIGHT_FLOOR_IND1);
+            Driver.io_set_bit(DriverChannels.LIGHT_FLOOR_IND1);
         } else {
-            DriverBridge.io_clear_bit(DriverChannels.LIGHT_FLOOR_IND1);
+            Driver.io_clear_bit(DriverChannels.LIGHT_FLOOR_IND1);
         }
 
         if ((floor & 0x01) == 1) {
-            DriverBridge.io_set_bit(DriverChannels.LIGHT_FLOOR_IND2);
+            Driver.io_set_bit(DriverChannels.LIGHT_FLOOR_IND2);
         } else {
-            DriverBridge.io_clear_bit(DriverChannels.LIGHT_FLOOR_IND2);
+            Driver.io_clear_bit(DriverChannels.LIGHT_FLOOR_IND2);
         }
     }
 
 
     public static void setDoorOpenLamp(boolean turnOn) {
         if (turnOn) {
-            DriverBridge.io_set_bit(DriverChannels.LIGHT_DOOR_OPEN);
+            Driver.io_set_bit(DriverChannels.LIGHT_DOOR_OPEN);
         } else {
-            DriverBridge.io_clear_bit(DriverChannels.LIGHT_DOOR_OPEN);
+            Driver.io_clear_bit(DriverChannels.LIGHT_DOOR_OPEN);
         }
     }
 
 
     public static void setStopLamp(boolean turnOn) {
         if (turnOn) {
-            DriverBridge.io_set_bit(DriverChannels.LIGHT_STOP);
+            Driver.io_set_bit(DriverChannels.LIGHT_STOP);
         } else {
-            DriverBridge.io_clear_bit(DriverChannels.LIGHT_STOP);
+            Driver.io_clear_bit(DriverChannels.LIGHT_STOP);
         }
     }
-
-
 
     public static boolean isButtonPressed(Button button, int floor) {
         if(!isFloorValid(floor)){
             return false;
         }
 
-        return DriverBridge.io_read_bit(DriverChannels.BUTTON_CHANNEL_MATRIX[floor][button.buttonIndex]) == 1;
+        return Driver.io_read_bit(DriverChannels.BUTTON_CHANNEL_MATRIX[floor][button.buttonIndex]) == 1;
     }
 
     public static int getElevatorFloor() {
-        if (DriverBridge.io_read_bit(DriverChannels.SENSOR_FLOOR1) == 1) {
+        if (Driver.io_read_bit(DriverChannels.SENSOR_FLOOR1) == 1) {
             return 0;
-        } else if (DriverBridge.io_read_bit(DriverChannels.SENSOR_FLOOR2) == 1) {
+        } else if (Driver.io_read_bit(DriverChannels.SENSOR_FLOOR2) == 1) {
             return 1;
-        } else if (DriverBridge.io_read_bit(DriverChannels.SENSOR_FLOOR3) == 1) {
+        } else if (Driver.io_read_bit(DriverChannels.SENSOR_FLOOR3) == 1) {
             return 2;
-        } else if (DriverBridge.io_read_bit(DriverChannels.SENSOR_FLOOR4) == 1) {
+        } else if (Driver.io_read_bit(DriverChannels.SENSOR_FLOOR4) == 1) {
             return 3;
         } else {
             return -1;
@@ -155,11 +154,11 @@ public class DriverHandler {
 
 
     public static boolean isStopPressed() {
-        return DriverBridge.io_read_bit(DriverChannels.STOP) == 1;
+        return Driver.io_read_bit(DriverChannels.STOP) == 1;
     }
 
     public static boolean isObstructionPressed() {
-        return DriverBridge.io_read_bit(DriverChannels.OBSTRUCTION) == 1;
+        return Driver.io_read_bit(DriverChannels.OBSTRUCTION) == 1;
     }
 
 }

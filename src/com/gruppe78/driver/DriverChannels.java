@@ -1,4 +1,4 @@
-package com.gruppe78;
+package com.gruppe78.driver;
 
 /**
  * Created by student on 05.02.16.

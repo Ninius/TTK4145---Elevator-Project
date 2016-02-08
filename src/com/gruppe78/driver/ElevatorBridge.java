@@ -1,4 +1,4 @@
-package com.gruppe78;
+package com.gruppe78.driver;
 
 /**
  * Created by student on 05.02.16.
@@ -10,7 +10,7 @@ package com.gruppe78;
  *
  *
  */
-public class DriverBridge {
+public class ElevatorBridge {
     private static final String LIBRARY_PATH = "/home/student/Gruppe123/IntellijProjects/src/libDriverBridge.so";
     static{
         try{
