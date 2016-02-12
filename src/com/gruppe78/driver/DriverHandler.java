@@ -11,6 +11,13 @@ package com.gruppe78.driver;
  */
 
 public class DriverHandler {
+    private static Driver sDriver;
+    public enum DriverType{
+        SIMULATOR(SimulatorDriver.get()),
+        ELEVATOR(ElevatorDriver.get());
+        Driver driver;
+        DriverType(Driver driver){this.driver = driver;}
+    }
 
     //Type enums:
     public enum MotorDirection{
@@ -45,8 +52,9 @@ public class DriverHandler {
     }
 
     //Public API:
-    public static boolean init() {
-        if(!Driver.io_init()){
+    public static boolean init(DriverType type) {
+        sDriver = type.driver;
+        if(!sDriver.io_init()){
             System.out.println("Could not initialize IO");
             return false;
         }
@@ -66,16 +74,16 @@ public class DriverHandler {
     public static void setMotorDirection(MotorDirection direction) {
         switch (direction){
             case STOP:
-                Driver.io_write_analog(DriverChannels.MOTOR, 0);
+                sDriver.io_write_analog(DriverChannels.MOTOR, 0);
                 return;
             case DOWN:
                 System.out.println("Setting motor direction to down");
-                Driver.io_set_bit(DriverChannels.MOTORDIR);
-                Driver.io_write_analog(DriverChannels.MOTOR, MOTOR_SPEED);
+                sDriver.io_set_bit(DriverChannels.MOTORDIR);
+                sDriver.io_write_analog(DriverChannels.MOTOR, MOTOR_SPEED);
                 return;
             case UP:
-                Driver.io_clear_bit(DriverChannels.MOTORDIR);
-                Driver.io_write_analog(DriverChannels.MOTOR,MOTOR_SPEED);
+                sDriver.io_clear_bit(DriverChannels.MOTORDIR);
+                sDriver.io_write_analog(DriverChannels.MOTOR,MOTOR_SPEED);
         }
     }
 
@@ -86,9 +94,9 @@ public class DriverHandler {
         }
 
         if (turnOn) {
-            Driver.io_set_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor][button.buttonIndex]);
+            sDriver.io_set_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor][button.buttonIndex]);
         } else {
-            Driver.io_clear_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor][button.buttonIndex]);
+            sDriver.io_clear_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor][button.buttonIndex]);
         }
     }
 
@@ -100,33 +108,33 @@ public class DriverHandler {
 
         // Binary encoding. One light must always be on.
         if ((floor & 0x02) == 2) {
-            Driver.io_set_bit(DriverChannels.LIGHT_FLOOR_IND1);
+            sDriver.io_set_bit(DriverChannels.LIGHT_FLOOR_IND1);
         } else {
-            Driver.io_clear_bit(DriverChannels.LIGHT_FLOOR_IND1);
+            sDriver.io_clear_bit(DriverChannels.LIGHT_FLOOR_IND1);
         }
 
         if ((floor & 0x01) == 1) {
-            Driver.io_set_bit(DriverChannels.LIGHT_FLOOR_IND2);
+            sDriver.io_set_bit(DriverChannels.LIGHT_FLOOR_IND2);
         } else {
-            Driver.io_clear_bit(DriverChannels.LIGHT_FLOOR_IND2);
+            sDriver.io_clear_bit(DriverChannels.LIGHT_FLOOR_IND2);
         }
     }
 
 
     public static void setDoorOpenLamp(boolean turnOn) {
         if (turnOn) {
-            Driver.io_set_bit(DriverChannels.LIGHT_DOOR_OPEN);
+            sDriver.io_set_bit(DriverChannels.LIGHT_DOOR_OPEN);
         } else {
-            Driver.io_clear_bit(DriverChannels.LIGHT_DOOR_OPEN);
+            sDriver.io_clear_bit(DriverChannels.LIGHT_DOOR_OPEN);
         }
     }
 
 
     public static void setStopLamp(boolean turnOn) {
         if (turnOn) {
-            Driver.io_set_bit(DriverChannels.LIGHT_STOP);
+            sDriver.io_set_bit(DriverChannels.LIGHT_STOP);
         } else {
-            Driver.io_clear_bit(DriverChannels.LIGHT_STOP);
+            sDriver.io_clear_bit(DriverChannels.LIGHT_STOP);
         }
     }
 
@@ -135,17 +143,17 @@ public class DriverHandler {
             return false;
         }
 
-        return Driver.io_read_bit(DriverChannels.BUTTON_CHANNEL_MATRIX[floor][button.buttonIndex]) == 1;
+        return sDriver.io_read_bit(DriverChannels.BUTTON_CHANNEL_MATRIX[floor][button.buttonIndex]) == 1;
     }
 
     public static int getElevatorFloor() {
-        if (Driver.io_read_bit(DriverChannels.SENSOR_FLOOR1) == 1) {
+        if (sDriver.io_read_bit(DriverChannels.SENSOR_FLOOR1) == 1) {
             return 0;
-        } else if (Driver.io_read_bit(DriverChannels.SENSOR_FLOOR2) == 1) {
+        } else if (sDriver.io_read_bit(DriverChannels.SENSOR_FLOOR2) == 1) {
             return 1;
-        } else if (Driver.io_read_bit(DriverChannels.SENSOR_FLOOR3) == 1) {
+        } else if (sDriver.io_read_bit(DriverChannels.SENSOR_FLOOR3) == 1) {
             return 2;
-        } else if (Driver.io_read_bit(DriverChannels.SENSOR_FLOOR4) == 1) {
+        } else if (sDriver.io_read_bit(DriverChannels.SENSOR_FLOOR4) == 1) {
             return 3;
         } else {
             return -1;
@@ -154,11 +162,11 @@ public class DriverHandler {
 
 
     public static boolean isStopPressed() {
-        return Driver.io_read_bit(DriverChannels.STOP) == 1;
+        return sDriver.io_read_bit(DriverChannels.STOP) == 1;
     }
 
     public static boolean isObstructionPressed() {
-        return Driver.io_read_bit(DriverChannels.OBSTRUCTION) == 1;
+        return sDriver.io_read_bit(DriverChannels.OBSTRUCTION) == 1;
     }
 
 }
