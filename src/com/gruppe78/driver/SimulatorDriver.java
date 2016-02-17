@@ -1,21 +1,22 @@
 package com.gruppe78.driver;
 
-import javafx.application.Application;
-
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 
 /**
  * The frontend interface to communicate with the simulator.
+ * TODO: Change to UDP.
  */
 public class SimulatorDriver implements Driver{
     private static SimulatorDriver sDriver;
+    private static DatagramSocket simulatorSocket;
+    private static InetAddress simulatorAddress;
+    private static final int RECEIVE_PACKET_SIZE = 1024;
+    private static final int RECEIVE_TIMEOUT = 200;
     private static final int simulatorPortNumber = 9078;
-    private static BufferedReader inFromSim;
-    private static DataOutputStream outToSim;
 
     private SimulatorDriver(){}
 
@@ -28,22 +29,37 @@ public class SimulatorDriver implements Driver{
 
     /* Helpers */
     private static void send(char id, int channel, int value){
+        String message = id+";"+channel+";"+value+";";
+        byte[] sendData = message.getBytes();
+        DatagramPacket packet = new DatagramPacket(sendData,sendData.length,simulatorAddress,simulatorPortNumber);
         try {
-            outToSim.writeBytes(id+";"+channel+";"+value+"\n");
-        } catch (IOException e) {}
+            simulatorSocket.send(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     private static int read(){
+        byte[] receiveData = new byte[RECEIVE_PACKET_SIZE];
+        DatagramPacket receivePacket = new DatagramPacket(receiveData, RECEIVE_PACKET_SIZE);
         try {
-            return Integer.valueOf(inFromSim.readLine());
-        } catch (IOException e) {return -1;}
+            simulatorSocket.receive(receivePacket);
+            String message = new String(receivePacket.getData()).split(";")[0];
+            return Integer.valueOf(message);
+        } catch (SocketTimeoutException e) {
+            System.out.println("Receive timed out");
+            return -Integer.MAX_VALUE;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return -Integer.MAX_VALUE;
+        }
     }
 
     /* Driver Interface implementation */
     public boolean io_init(){
         try {
-            Socket simulatorSocket = new Socket("localhost",simulatorPortNumber);
-            inFromSim = new BufferedReader(new InputStreamReader(simulatorSocket.getInputStream()));
-            outToSim = new DataOutputStream(simulatorSocket.getOutputStream());
+            simulatorSocket = new DatagramSocket();
+            simulatorSocket.setSoTimeout(RECEIVE_TIMEOUT);
+            simulatorAddress = InetAddress.getByName("localhost");
         } catch (IOException e) {
             e.printStackTrace();
             return false;

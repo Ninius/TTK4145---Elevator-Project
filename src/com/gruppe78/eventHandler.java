@@ -1,7 +1,7 @@
 package com.gruppe78;
 
 public class eventHandler{
-    private IOState IO = new IOState(numFloor);
+    /*private IOState IO = new IOState(numFloor);
     public void main(){
         while(1){
         IOState newIO = new IOState(numFloor;
@@ -21,5 +21,5 @@ public class eventHandler{
         }
         IO = newIO;
         }
-    }
+    }*/
 }

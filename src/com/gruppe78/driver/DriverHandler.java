@@ -12,14 +12,14 @@ package com.gruppe78.driver;
 
 public class DriverHandler {
     private static Driver sDriver;
+
+    //Type enums:
     public enum DriverType{
         SIMULATOR(SimulatorDriver.get()),
         ELEVATOR(ElevatorDriver.get());
         Driver driver;
         DriverType(Driver driver){this.driver = driver;}
     }
-
-    //Type enums:
     public enum MotorDirection{
         UP(1),
         STOP(0),
