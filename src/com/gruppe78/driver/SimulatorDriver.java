@@ -8,7 +8,7 @@ import java.net.SocketTimeoutException;
 
 /**
  * The frontend interface to communicate with the simulator.
- * TODO: Change to UDP.
+ * TODO: MAYBE MAKE AN OWN THREAD TO RECEIVE SO DELAY IS SKIPPED.
  */
 public class SimulatorDriver implements Driver{
     private static SimulatorDriver sDriver;
