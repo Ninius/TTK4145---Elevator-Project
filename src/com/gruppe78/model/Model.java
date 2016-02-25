@@ -1,4 +1,6 @@
-package com.gruppe78;
+package com.gruppe78.model;
+
+import com.gruppe78.StateChanged;
 
 import java.util.ArrayList;
 

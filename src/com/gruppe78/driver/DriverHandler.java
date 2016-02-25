@@ -1,5 +1,8 @@
 package com.gruppe78.driver;
 
+import com.gruppe78.model.Button;
+import com.gruppe78.model.MotorDirection;
+
 /**
  * DriverHandler works as a bridge between the driver library written in C and the rest of the application.
  * It offers enum types and booleans to ensure that the rest of the application works within bounds of the elevator.
@@ -12,30 +15,8 @@ package com.gruppe78.driver;
 
 public class DriverHandler {
     private static Driver sDriver;
-
-    //Type enums:
-    public enum DriverType{
-        SIMULATOR(SimulatorDriver.get()),
-        ELEVATOR(ElevatorDriver.get());
-        Driver driver;
-        DriverType(Driver driver){this.driver = driver;}
-    }
-    public enum MotorDirection{
-        UP(1),
-        STOP(0),
-        DOWN(-1);
-        public final int directionIndex;
-        MotorDirection(int index){directionIndex = index;}
-    }
-    public enum Button{
-        OUTSIDE_UP(0),
-        OUTSIDE_DOWN(1),
-        INTERNAL(2);
-        public final int buttonIndex;
-        Button(int index){buttonIndex = index;}
-    }
-
-    //Final constants:
+    public static final int ELEVATOR_DRIVER = 1;
+    public static final int SIMULATOR_DRIVER = 2;
     private static final int MOTOR_SPEED = 2800;
     public static final int N_FLOORS = 4;
     public static final int N_BUTTONS = 3;
@@ -51,20 +32,21 @@ public class DriverHandler {
         }
     }
 
-    //Public API:
-    public static boolean init(DriverType type) {
-        sDriver = type.driver;
+    /***************************************************
+     * PUBLIC API
+     ****************************************************/
+
+    public static boolean init(int type) {
+        sDriver = type == 1 ? ElevatorDriver.get() : SimulatorDriver.get();
         if(!sDriver.io_init()){
-            System.out.println("Could not initialize IO");
             return false;
         }
-        /*
         for (int floor = 0; floor < N_FLOORS; floor++) {
             for(Button b : Button.values()){
                 setButtonLamp(b, floor, false);
             }
         }
-        */
+        setMotorDirection(MotorDirection.STOP);
         setStopLamp(false);
         setDoorOpenLamp(false);
         setFloorIndicator(0);
@@ -77,7 +59,6 @@ public class DriverHandler {
                 sDriver.io_write_analog(DriverChannels.MOTOR, 0);
                 return;
             case DOWN:
-                System.out.println("Setting motor direction to down");
                 sDriver.io_set_bit(DriverChannels.MOTORDIR);
                 sDriver.io_write_analog(DriverChannels.MOTOR, MOTOR_SPEED);
                 return;
@@ -142,7 +123,6 @@ public class DriverHandler {
         if(!isFloorValid(floor)){
             return false;
         }
-
         return sDriver.io_read_bit(DriverChannels.BUTTON_CHANNEL_MATRIX[floor][button.buttonIndex]) == 1;
     }
 

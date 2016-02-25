@@ -8,14 +8,14 @@ import java.net.SocketTimeoutException;
 
 /**
  * The frontend interface to communicate with the simulator.
- * TODO: MAYBE MAKE AN OWN THREAD TO RECEIVE SO DELAY IS SKIPPED.
+ * TODO: Possibly make an own thread so delay is not present.
  */
 public class SimulatorDriver implements Driver{
     private static SimulatorDriver sDriver;
     private static DatagramSocket simulatorSocket;
     private static InetAddress simulatorAddress;
     private static final int RECEIVE_PACKET_SIZE = 1024;
-    private static final int RECEIVE_TIMEOUT = 200;
+    private static final int RECEIVE_TIMEOUT = 100;
     private static final int simulatorPortNumber = 9078;
 
     private SimulatorDriver(){}
@@ -27,7 +27,10 @@ public class SimulatorDriver implements Driver{
         return sDriver;
     }
 
-    /* Helpers */
+    /**************************************
+     * Private helpers
+     *************************************/
+
     private static void send(char id, int channel, int value){
         String message = id+";"+channel+";"+value+";";
         byte[] sendData = message.getBytes();
@@ -54,7 +57,10 @@ public class SimulatorDriver implements Driver{
         }
     }
 
-    /* Driver Interface implementation */
+    /************************************
+     * Driver Interface implementation
+     ************************************/
+
     public boolean io_init(){
         try {
             simulatorSocket = new DatagramSocket();
