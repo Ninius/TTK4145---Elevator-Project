@@ -1,15 +1,14 @@
 package com.gruppe78.model;
 
-/**
- * Created by student on 26.02.16.
- */
 public enum Floor {
     FLOOR0(0),
     FLOOR1(1),
     FLOOR2(2),
     FLOOR3(3);
-    private static final int topFloor = 3;
+
+    public static final int NUMBER_OF_FLOORS = Floor.values().length;
     public int index;
+
     Floor(int index){
         this.index = index;
     }
@@ -17,6 +16,6 @@ public enum Floor {
         return index == 0;
     }
     public boolean isTop(){
-        return index == topFloor;
+        return index + 1 == NUMBER_OF_FLOORS;
     }
 }

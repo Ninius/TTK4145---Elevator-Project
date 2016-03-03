@@ -15,7 +15,7 @@ public class SimulatorDriver implements Driver{
     private static DatagramSocket simulatorSocket;
     private static InetAddress simulatorAddress;
     private static final int RECEIVE_PACKET_SIZE = 1024;
-    private static final int RECEIVE_TIMEOUT = 100;
+    private static final int RECEIVE_TIMEOUT = 50;
     private static final int simulatorPortNumber = 9078;
 
     private SimulatorDriver(){}

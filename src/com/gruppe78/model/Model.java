@@ -1,22 +1,25 @@
 package com.gruppe78.model;
 
-import com.gruppe78.ModelChangedListener;
-
 import java.util.ArrayList;
 
 /**
- * Created by student on 12.02.16.
+ * Because Model is synchronized there should be as little interaction with it as possible.
+ * Maybe replace the Singleton pattern with static methods since there may be little
  */
 public class Model {
     private static Model sModel;
-    ArrayList<ModelChangedListener> listenerList = new ArrayList<>();
-    ArrayList<Elevator> elevators = new ArrayList<>();
+    private ArrayList<ModelChangedListener> listenerList = new ArrayList<>();
+    private ArrayList<Elevator> elevators = new ArrayList<>();
+    private boolean[][] mButtonPressed = new boolean[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS];
+    private Floor mFloor;
 
-    private Model(){
+    /****************************************
+     * Constructing and obtaining of reference.
+     */
 
-    }
+    private Model(){}
 
-    public static Model get(){
+    public synchronized static Model get(){
         if(sModel == null){
             sModel = new Model();
         }
@@ -27,10 +30,19 @@ public class Model {
         listenerList.add(listener);
     }
 
-    public synchronized void setElevatorFloor(int i){
-        //Add change.
+    public synchronized void setButtonPressed(Floor floor, Button button, boolean pressed){
+        if(mButtonPressed[floor.index][button.buttonIndex] == pressed) return;
+        mButtonPressed[floor.index][button.buttonIndex] = pressed;
         for(ModelChangedListener listener : listenerList){
-            listener.onFloorChanged();
+            listener.onButtonPressed(floor, button, pressed);
         }
+    }
+    public synchronized void setFloor(Floor floor){
+        if(floor == mFloor) return;
+        mFloor = floor;
+        for(ModelChangedListener listener : listenerList){
+            listener.onFloorChanged(floor);
+        }
+
     }
 }

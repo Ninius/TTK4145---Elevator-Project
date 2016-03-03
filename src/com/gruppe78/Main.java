@@ -1,6 +1,7 @@
 package com.gruppe78;
 
 import com.gruppe78.driver.DriverHandler;
+import com.gruppe78.model.Floor;
 import com.gruppe78.model.MotorDirection;
 
 public class Main {
@@ -11,10 +12,9 @@ public class Main {
         DriverHandler.setMotorDirection(MotorDirection.UP);
         while (true){
             Thread.sleep(1000);
-            if(DriverHandler.getElevatorFloor() == 3){
+            if(DriverHandler.getElevatorFloor() == Floor.FLOOR3){
                 DriverHandler.setMotorDirection(MotorDirection.STOP);
             }
         }
     }
-
 }
