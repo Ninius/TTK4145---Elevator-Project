@@ -61,14 +61,16 @@ public class DriverHandler {
 
     public static void setButtonLamp(Button button, Floor floor, boolean turnOn) {
         if (turnOn) {
-            sDriver.io_set_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor.index][button.buttonIndex]);
+            sDriver.io_set_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor.index][button.index]);
         } else {
-            sDriver.io_clear_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor.index][button.buttonIndex]);
+            sDriver.io_clear_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor.index][button.index]);
         }
     }
 
 
     public static void setFloorIndicator(Floor floor) {
+        if(floor == null) return;
+
         // Binary encoding. One light must always be on.
         if ((floor.index & 0x02) == 2) {
             sDriver.io_set_bit(DriverChannels.LIGHT_FLOOR_IND1);
@@ -102,7 +104,7 @@ public class DriverHandler {
     }
 
     public static boolean isButtonPressed(Button button, Floor floor) {
-        return sDriver.io_read_bit(DriverChannels.BUTTON_CHANNEL_MATRIX[floor.index][button.buttonIndex]) == 1;
+        return sDriver.io_read_bit(DriverChannels.BUTTON_CHANNEL_MATRIX[floor.index][button.index]) == 1;
     }
 
     public static Floor getElevatorFloor() {

@@ -1,5 +1,6 @@
 package com.gruppe78;
 
+import com.gruppe78.driver.DriverHandler;
 import com.gruppe78.model.Button;
 import com.gruppe78.model.Floor;
 import com.gruppe78.model.Model;
@@ -10,10 +11,11 @@ import com.gruppe78.model.ModelChangedListener;
  */
 public class ElevatorController implements ModelChangedListener {
     private static ElevatorController sElevatorController;
+    private Model mModel;
 
     private ElevatorController(){
-        Model model = Model.get();
-        model.addModelChangedListener(this);
+        mModel = Model.get();
+        mModel.addModelChangedListener(this);
     }
 
     public static ElevatorController get(){
@@ -25,6 +27,9 @@ public class ElevatorController implements ModelChangedListener {
 
     @Override
     public void onFloorChanged(Floor newFloor) {
+        if(newFloor != null){
+            DriverHandler.setFloorIndicator(newFloor);
+        }
 
     }
 

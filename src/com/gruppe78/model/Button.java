@@ -5,6 +5,7 @@ public enum Button{
     OUTSIDE_DOWN(1),
     INTERNAL(2);
     public final static int NUMBER_OF_BUTTONS = Button.values().length;
-    public final int buttonIndex;
-    Button(int index){buttonIndex = index;}
+    public final int index;
+    Button(int index){
+        this.index = index;}
 }
