@@ -11,11 +11,11 @@ import java.util.ArrayList;
  */
 public class CostFunction {
     static Elevator costFunction(int floor, int type){
-        int cost = 0; int direction = 0;
+        /*int cost = 0; int direction = 0;
         int minCost = 10000; Elevator minCostElevator;
         int elevFloor; int elevDir;
 //        ArrayList<Elevator> elevators = Model.getElevatorList();
-        for (Elevator elevator : Model.getElevatorList()) {
+        for (Elevator elevator : Model.get().getElevatorList()) {
             elevFloor = elevator.getFloor();
             elevDir = elevator.getDirection();
             if (floor > elevFloor){
@@ -40,6 +40,6 @@ public class CostFunction {
             }
             cost = 0;
         }
-        return minCostElevator;
+        return minCostElevator;*/ return null;
     }
 }

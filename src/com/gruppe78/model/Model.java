@@ -9,33 +9,20 @@ import java.util.ArrayList;
 public class Model {
     private static Model sModel = new Model();
 
-    private ArrayList<ModelChangedListener> listenerList = new ArrayList<>();
     private ArrayList<Elevator> elevators = new ArrayList<>();
-    private boolean[][] mButtonPressed = new boolean[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS];
-    private Floor mFloor;
+    private Order[][] globalOrders = new Order[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS - 1];
 
     /****************************************************************************************************************
      * Constructing and obtaining of reference. Eager initialization.
      ****************************************************************************************************************/
 
-    private Model(){}
+    private Model(){
+
+    }
 
     public static Model get(){
         return sModel;
     }
-
-
-    /****************************************************************************************************************
-     * Adding and removing of listeners.
-     ****************************************************************************************************************/
-
-    public synchronized void addModelChangedListener(ModelChangedListener listener){
-        listenerList.add(listener);
-    }
-    public synchronized void removeModelChangedListener(ModelChangedListener listener){
-        listenerList.remove(listener);
-    }
-
 
     /***************************************************************************************************************
      * The list of elevators
@@ -49,25 +36,27 @@ public class Model {
         elevators.remove(elevator);
     }
 
-    /***************************************************************************************************************
-     * Elevator specific implementations.
-     ***************************************************************************************************************/
-
-    public synchronized void setButtonPressed(Floor floor, Button button, boolean pressed){
-        if(mButtonPressed[floor.index][button.index] == pressed) return;
-        mButtonPressed[floor.index][button.index] = pressed;
-
-        for(ModelChangedListener listener : listenerList){
-            listener.onButtonPressed(floor, button, pressed);
-        }
+    public synchronized ArrayList<Elevator> getElevatorList(){
+        return elevators;
     }
 
-    public synchronized void setFloor(Floor floor){
-        if(floor == mFloor) return;
-        mFloor = floor;
-
-        for(ModelChangedListener listener : listenerList){
-            listener.onFloorChanged(floor);
+    public synchronized Elevator getLocalElevator(){
+        for(Elevator elevator : elevators){
+            if(elevator.isLocal()) return elevator;
         }
+        return null;
+    }
+
+    /***************************************************************************************************************
+     * Orders
+     ***************************************************************************************************************/
+
+    public void addGlobalOrder(Order order){
+        if(order.getType() == Button.INTERNAL) return;
+        globalOrders[order.getFloor().index][order.getType().index] = order;
+    }
+    public void removeGlobalOrder(Order order){
+        if(order.getType() == Button.INTERNAL) return;
+        globalOrders[order.getFloor().index][order.getType().index] = null;
     }
 }

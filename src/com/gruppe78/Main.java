@@ -1,20 +1,20 @@
 package com.gruppe78;
 
 import com.gruppe78.driver.DriverHandler;
+import com.gruppe78.model.Elevator;
 import com.gruppe78.model.Floor;
+import com.gruppe78.model.Model;
 import com.gruppe78.model.MotorDirection;
 
 public class Main {
+    private static Elevator localElevator;
     public static void main(String[] args) throws InterruptedException {
-        System.out.println("System started");
-        DriverHandler.init(DriverHandler.SIMULATOR_DRIVER);
-        DriverHandler.setDoorOpenLamp(true);
-        DriverHandler.setMotorDirection(MotorDirection.UP);
-        while (true){
-            Thread.sleep(1000);
-            if(DriverHandler.getElevatorFloor() == Floor.FLOOR3){
-                DriverHandler.setMotorDirection(MotorDirection.STOP);
-            }
-        }
+        System.out.println("System initializing");
+        DriverHandler.init(DriverHandler.ELEVATOR_DRIVER);
+        localElevator = new Elevator(true);
+        Model.get().addElevator(localElevator);
+
+        ElevatorEventHandler.init(localElevator);
+        ElevatorController.init(localElevator);
     }
 }
