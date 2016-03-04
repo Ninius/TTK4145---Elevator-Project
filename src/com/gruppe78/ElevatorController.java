@@ -1,10 +1,7 @@
 package com.gruppe78;
 
 import com.gruppe78.driver.DriverHandler;
-import com.gruppe78.model.Button;
-import com.gruppe78.model.Floor;
-import com.gruppe78.model.Model;
-import com.gruppe78.model.ModelChangedListener;
+import com.gruppe78.model.*;
 
 /**
  * Controls the elevator based on changes in model.
@@ -30,11 +27,14 @@ public class ElevatorController implements ModelChangedListener {
         if(newFloor != null){
             DriverHandler.setFloorIndicator(newFloor);
         }
+        if (mModel.getOrder(newFloor) == true){
+            DriverHandler.setMotorDirection(MotorDirection.STOP);
 
+        }
     }
 
     @Override
     public void onButtonPressed(Floor floor, Button button, boolean newValue) {
-
+        DriverHandler.setButtonLamp(button, floor, true);
     }
 }
