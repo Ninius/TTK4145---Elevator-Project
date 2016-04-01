@@ -56,6 +56,11 @@ public class DeviceSearcher {
                     //We have a response
                     Log.i(getClass().getName(), "Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
 
+                    //Check if the message is correct
+                    String message = new String(receivePacket.getData()).trim();
+                    if (message.equals(RESPONSE_MSG)) {
+                        Elevator elevator = new Elevator(false);
+                    }
                     c.close();
                 } catch (IOException ex) {
                     Log.e(getClass().getName(),ex);
