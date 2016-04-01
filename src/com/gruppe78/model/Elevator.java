@@ -1,6 +1,7 @@
 package com.gruppe78.model;
 
 import java.util.ArrayList;
+import java.util.function.ObjDoubleConsumer;
 
 /**
  * Created by student on 26.02.16.
@@ -10,6 +11,7 @@ public class Elevator {
     private boolean[][] mButtonPressed = new boolean[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS];
     private Floor mFloor;
     private Floor mLastFloor;
+    private Object floorLockObject = new Object();
     private boolean mLocal;
 
     private ArrayList<ElevatorEventListener> listenerList = new ArrayList<>();
@@ -43,17 +45,19 @@ public class Elevator {
         }
     }
 
-    public synchronized void setFloor(Floor floor){
-        if(floor == mFloor) return;
-        if(floor == null){
-            mLastFloor = mFloor;
-        }else{
-            mLastFloor = floor;
-        }
-        mFloor = floor;
+    public void setFloor(Floor floor){
+        synchronized (floorLockObject){
+            if(floor == mFloor) return;
+            if(floor == null){
+                mLastFloor = mFloor;
+            }else{
+                mLastFloor = floor;
+            }
+            mFloor = floor;
 
-        for(ElevatorEventListener listener : listenerList){
-            listener.onFloorChanged(floor);
+            for(ElevatorEventListener listener : listenerList){
+                listener.onFloorChanged(floor);
+            }
         }
     }
 
