@@ -47,6 +47,10 @@ public class Elevator {
     public Floor getFloor(){
         return mFloor;
     }
+    public int getDirection(){
+        return mFloor.index - mLastFloor.index;
+    }
+
     public void setFloor(Floor floor){
         synchronized (floorLockObject){
             if(floor == mFloor) return;

@@ -2,19 +2,33 @@ package com.gruppe78;
 
 import com.gruppe78.model.Elevator;
 import com.gruppe78.model.Floor;
-import com.gruppe78.model.Model;
+import com.gruppe78.model.Order;
 
 import java.util.ArrayList;
 
 /**
  * Created by oysteikh on 3/4/16.
  */
+
+//Move to Elevator class?
 public class CostFunction {
-    static Elevator costFunction(int floor, int type){
+    static Elevator costFunction(Order order){
+        /*
+        int orderDirection = order.getFloor().index - mFloor.getFloor().index;
+        int cost = 0;
+        if (orderDirection != this.getDirection() && orderDirection != 0){
+            cost += Floor.NUMBER_OF_FLOORS;
+        }
+        if (orderDirection != this.getDirection()){
+            cost += (Floor.NUMBER_OF_FLOORS-1);
+        }
+        cost += (order.getFloor().index - this.getFloor());
+        return cost;
+        */
+
+        /* Old implementation */
         /*int cost = 0; int direction = 0;
-        int minCost = 10000; Elevator minCostElevator;
         int elevFloor; int elevDir;
-//        ArrayList<Elevator> elevators = Model.getElevatorList();
         for (Elevator elevator : Model.get().getElevatorList()) {
             elevFloor = elevator.getFloor();
             elevDir = elevator.getDirection();
