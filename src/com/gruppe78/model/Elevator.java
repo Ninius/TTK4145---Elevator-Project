@@ -44,7 +44,9 @@ public class Elevator {
             listener.onButtonPressed(floor, button, pressed);
         }
     }
-
+    public Floor getFloor(){
+        return mFloor;
+    }
     public void setFloor(Floor floor){
         synchronized (floorLockObject){
             if(floor == mFloor) return;

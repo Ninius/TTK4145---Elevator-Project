@@ -3,6 +3,8 @@ package com.gruppe78;
 import com.gruppe78.driver.DriverHandler;
 import com.gruppe78.model.*;
 
+import java.sql.Driver;
+
 /**
  * Controls the elevator based on changes in model.
  */
@@ -22,6 +24,11 @@ public class ElevatorController implements ElevatorEventListener {
 
     public static ElevatorController get(){
         return sElevatorController;
+    }
+
+    public void moveElevator(Order order){
+        MotorDirection  orderDirection = MotorDirection.values()[order.getFloor().index - localElevator.getFloor().index];
+        DriverHandler.setMotorDirection(orderDirection);
     }
 
     @Override
