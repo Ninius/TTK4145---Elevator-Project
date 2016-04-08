@@ -10,65 +10,60 @@ import java.net.*;
  * Set up server after discovery.
  */
 public class DeviceSearcher {
+    private static final String NAME = DeviceSearcher.class.getSimpleName();
     private static DeviceSearcher sDeviceSearcher;
     private static final String REQUEST_MSG = "REQUEST_GROUP123";
     private static final String RESPONSE_MSG = "RESPONSE_GROUP123";
-    private static int discoveryPort;
 
     private DatagramSocket socket;
 
-    private DeviceSearcher(int discoveryPort){
-        this.discoveryPort = discoveryPort;
+    private DeviceSearcher(){
     }
 
-    public static void get(int discoveryPort){
+    public static DeviceSearcher get(){
         if(sDeviceSearcher == null){
-            sDeviceSearcher = new DeviceSearcher(discoveryPort);
+            sDeviceSearcher = new DeviceSearcher();
         }
-        sDeviceSearcher = new DeviceSearcher(discoveryPort);
+        return sDeviceSearcher;
     }
 
-    public void searchForElevators(int discoveryPort){
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // Find the server using UDP broadcast
-                try {
-                    //Open a random port to send the package
-                    DatagramSocket c = new DatagramSocket();
-                    c.setBroadcast(true);
+    public void searchForElevators(int discoveryPort, int timeoutLength){
+        try {
+            //Open a random port to send the package
+            DatagramSocket c = new DatagramSocket();
+            c.setBroadcast(true);
+            c.setSoTimeout(timeoutLength);
 
-                    byte[] sendData = REQUEST_MSG.getBytes();
+            byte[] sendData = REQUEST_MSG.getBytes();
 
-                    //Try the 255.255.255.255 first
-                    try {
-                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName("255.255.255.255"), discoveryPort);
-                        c.send(sendPacket);
-                        Log.i(getClass().getName(), "Request packet sent to: 255.255.255.255 (DEFAULT)");
-                    } catch (Exception e) {
-                    }
-
-                    //Wait for a response
-                    byte[] recvBuf = new byte[15000];
-                    DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
-                    c.receive(receivePacket);
-
-                    //We have a response
-                    Log.i(getClass().getName(), "Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
-
-                    //Check if the message is correct
-                    String message = new String(receivePacket.getData()).trim();
-                    if (message.equals(RESPONSE_MSG)) {
-                        Elevator elevator = new Elevator(false);
-                    }
-                    c.close();
-                } catch (IOException ex) {
-                    Log.e(getClass().getName(),ex);
-                }
+            //Try the 255.255.255.255 first
+            try {
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName("255.255.255.255"), discoveryPort);
+                c.send(sendPacket);
+                Log.i(NAME, "Request packet sent to: 255.255.255.255 (DEFAULT)");
+            } catch (Exception e) {
+                Log.e(NAME, e);
             }
-        });
-        thread.setName("Discover Client Thread");
-        thread.start();
+
+            //Wait for a response
+            byte[] recvBuf = new byte[15000];
+            DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
+            c.receive(receivePacket);
+
+            //We have a response
+            Log.i(NAME, "Broadcast response from server: " + receivePacket.getAddress().getHostAddress());
+
+            //Check if the message is correct
+            String message = new String(receivePacket.getData()).trim();
+            if (message.equals(RESPONSE_MSG)) {
+                Log.i(NAME, "Response match!");
+            }
+            c.close();
+        }catch (SocketTimeoutException e){
+            Log.i(NAME,"Timeout on receive");
+        } catch (IOException ex) {
+            Log.e(getClass().getName(),ex);
+        }
     }
 
     public void startElevatorSearchServer(int discoveryPort){
@@ -76,8 +71,8 @@ public class DeviceSearcher {
             @Override
             public void run() {
                 try {
-                    //Keep a socket open to listen to all the UDP trafic that is destined for this port
-                    socket = new DatagramSocket(8888, InetAddress.getByName("0.0.0.0"));
+                    //Keep a socket open to listen to all the UDP traffic that is destined for this port
+                    socket = new DatagramSocket(discoveryPort, InetAddress.getByName("0.0.0.0"));
                     socket.setBroadcast(true);
 
                     while (true) {
