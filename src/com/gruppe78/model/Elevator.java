@@ -90,8 +90,7 @@ public class Elevator {
     public void clearInternalOrder(Floor floor){
         internalOrders[floor.index] = null;
     }
-    public void setFloor(Floor floor){
-        synchronized (floorLockObject){
+    public synchronized void setFloor(Floor floor){
             if(floor == mFloor) return;
             if(floor == null){
                 mLastFloor = mFloor;
@@ -103,7 +102,6 @@ public class Elevator {
             for(ElevatorEventListener listener : listenerList){
                 listener.onFloorChanged(floor);
             }
-        }
     }
 
     public String getIPAddress(){
