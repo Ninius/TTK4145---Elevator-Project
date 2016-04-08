@@ -60,7 +60,7 @@ public class ElevatorController implements ElevatorEventListener {
             DriverHandler.setFloorIndicator(newFloor);
         }
         //Temp
-        if (Model.get().getNextOrder().getFloor() == newFloor){
+        if (Model.get().getNextOrder().getFloor() == newFloor || Model.get().orderExists(newFloor)){
             DriverHandler.setMotorDirection(MotorDirection.STOP);
             DriverHandler.setDoorOpenLamp(true);
             Model.get().getLocalElevator().clearInternalOrder(newFloor);
