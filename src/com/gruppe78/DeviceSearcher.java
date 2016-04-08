@@ -63,7 +63,7 @@ public class DeviceSearcher {
 
                     // Send the broadcast package!
                     try {
-                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, 8888);
+                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, discoveryPort);
                         c.send(sendPacket);
                     } catch (Exception e) {
                     }
