@@ -8,4 +8,16 @@ public enum Button{
     public final int index;
     Button(int index){
         this.index = index;}
+    public int getDirection(){
+        int direction = 0;
+        switch(index){
+            case 0:
+                direction = 1;
+            case 1:
+                direction = -1;
+            case 2:
+                direction = 0;
+        }
+        return direction;
+    }
 }

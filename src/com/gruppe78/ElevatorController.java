@@ -41,11 +41,14 @@ public class ElevatorController implements ElevatorEventListener {
                 }
             }
         });
+        thread.setName("DoorTimer");
+        thread.start();
     }
+
     public void moveElevator(){
         if (!timer){
             DriverHandler.setDoorOpenLamp(false);
-            Order order = Model.get().getLocalElevator().getNextOrder();
+            Order order = Model.get().getNextOrder();
             MotorDirection  orderDirection = MotorDirection.values()[order.getFloor().index - localElevator.getFloor().index];
             DriverHandler.setMotorDirection(orderDirection);
         }
@@ -56,12 +59,18 @@ public class ElevatorController implements ElevatorEventListener {
         if(newFloor != null){
             DriverHandler.setFloorIndicator(newFloor);
         }
-        if (Model.get().getLocalElevator().getNextOrder().getFloor().index == newFloor.index){
+        //Temp
+        if (Model.get().getNextOrder().getFloor() == newFloor){
             DriverHandler.setMotorDirection(MotorDirection.STOP);
             DriverHandler.setDoorOpenLamp(true);
+            Model.get().getLocalElevator().clearInternalOrder(newFloor);
+            Model.get().clearGlobalOrder(newFloor);
+            for(Button button : Button.values()){
+                DriverHandler.setButtonLamp(button, newFloor, false);
+            }
             Timer(3*1000);
-            Model.get().getLocalElevator().clearOrder(newFloor);
-
+            Model.get().getLocalElevator().clearInternalOrder(newFloor);
+            Model.get().clearGlobalOrder(newFloor);
         }
         moveElevator();
 

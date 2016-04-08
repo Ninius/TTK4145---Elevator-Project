@@ -8,7 +8,6 @@ import java.util.ArrayList;
  */
 public class Model {
     private static Model sModel = new Model();
-
     private ArrayList<Elevator> elevators = new ArrayList<>();
     private Order[][] globalOrders = new Order[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS - 1];
 
@@ -47,16 +46,32 @@ public class Model {
         return null;
     }
 
+
+
     /***************************************************************************************************************
      * Orders
      ***************************************************************************************************************/
-
+    public int getNumberOfGlobalOrders(){
+        int orders = 0;
+        for (int i = 0; i < Floor.NUMBER_OF_FLOORS; i++){
+            for (int j = 0; j < Button.NUMBER_OF_BUTTONS - 1; j++){
+                if (globalOrders[i][j] != null && globalOrders[i][j].getElevator() == getLocalElevator()){
+                    orders++;
+                }
+            }
+        }
+        return orders;
+    }
     public void addGlobalOrder(Order order){
         if(order.getType() == Button.INTERNAL) return;
         globalOrders[order.getFloor().index][order.getType().index] = order;
     }
-    public void removeGlobalOrder(Order order){
-        if(order.getType() == Button.INTERNAL) return;
-        globalOrders[order.getFloor().index][order.getType().index] = null;
+    public void clearGlobalOrder(Floor floor){
+        globalOrders[floor.index][0] = null;
+        globalOrders[floor.index][1] = null;
+    }
+    
+    public Order getNextOrder(){
+        return null;
     }
 }

@@ -1,10 +1,7 @@
 package com.gruppe78;
 
 import com.gruppe78.driver.DriverHandler;
-import com.gruppe78.model.Button;
-import com.gruppe78.model.Elevator;
-import com.gruppe78.model.Floor;
-import com.gruppe78.model.Model;
+import com.gruppe78.model.*;
 
 /**
  * Pings the driver for button and sensor events and sends info to Model if something has changed.
@@ -64,7 +61,7 @@ public class ElevatorEventHandler{
                     }
 
                     Floor floor = DriverHandler.getElevatorFloor();
-                    if(lastFloor != floor){
+                    if(lastFloor != floor && floor != null){
                         lastFloor = floor;
                         mElevator.setFloor(floor);
                     }

@@ -2,6 +2,7 @@ package com.gruppe78;
 
 import com.gruppe78.model.Elevator;
 import com.gruppe78.model.Floor;
+import com.gruppe78.model.Model;
 import com.gruppe78.model.Order;
 
 import java.util.ArrayList;
@@ -12,19 +13,20 @@ import java.util.ArrayList;
 
 //Move to Elevator class?
 public class CostFunction {
-    static Elevator costFunction(Order order){
-        /*
-        int orderDirection = order.getFloor().index - mFloor.getFloor().index;
+    static int costFunction(Order order){
+        int orderDirection = order.getFloor().index - Model.get().getLocalElevator().getFloor().index;
         int cost = 0;
-        if (orderDirection != this.getDirection() && orderDirection != 0){
+        if (orderDirection != Model.get().getLocalElevator().getDirection() && orderDirection != 0){
             cost += Floor.NUMBER_OF_FLOORS;
         }
-        if (orderDirection != this.getDirection()){
+        if (order.getType().getDirection() != Model.get().getLocalElevator().getDirection()){
             cost += (Floor.NUMBER_OF_FLOORS-1);
         }
-        cost += (order.getFloor().index - this.getFloor());
+        cost += (order.getFloor().index - Model.get().getLocalElevator().getFloor().index);
+        cost += Model.get().getLocalElevator().getNumberOfInternalOrders()*Floor.NUMBER_OF_FLOORS/2;
+        cost += Model.get().getNumberOfGlobalOrders()*Floor.NUMBER_OF_FLOORS/2;
         return cost;
-        */
+
 
         /* Old implementation */
         /*int cost = 0; int direction = 0;
@@ -54,6 +56,6 @@ public class CostFunction {
             }
             cost = 0;
         }
-        return minCostElevator;*/ return null;
+        return minCostElevator;*/
     }
 }
