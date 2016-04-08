@@ -6,6 +6,7 @@ import com.gruppe78.model.Floor;
 import com.gruppe78.model.Model;
 import com.gruppe78.model.MotorDirection;
 import com.gruppe78.utilities.Log;
+import com.gruppe78.utilities.Utilities;
 
 
 import java.net.Inet4Address;
