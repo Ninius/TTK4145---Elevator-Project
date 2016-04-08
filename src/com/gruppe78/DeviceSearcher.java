@@ -5,6 +5,7 @@ import com.gruppe78.utilities.Log;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Enumeration;
 
 /**
  * Set up server after discovery.
@@ -44,6 +45,34 @@ public class DeviceSearcher {
             } catch (Exception e) {
                 Log.e(NAME, e);
             }
+
+            // Broadcast the message over all the network interfaces
+            Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
+
+                if (networkInterface.isLoopback() || !networkInterface.isUp()) {
+                    continue; // Don't want to broadcast to the loopback interface
+                }
+
+                for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
+                    InetAddress broadcast = interfaceAddress.getBroadcast();
+                    if (broadcast == null) {
+                        continue;
+                    }
+
+                    // Send the broadcast package!
+                    try {
+                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, 8888);
+                        c.send(sendPacket);
+                    } catch (Exception e) {
+                    }
+
+                    System.out.println(getClass().getName() + ">>> Request packet sent to: " + broadcast.getHostAddress() + "; Interface: " + networkInterface.getDisplayName());
+                }
+            }
+
+            System.out.println(getClass().getName() + ">>> Done looping over all network interfaces. Now waiting for a reply!");
 
             //Wait for a response
             byte[] recvBuf = new byte[15000];
