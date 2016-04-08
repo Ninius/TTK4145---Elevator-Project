@@ -62,6 +62,18 @@ public class Model {
         }
         return orders;
     }
+    public boolean orderExists(Floor floor){
+        if (getLocalElevator().getInternalOrder(floor.index) != null){
+            return true;
+        }
+        if (getLocalElevator().getDirection() == 1 && globalOrders[floor.index][0] != null && globalOrders[floor.index][0].getElevator() == getLocalElevator()){
+            return true;
+        }
+        if (getLocalElevator().getDirection() == -1 && globalOrders[floor.index][1] != null && globalOrders[floor.index][1].getElevator() == getLocalElevator()){
+            return true;
+        }
+        return false;
+    }
     public void addGlobalOrder(Order order){
         if(order.getType() == Button.INTERNAL) return;
         if(globalOrders[order.getFloor().index][order.getType().index] != null) return;
