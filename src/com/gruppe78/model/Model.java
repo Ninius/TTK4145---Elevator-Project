@@ -10,7 +10,7 @@ import java.util.List;
  * Maybe replace the Singleton pattern with static methods since there may be little use of polymorphism capabilities here.
  */
 public class Model {
-    private static Model sModel = new Model();
+    private static Model sModel;
     private List<Elevator> mElevators = new ArrayList<>();
     private Order[][] globalOrders = new Order[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS - 1];
 
@@ -22,10 +22,10 @@ public class Model {
         mElevators = Collections.unmodifiableList(elevators);
     }
 
-    public static void init(ArrayList<Elevator> elevators){
-        if(sModel != null) return;
+    public static void init(ArrayList<Elevator> elevators) {
+        if (sModel != null) return;
         sModel = new Model(elevators);
-
+    }
     public static Model get(){
         return sModel;
     }

@@ -78,10 +78,6 @@ public class Elevator {
     public int getDirection(){
         return mFloor.index - mLastFloor.index;
     }
-    public Order getNextOrder(){
-        return orderList.get(0);
-    }
-
 
     //Replace with floor type?
     public void addInternalOrder(Floor floor, Button button){
