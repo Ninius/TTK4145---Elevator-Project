@@ -14,6 +14,10 @@ import java.util.ArrayList;
 //Move to Elevator class?
 public class CostFunction {
     static int costFunction(Order order){
+/*        if (Model.get().getLocalElevator().isActive()  == false){
+            return Integer.MAX_VALUE;
+        }*/
+
         int orderDirection = order.getFloor().index - Model.get().getLocalElevator().getFloor().index;
         int cost = 0;
         if (orderDirection != Model.get().getLocalElevator().getDirection() && orderDirection != 0){
@@ -25,6 +29,7 @@ public class CostFunction {
         cost += (order.getFloor().index - Model.get().getLocalElevator().getFloor().index);
         cost += Model.get().getLocalElevator().getNumberOfInternalOrders()*Floor.NUMBER_OF_FLOORS/2;
         cost += Model.get().getNumberOfGlobalOrders()*Floor.NUMBER_OF_FLOORS/2;
+        //if(
         return cost;
 
 

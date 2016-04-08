@@ -64,7 +64,9 @@ public class Model {
     }
     public void addGlobalOrder(Order order){
         if(order.getType() == Button.INTERNAL) return;
-        //Order newOrder = new Order(costFunction(), order.getType(), order.getFloor());
+        if(globalOrders[order.getFloor().index][order.getType().index] != null) return;
+
+        //Order newOrder = new Order(getMinCostElevator(order), order.getType(), order.getFloor());
         globalOrders[order.getFloor().index][order.getType().index] = order;
     }
     public void clearGlobalOrder(Floor floor){
@@ -86,6 +88,37 @@ public class Model {
     }
     
     public Order getNextOrder(){
+        Order nextOrder;
+        int direction = getLocalElevator().getDirection();
+        if (direction == 0){
+            direction = 1;
+        }
+        if (direction == 1){
+            for (int i = Floor.NUMBER_OF_FLOORS; i >= 0; i--){
+                if (getLocalElevator().getInternalOrder(i) != null){
+                    return getLocalElevator().getInternalOrder(i);
+                }
+                else if(globalOrders[i][0] != null && globalOrders[i][0].getElevator() == getLocalElevator()){
+                    return globalOrders[i][0];
+                }
+                else if(globalOrders[i][1] != null && globalOrders[i][1].getElevator() == getLocalElevator()){
+                    return globalOrders[i][1];
+                }
+            }
+        }
+        else{
+            for (int i = 0; i < Floor.NUMBER_OF_FLOORS; i++){
+                if (getLocalElevator().getInternalOrder(i) != null){
+                    return getLocalElevator().getInternalOrder(i);
+                }
+                else if(globalOrders[i][1] != null && globalOrders[i][1].getElevator() == getLocalElevator()){
+                    return globalOrders[i][1];
+                }
+                else if(globalOrders[i][0] != null && globalOrders[i][0].getElevator() == getLocalElevator()){
+                    return globalOrders[i][0];
+                }
+            }
+        }
         return null;
     }
 }

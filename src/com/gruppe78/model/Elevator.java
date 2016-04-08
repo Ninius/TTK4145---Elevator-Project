@@ -16,7 +16,6 @@ public class Elevator {
     private Object floorLockObject = new Object();
     private String mAddress;
 
-
     private ArrayList<ElevatorEventListener> listenerList = new ArrayList<>();
 
     public Elevator(String address){
@@ -55,7 +54,9 @@ public class Elevator {
     public Floor getFloor(){
         return mFloor;
     }
-
+    public Order getInternalOrder(int floor){
+        return internalOrders[floor];
+    }
     public int getNumberOfInternalOrders(){
         int orders = 0;
         for (int i = 0; i < Floor.NUMBER_OF_FLOORS; i++){
