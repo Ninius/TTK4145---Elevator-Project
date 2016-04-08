@@ -1,5 +1,7 @@
 package com.gruppe78;
 
+import com.gruppe78.model.Order;
+
 public class orderHandler {
     private boolean[] callUp;
     private boolean[] callDown;
@@ -18,6 +20,10 @@ public class orderHandler {
             case 0: localOrders[floor] = true;
             case 1: callUp[floor] = true;
         }
+    }
+
+    public Order getNextOrder(){
+        return null;
     }
     
     public void clearOrder(int dir, int floor){

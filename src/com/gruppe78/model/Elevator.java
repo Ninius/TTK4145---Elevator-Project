@@ -8,6 +8,7 @@ import java.util.function.ObjDoubleConsumer;
  */
 public class Elevator {
     private Order[] internalOrders = new Order[Floor.NUMBER_OF_FLOORS];
+    private ArrayList<Order> orderList = new ArrayList<>();
     private boolean[][] mButtonPressed = new boolean[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS];
     private Floor mFloor;
     private Floor mLastFloor;
@@ -50,7 +51,18 @@ public class Elevator {
     public int getDirection(){
         return mFloor.index - mLastFloor.index;
     }
-
+    public Order getNextOrder(){
+        return orderList.get(0);
+    }
+    //Replace with floor type?
+    public void clearOrder(Floor floor){
+        for (Order order: orderList){
+            if (order.getFloor().index == floor.index){
+                orderList.remove(order);
+                //Network call to clear other elevators?
+            }
+        }
+    }
     public void setFloor(Floor floor){
         synchronized (floorLockObject){
             if(floor == mFloor) return;
