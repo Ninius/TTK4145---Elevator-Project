@@ -27,7 +27,7 @@ public class ElevatorController implements ElevatorEventListener {
         return sElevatorController;
     }
 
-    public void Timer(int time){
+    public void startTimer(int time){
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -68,7 +68,7 @@ public class ElevatorController implements ElevatorEventListener {
             for(Button button : Button.values()){
                 DriverHandler.setButtonLamp(button, newFloor, false);
             }
-            Timer(3*1000);
+            startTimer(3*1000);
             Model.get().getLocalElevator().clearInternalOrder(newFloor);
             Model.get().clearGlobalOrder(newFloor);
         }
