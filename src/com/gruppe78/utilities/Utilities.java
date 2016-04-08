@@ -1,15 +1,11 @@
 package com.gruppe78.utilities;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.Enumeration;
 
-/**
- * Created by student on 08.04.16.
- */
 public class Utilities {
+    private static final String NAME = Utilities.class.getSimpleName();
+
     public static void printNetworkInterfaces(){
         try {
             Enumeration e = NetworkInterface.getNetworkInterfaces();
@@ -27,6 +23,23 @@ public class Utilities {
             e1.printStackTrace();
         }
     }
+    public static String getLocalAddress(){
+        try {
+            Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
+            while(interfaces.hasMoreElements()) {
+                NetworkInterface n = (NetworkInterface) interfaces.nextElement();
+                Enumeration inetAddresses = n.getInetAddresses();
+                while (inetAddresses.hasMoreElements()) {
+                    InetAddress i = (InetAddress) inetAddresses.nextElement();
+                    if(i instanceof Inet4Address && i.getHostAddress().split("\\.")[0].equals("129")) return i.getHostAddress();
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     public static InetAddress getLocalHostLANAddress() throws UnknownHostException {
         try {

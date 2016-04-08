@@ -12,9 +12,13 @@ import java.util.Enumeration;
  */
 public class DeviceSearcher {
     private static final String NAME = DeviceSearcher.class.getSimpleName();
-    private static DeviceSearcher sDeviceSearcher;
     private static final String REQUEST_MSG = "REQUEST_GROUP123";
     private static final String RESPONSE_MSG = "RESPONSE_GROUP123";
+    private static final int DISCOVERY_PORT = 4123;
+    private static final int DISCOVER_TIMEOUT = 5000;
+    private static final String BROADCAST_ADDRESS = "129.241.187.255";
+
+    private static DeviceSearcher sDeviceSearcher;
 
     private DatagramSocket socket;
 
@@ -28,51 +32,26 @@ public class DeviceSearcher {
         return sDeviceSearcher;
     }
 
-    public void searchForElevators(int discoveryPort, int timeoutLength){
+    public void searchForElevators(){
         try {
             //Open a random port to send the package
             DatagramSocket c = new DatagramSocket();
             c.setBroadcast(true);
-            c.setSoTimeout(timeoutLength);
+            c.setSoTimeout(DISCOVER_TIMEOUT);
 
             byte[] sendData = REQUEST_MSG.getBytes();
 
-            //Try the 255.255.255.255 first
             try {
-                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName("255.255.255.255"), discoveryPort);
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(BROADCAST_ADDRESS), DISCOVERY_PORT);
                 c.send(sendPacket);
-                Log.i(NAME, "Request packet sent to: 255.255.255.255 (DEFAULT)");
+                Log.i(NAME, "Request packet sent to: "+BROADCAST_ADDRESS + " - Waiting for reply");
             } catch (Exception e) {
                 Log.e(NAME, e);
             }
 
-            // Broadcast the message over all the network interfaces
-            Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface networkInterface = (NetworkInterface) interfaces.nextElement();
-
-                for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
-                    InetAddress broadcast = interfaceAddress.getBroadcast();
-                    if (broadcast == null) {
-                        continue;
-                    }
-
-                    // Send the broadcast package!
-                    try {
-                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast, discoveryPort);
-                        c.send(sendPacket);
-                    } catch (Exception e) {
-                    }
-
-                    System.out.println(getClass().getName() + ">>> Request packet sent to: " + broadcast.getHostAddress() + "; Interface: " + networkInterface.getDisplayName());
-                }
-            }
-
-            System.out.println(getClass().getName() + ">>> Done looping over all network interfaces. Now waiting for a reply!");
-
             //Wait for a response
-            byte[] recvBuf = new byte[15000];
-            DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
+            byte[] receiveBuffer = new byte[15000];
+            DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
             c.receive(receivePacket);
 
             //We have a response
@@ -91,13 +70,13 @@ public class DeviceSearcher {
         }
     }
 
-    public void startElevatorSearchServer(int discoveryPort){
+    public void startElevatorSearchServer(){
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     //Keep a socket open to listen to all the UDP traffic that is destined for this port
-                    socket = new DatagramSocket(discoveryPort, InetAddress.getByName("0.0.0.0"));
+                    socket = new DatagramSocket(DISCOVERY_PORT, InetAddress.getByName("0.0.0.0"));
                     socket.setBroadcast(true);
 
                     while (true) {

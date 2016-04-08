@@ -1,5 +1,7 @@
 package com.gruppe78.model;
 
+import com.gruppe78.utilities.Utilities;
+
 import java.util.ArrayList;
 import java.util.function.ObjDoubleConsumer;
 
@@ -13,12 +15,12 @@ public class Elevator {
     private Floor mFloor;
     private Floor mLastFloor;
     private Object floorLockObject = new Object();
-    private boolean mLocal;
+    private String mAddress;
 
     private ArrayList<ElevatorEventListener> listenerList = new ArrayList<>();
 
-    public Elevator(boolean local){
-        mLocal = local;
+    public Elevator(String address){
+        mAddress = address;
     }
 
 
@@ -80,8 +82,6 @@ public class Elevator {
     }
 
     public boolean isLocal(){
-        return mLocal;
+        return Utilities.getLocalAddress() != null && Utilities.getLocalAddress() == mAddress;
     }
-
-
 }
