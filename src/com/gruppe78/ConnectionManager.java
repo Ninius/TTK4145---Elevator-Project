@@ -16,7 +16,7 @@ public class ConnectionManager extends Thread{
     public void run() {
         List<Elevator> elevators = Model.get().getElevatorList();
         for(Elevator elevator : elevators){
-            String address = elevator.getAddress();
+            String address = elevator.getIPAddress();
         }
     }
 }

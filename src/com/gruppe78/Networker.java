@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class Networker {
     public static void establishConnections(){
         for(Elevator elevator : Model.get().getElevatorList()){
-            String address = elevator.getAddress();
+            String address = elevator.getIPAddress();
         }
     }
 }

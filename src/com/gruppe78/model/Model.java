@@ -21,7 +21,6 @@ public class Model {
     private Model(ArrayList<Elevator> elevators){
         mElevators = Collections.unmodifiableList(elevators);
     }
-
     public static void init(ArrayList<Elevator> elevators) {
         if (sModel != null) return;
         sModel = new Model(elevators);
