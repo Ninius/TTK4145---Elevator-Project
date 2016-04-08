@@ -2,6 +2,7 @@ package com.gruppe78.model;
 
 import com.gruppe78.utilities.Utilities;
 
+import java.net.DatagramSocket;
 import java.util.ArrayList;
 import java.util.function.ObjDoubleConsumer;
 
@@ -9,17 +10,24 @@ import java.util.function.ObjDoubleConsumer;
  * Created by student on 26.02.16.
  */
 public class Elevator {
+    private final String mIPAddress; //Serves as the unique identifier
+
+    //Orders:
     private Order[] internalOrders = new Order[Floor.NUMBER_OF_FLOORS];
+
     private boolean[][] mButtonPressed = new boolean[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS];
+
+    //Position and direction:
     private Floor mFloor;
     private Floor mLastFloor;
-    private Object floorLockObject = new Object();
-    private String mAddress;
+
+    //Network:
+    private DatagramSocket UDPSocket;
 
     private ArrayList<ElevatorEventListener> listenerList = new ArrayList<>();
 
-    public Elevator(String address){
-        mAddress = address;
+    public Elevator(String IPAddress){
+        mIPAddress = IPAddress;
     }
 
 
@@ -70,6 +78,10 @@ public class Elevator {
     public int getDirection(){
         return mFloor.index - mLastFloor.index;
     }
+    public Order getNextOrder(){
+        return orderList.get(0);
+    }
+
 
     //Replace with floor type?
     public void addInternalOrder(Floor floor, Button button){
@@ -78,7 +90,6 @@ public class Elevator {
     public void clearInternalOrder(Floor floor){
         internalOrders[floor.index] = null;
     }
-
     public void setFloor(Floor floor){
         synchronized (floorLockObject){
             if(floor == mFloor) return;
@@ -95,7 +106,11 @@ public class Elevator {
         }
     }
 
+    public String getIPAddress(){
+        return mIPAddress;
+    }
+
     public boolean isLocal(){
-        return Utilities.getLocalAddress() != null && Utilities.getLocalAddress() == mAddress;
+        return Utilities.getLocalAddress() != null && Utilities.getLocalAddress() == mIPAddress;
     }
 }

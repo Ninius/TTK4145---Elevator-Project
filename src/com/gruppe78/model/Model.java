@@ -1,6 +1,9 @@
 package com.gruppe78.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Because Model is synchronized there should be as little interaction with it as possible.
@@ -8,16 +11,20 @@ import java.util.ArrayList;
  */
 public class Model {
     private static Model sModel = new Model();
-    private ArrayList<Elevator> elevators = new ArrayList<>();
+    private List<Elevator> mElevators = new ArrayList<>();
     private Order[][] globalOrders = new Order[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS - 1];
 
     /****************************************************************************************************************
-     * Constructing and obtaining of reference. Eager initialization.
+     * Constructing and obtaining of reference. Initialization of elevators must be done before.
      ****************************************************************************************************************/
 
-    private Model(){
-
+    private Model(ArrayList<Elevator> elevators){
+        mElevators = Collections.unmodifiableList(elevators);
     }
+
+    public static void init(ArrayList<Elevator> elevators){
+        if(sModel != null) return;
+        sModel = new Model(elevators);
 
     public static Model get(){
         return sModel;
@@ -27,26 +34,16 @@ public class Model {
      * The list of elevators
      ***************************************************************************************************************/
 
-    public synchronized void addElevator(Elevator elevator){
-        elevators.add(elevator);
-    }
-
-    public synchronized void removeElevator(Elevator elevator){
-        elevators.remove(elevator);
-    }
-
-    public synchronized ArrayList<Elevator> getElevatorList(){
-        return elevators;
+    public List<Elevator> getElevatorList(){
+        return mElevators;
     }
 
     public synchronized Elevator getLocalElevator(){
-        for(Elevator elevator : elevators){
+        for(Elevator elevator : mElevators){
             if(elevator.isLocal()) return elevator;
         }
         return null;
     }
-
-
 
     /***************************************************************************************************************
      * Orders
@@ -86,7 +83,7 @@ public class Model {
             }
         }
     }
-    
+
     public Order getNextOrder(){
         Order nextOrder;
         int direction = getLocalElevator().getDirection();
