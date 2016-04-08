@@ -16,7 +16,7 @@ import java.util.Enumeration;
 public class Main {
     //Predefined system variables:
     private static final int DISCOVERY_PORT = 4123;
-    private static final int DISCOVER_TIMEOUT = 2000; //ms
+    private static final int DISCOVER_TIMEOUT = 5000; //ms
 
 
     private static Elevator localElevator;
