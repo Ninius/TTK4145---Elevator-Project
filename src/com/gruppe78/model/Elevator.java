@@ -62,9 +62,12 @@ public class Elevator {
     public Floor getFloor(){
         return mFloor;
     }
+
     public Order getInternalOrder(int floor){
-        return internalOrders[floor];
+        if (floor >= 0 && floor < Floor.NUMBER_OF_FLOORS) return internalOrders[floor];
+        return null;
     }
+
     public int getNumberOfInternalOrders(){
         int orders = 0;
         for (int i = 0; i < Floor.NUMBER_OF_FLOORS; i++){

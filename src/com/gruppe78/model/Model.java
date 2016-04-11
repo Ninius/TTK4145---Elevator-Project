@@ -12,7 +12,7 @@ import java.util.List;
 public class Model {
     private static Model sModel;
     private List<Elevator> mElevators = new ArrayList<>();
-    private Order[][] globalOrders = new Order[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS - 1];
+    private volatile Order[][] globalOrders = new Order[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS - 1];
 
     /****************************************************************************************************************
      * Constructing and obtaining of reference. Initialization of elevators must be done before.
@@ -47,6 +47,23 @@ public class Model {
     /***************************************************************************************************************
      * Orders
      ***************************************************************************************************************/
+    public Order getGlobalOrders(int floor, int type){
+        if (floor >= 0 && floor < Floor.NUMBER_OF_FLOORS && type >= 0 && type < Button.NUMBER_OF_BUTTONS){
+            synchronized (globalOrders){
+                return globalOrders[floor][type];
+            }
+        }
+        else{
+            return null;
+        }
+    }
+    public void setGlobalOrders(Order order, int floor, int type){
+        if (floor >= 0 && floor < Floor.NUMBER_OF_FLOORS && type >= 0 && type < Button.NUMBER_OF_BUTTONS){
+            synchronized (globalOrders){
+                globalOrders[floor][type] = order;
+            }
+        }
+    }
     public int getNumberOfGlobalOrders(){
         int orders = 0;
         for (int i = 0; i < Floor.NUMBER_OF_FLOORS; i++){
