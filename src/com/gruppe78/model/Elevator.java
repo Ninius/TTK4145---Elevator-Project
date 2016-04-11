@@ -94,6 +94,7 @@ public class Elevator {
     public Order getInternalOrder(Floor floor){
         return internalOrders[floor.index];
     }
+
     public int getNumberOfInternalOrders(){
         int orders = 0;
         for (int i = 0; i < Floor.NUMBER_OF_FLOORS; i++){
