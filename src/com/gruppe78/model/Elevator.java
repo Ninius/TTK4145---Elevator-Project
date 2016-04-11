@@ -95,16 +95,6 @@ public class Elevator {
         return internalOrders[floor.index];
     }
 
-    public int getNumberOfInternalOrders(){
-        int orders = 0;
-        for (int i = 0; i < Floor.NUMBER_OF_FLOORS; i++){
-            if (internalOrders[i] != null){
-                orders++;
-            }
-        }
-        return orders;
-    }
-
     public synchronized void setDirection(Direction direction){
         mDirection = direction;
     }

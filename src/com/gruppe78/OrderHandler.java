@@ -1,17 +1,21 @@
 package com.gruppe78;
 
 import com.gruppe78.model.*;
-import com.sun.org.apache.xpath.internal.operations.Mod;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by oysteikh on 4/11/16.
  */
 public class OrderHandler {
-    public static int getNumberOfGlobalOrders(){
+    public int getNumberOfGlobalOrders(Elevator elevator){
         int orders = 0;
-        for (int i = 0; i < Floor.NUMBER_OF_FLOORS; i++){
-            for (int j = 0; j < Button.NUMBER_OF_BUTTONS - 1; j++){
-                if (Model.get().getGlobalOrders(i, j) != null && Model.get().getGlobalOrders(i, j).getElevator() == Model.get().getLocalElevator()){
+        for (Floor floor : Floor.values()){
+            for (Button button : Button.values()){
+                if(button == Button.INTERNAL) continue;
+                if(SystemData.get().getGlobalOrder(floor,button) != null && SystemData.get().getGlobalOrder(floor,button).getElevator() == elevator){
                     orders++;
                 }
             }
@@ -19,85 +23,74 @@ public class OrderHandler {
         return orders;
     }
 
-    public static boolean validOrderExists(Floor floor){
-        if (Model.get().getLocalElevator().getInternalOrder(floor.index) != null){
+    public boolean isOrderOnFloor(Floor floor, Elevator elevator){
+        if (elevator.getInternalOrder(floor) != null){
             return true;
         }
-        if (Model.get().getLocalElevator().getDirection() == 1 && Model.get().getGlobalOrders(floor.index, 0) != null &&
-                Model.get().getGlobalOrders(floor.index, 0).getElevator() == Model.get().getLocalElevator()){
+        if (SystemData.get().getGlobalOrder(floor, Button.OUTSIDE_UP) != null && elevator.getDirection() == Direction.UP && SystemData.get().getGlobalOrder(floor, Button.OUTSIDE_UP).getElevator() == elevator){
             return true;
         }
-        if (Model.get().getLocalElevator().getDirection() == -1 && Model.get().getGlobalOrders(floor.index, 1) != null &&
-                Model.get().getGlobalOrders(floor.index, 1).getElevator() == Model.get().getLocalElevator()){
+        if (SystemData.get().getGlobalOrder(floor, Button.OUTSIDE_DOWN) != null && elevator.getDirection() == Direction.DOWN && SystemData.get().getGlobalOrder(floor, Button.OUTSIDE_DOWN).getElevator() == elevator){
             return true;
         }
         return false;
     }
 
-    public static void addGlobalOrder(Order order){
-        if(order.getType() == Button.INTERNAL) return;
-        if(Model.get().getGlobalOrders(order.getFloor().index, order.getType().index)!= null) return;
-
-        //Order newOrder = new Order(getMinCostElevator(order), order.getType(), order.getFloor());
-        Model.get().setGlobalOrders(order, order.getFloor().index, order.getType().index);
-    }
-
-    public static void clearGlobalOrder(Floor floor){
-        Model.get().setGlobalOrders(null, floor.index, 0);
-        Model.get().setGlobalOrders(null, floor.index, 1);
-    }
-
     public static void reassignElevatorOrders(Elevator elevator){
-        for (int i = 0; i < Floor.NUMBER_OF_FLOORS; i++){
-            for (int j = 0; j < Button.NUMBER_OF_BUTTONS - 1; j++){
-                if (Model.get().getGlobalOrders(i, j) != null && Model.get().getGlobalOrders(i, j).getElevator() == elevator){
-                    Order tempOrder = Model.get().getGlobalOrders(i, j);
-                    Model.get().setGlobalOrders(null, i, 1);
-                    addGlobalOrder(tempOrder);
+        SystemData data = SystemData.get();
+        for (Floor floor : Floor.values()){
+            for (Button button : Button.values()){
+                if(button == Button.INTERNAL) continue;
+                if (data.getGlobalOrder(floor, button) != null && data.getGlobalOrder(floor, button).getElevator() == elevator){
+                    Order tempOrder = data.getGlobalOrder(floor, button);
+                    data.clearGlobalOrder(floor, button);
+                    data.addGlobalOrder(tempOrder);
                     //Reassign order
                 }
             }
         }
     }
 
-    public static Order getNextOrder(){
-        Order nextOrder;
-        int direction = Model.get().getLocalElevator().getDirection();
-        if (direction == 0){
-            direction = 1;
+    public Order getNextOrder(Elevator elevator){ //TODO: Check.
+        SystemData data = SystemData.get();
+        Direction direction = elevator.getDirection();
+        if (direction == Direction.NONE){
+            direction = Direction.UP;
         }
-        if (direction == 1){
-            for (int i = Floor.NUMBER_OF_FLOORS; i >= 0; i--){
-                if (Model.get().getLocalElevator().getInternalOrder(i) != null){
-                    return Model.get().getLocalElevator().getInternalOrder(i);
+        if (direction == Direction.UP){
+            List<Floor> reverseValues = Arrays.asList(Floor.values());
+            Collections.reverse(reverseValues);
+            for (Floor floor : reverseValues){
+                if (elevator.getInternalOrder(floor) != null){
+                    return elevator.getInternalOrder(floor);
                 }
-                else if(Model.get().getGlobalOrders(i, 0) != null && Model.get().getGlobalOrders(i, 0).getElevator() == Model.get().getLocalElevator()){
-                    return Model.get().getGlobalOrders(i, 0);
+                else if(data.getGlobalOrder(floor, Button.OUTSIDE_DOWN) != null && data.getGlobalOrder(floor, Button.OUTSIDE_DOWN).getElevator() == elevator){
+                    return data.getGlobalOrder(floor, Button.OUTSIDE_DOWN);
                 }
-                else if(Model.get().getGlobalOrders(i, 1) != null && Model.get().getGlobalOrders(i, 1).getElevator() == Model.get().getLocalElevator()){
-                    return Model.get().getGlobalOrders(i, 1);
+                else if(data.getGlobalOrder(floor, Button.OUTSIDE_UP) != null && data.getGlobalOrder(floor, Button.OUTSIDE_UP).getElevator() == elevator){
+                    return data.getGlobalOrder(floor, Button.OUTSIDE_UP);
                 }
             }
         }
         else{
-            for (int i = 0; i < Floor.NUMBER_OF_FLOORS; i++){
-                if (Model.get().getLocalElevator().getInternalOrder(i) != null){
-                    return Model.get().getLocalElevator().getInternalOrder(i);
+            for (Floor floor : Floor.values()){
+                if (elevator.getInternalOrder(floor) != null){
+                    return elevator.getInternalOrder(floor);
                 }
-                else if(Model.get().getGlobalOrders(i, 1) != null && Model.get().getGlobalOrders(i, 1).getElevator() == Model.get().getLocalElevator()){
-                    return Model.get().getGlobalOrders(i, 1);
+                else if(data.getGlobalOrder(floor, Button.OUTSIDE_DOWN) != null && data.getGlobalOrder(floor,Button.OUTSIDE_DOWN).getElevator() == elevator){
+                    return data.getGlobalOrder(floor, Button.OUTSIDE_DOWN);
                 }
-                else if(Model.get().getGlobalOrders(i, 0) != null && Model.get().getGlobalOrders(i, 0).getElevator() == Model.get().getLocalElevator()){
-                    return Model.get().getGlobalOrders(i, 0);
+                else if(data.getGlobalOrder(floor, Button.OUTSIDE_UP) != null && data.getGlobalOrder(floor, Button.OUTSIDE_UP).getElevator() == elevator){
+                    return data.getGlobalOrder(floor, Button.OUTSIDE_UP);
                 }
             }
         }
         return null;
     }
-    public static int getNumberOfInternalOrders(){
+    public int getNumberOfInternalOrders(Elevator elevator){
         int orders = 0;
-        for (int i = 0; i < Floor.NUMBER_OF_FLOORS; i++){
-            if (Model.get().getLocalElevator().getInternalOrder(i) != null){
+        for (Floor floor : Floor.values()){
+            if (elevator.getInternalOrder(floor) != null){
                 orders++;
             }
         }
