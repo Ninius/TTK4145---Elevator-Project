@@ -4,15 +4,15 @@ import com.gruppe78.driver.DriverHandler;
 import com.gruppe78.model.*;
 
 /**
- * Pings the driver for button and sensor events and sends info to Model if something has changed.
+ * Pings the driver for button and sensor events and sends info to SystemData if something has changed.
  *
  * Possibly start two independent threads for the pinging.
  */
 @SuppressWarnings("InfiniteLoopStatement")
-public class ElevatorEventHandler{
-    private static ElevatorEventHandler sElevatorEventHandler;
+public class LocalElevatorIOChecker {
+    private static LocalElevatorIOChecker sLocalElevatorIOChecker;
     private Elevator mElevator;
-    private IOPingerThread thread;
+    private IOCheckThread thread;
 
     //Settings:
     private static final long SLEEP_TIME = 200;
@@ -26,21 +26,22 @@ public class ElevatorEventHandler{
      * Constructing, initializing and referencing
      ******************************************************************************************************/
 
-    private ElevatorEventHandler(Elevator elevator){
-        mElevator = elevator;
-        thread = new IOPingerThread();
+    private LocalElevatorIOChecker(){
+        mElevator = SystemData.get().getLocalElevator();
+        thread = new IOCheckThread();
+        thread.setName("IOCheckThread");
         thread.start();
     }
-    public static void init(Elevator localElevator){
-        if(sElevatorEventHandler != null) return;
-        sElevatorEventHandler = new ElevatorEventHandler(localElevator);
+    public static void init(){
+        if(sLocalElevatorIOChecker != null) return;
+        sLocalElevatorIOChecker = new LocalElevatorIOChecker();
     }
 
-    public static ElevatorEventHandler get(){
-        return sElevatorEventHandler;
+    public static LocalElevatorIOChecker get(){
+        return sLocalElevatorIOChecker;
     }
 
-    private class IOPingerThread extends Thread{
+    private class IOCheckThread extends Thread{
 
         @Override
         public void run(){

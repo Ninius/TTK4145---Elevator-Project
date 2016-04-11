@@ -1,23 +1,30 @@
 package com.gruppe78.model;
 
 public enum Button{
-    OUTSIDE_UP(0),
-    OUTSIDE_DOWN(1),
-    INTERNAL(2);
+    OUTSIDE_UP(0, true, false),
+    OUTSIDE_DOWN(1, false, true),
+    INTERNAL(2, true, true);
+
     public final static int NUMBER_OF_BUTTONS = Button.values().length;
+
     public final int index;
-    Button(int index){
-        this.index = index;}
-    public int getDirection(){
-        int direction = 0;
-        switch(index){
-            case 0:
-                direction = 1;
-            case 1:
-                direction = -1;
-            case 2:
-                direction = 0;
-        }
-        return direction;
+    public final boolean up;
+    public final boolean down;
+    Button(int index, boolean up, boolean down){
+        this.index = index;
+        this.up = up;
+        this.down = down;
+    }
+
+    public boolean matchDirection(Direction direction){
+        if(direction == Direction.DOWN) return down;
+        if(direction == Direction.UP) return up;
+        return true;
+    }
+    public boolean isUp(){
+        return up;
+    }
+    public boolean isDown(){
+        return down;
     }
 }

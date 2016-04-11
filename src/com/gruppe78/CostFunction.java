@@ -1,11 +1,6 @@
 package com.gruppe78;
 
-import com.gruppe78.model.Elevator;
-import com.gruppe78.model.Floor;
-import com.gruppe78.model.Model;
-import com.gruppe78.model.Order;
-
-import java.util.ArrayList;
+import com.gruppe78.model.*;
 
 /**
  * Created by oysteikh on 3/4/16.
@@ -14,29 +9,29 @@ import java.util.ArrayList;
 //Move to Elevator class?
 public class CostFunction {
     static int costFunction(Order order){
-/*        if (Model.get().getLocalElevator().isActive()  == false){
+        /*if (SystemData.get().getLocalElevator().isActive()  == false){
             return Integer.MAX_VALUE;
         }*/
-
-        int orderDirection = order.getFloor().index - Model.get().getLocalElevator().getFloor().index;
         int cost = 0;
-        if (orderDirection != Model.get().getLocalElevator().getDirection() && orderDirection != 0){
+        Elevator localElevator = SystemData.get().getLocalElevator();
+
+        Direction directionToOrder = localElevator.getLastKnownFloor().directionTo(order.getFloor());
+        if (directionToOrder != localElevator.getDirection() && directionToOrder != Direction.NONE){
             cost += Floor.NUMBER_OF_FLOORS;
         }
-        if (order.getType().getDirection() != Model.get().getLocalElevator().getDirection()){
+        if (!order.getType().matchDirection(localElevator.getDirection())){
             cost += (Floor.NUMBER_OF_FLOORS-1);
         }
-        cost += (order.getFloor().index - Model.get().getLocalElevator().getFloor().index);
-        cost += Model.get().getLocalElevator().getNumberOfInternalOrders()*Floor.NUMBER_OF_FLOORS/2;
-        cost += Model.get().getNumberOfGlobalOrders()*Floor.NUMBER_OF_FLOORS/2;
-        //if(
+        cost += localElevator.getLastKnownFloor().lengthTo(order.getFloor());
+        cost += SystemData.get().getLocalElevator().getNumberOfInternalOrders()*Floor.NUMBER_OF_FLOORS/2;
+        cost += SystemData.get().getNumberOfGlobalOrders(localElevator)*Floor.NUMBER_OF_FLOORS/2;
         return cost;
 
 
         /* Old implementation */
         /*int cost = 0; int direction = 0;
         int elevFloor; int elevDir;
-        for (Elevator elevator : Model.get().getElevatorList()) {
+        for (Elevator elevator : SystemData.get().getElevatorList()) {
             elevFloor = elevator.getFloor();
             elevDir = elevator.getDirection();
             if (floor > elevFloor){

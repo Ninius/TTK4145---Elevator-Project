@@ -1,35 +1,33 @@
 package com.gruppe78.model;
 
-import com.gruppe78.utilities.Utilities;
-
-import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.function.ObjDoubleConsumer;
 
-/**
- * Created by student on 26.02.16.
- */
 public class Elevator {
-    private final String mIPAddress; //Serves as the unique identifier
+    private final InetAddress mInetAddress;
+    private final boolean mLocal;
 
-    //Orders:
     private Order[] internalOrders = new Order[Floor.NUMBER_OF_FLOORS];
-
     private boolean[][] mButtonPressed = new boolean[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS];
 
     //Position and direction:
     private Floor mFloor;
-    private Floor mLastFloor;
+    private Floor mLastKnownFloor;
+    private Direction mDirection;
 
-    //Network:
-    private DatagramSocket UDPSocket;
+    //Status:
+    private volatile boolean mConnected = false;
+    private volatile boolean mOperable = true;
+    private volatile long lastConnect = 0;
 
+    //Listeners:
     private ArrayList<ElevatorEventListener> listenerList = new ArrayList<>();
+    private ArrayList<ElevatorNetworkListener> networkListeners = new ArrayList<>();
 
-    public Elevator(String IPAddress){
-        mIPAddress = IPAddress;
+    public Elevator(InetAddress InetAddress, boolean local){
+        mInetAddress = InetAddress;
+        mLocal = local;
     }
-
 
     /****************************************************************************************************************
      * Adding and removing of listeners.
@@ -40,6 +38,12 @@ public class Elevator {
     }
     public synchronized void removeElevatorEventListener(ElevatorEventListener listener){
         listenerList.remove(listener);
+    }
+    public synchronized void addElevatorNetworkListener(ElevatorNetworkListener listener){
+        networkListeners.add(listener);
+    }
+    public synchronized void removeElevatorNetworkListener(ElevatorNetworkListener listener){
+        networkListeners.remove(listener);
     }
 
     /***************************************************************************************************************
@@ -53,17 +57,42 @@ public class Elevator {
             addInternalOrder(floor, button);
         }
         else{
-            Model.get().addGlobalOrder(new Order(this, button, floor));
+            SystemData.get().addGlobalOrder(new Order(this, button, floor));
         }
         for(ElevatorEventListener listener : listenerList){
             listener.onButtonPressed(floor, button, pressed);
         }
     }
-    public Floor getFloor(){
+
+    /**************************************************************************************************************
+     * Position and movement
+     **************************************************************************************************************/
+    public synchronized Floor getLastKnownFloor(){
+        return mLastKnownFloor;
+    }
+    public synchronized Floor getFloor(){
         return mFloor;
     }
-    public Order getInternalOrder(int floor){
-        return internalOrders[floor];
+    public synchronized void setFloor(Floor newFloor){
+        if(newFloor == mFloor) return;
+        if(newFloor == null){
+            mLastKnownFloor = mFloor;
+        }else{
+            mLastKnownFloor = newFloor;
+        }
+        mFloor = newFloor;
+
+        for(ElevatorEventListener listener : listenerList){
+            listener.onFloorChanged(newFloor);
+        }
+    }
+
+    /**************************************************************************************************************
+     * Internal orders
+     **************************************************************************************************************/
+
+    public Order getInternalOrder(Floor floor){
+        return internalOrders[floor.index];
     }
     public int getNumberOfInternalOrders(){
         int orders = 0;
@@ -75,8 +104,11 @@ public class Elevator {
         return orders;
     }
 
-    public int getDirection(){
-        return mFloor.index - mLastFloor.index;
+    public synchronized void setDirection(Direction direction){
+        mDirection = direction;
+    }
+    public synchronized Direction getDirection(){
+        return mDirection;
     }
 
     //Replace with floor type?
@@ -86,25 +118,32 @@ public class Elevator {
     public void clearInternalOrder(Floor floor){
         internalOrders[floor.index] = null;
     }
-    public synchronized void setFloor(Floor floor){
-            if(floor == mFloor) return;
-            if(floor == null){
-                mLastFloor = mFloor;
-            }else{
-                mLastFloor = floor;
-            }
-            mFloor = floor;
-
-            for(ElevatorEventListener listener : listenerList){
-                listener.onFloorChanged(floor);
-            }
-    }
-
-    public String getIPAddress(){
-        return mIPAddress;
-    }
 
     public boolean isLocal(){
-        return Utilities.getLocalAddress() != null && Utilities.getLocalAddress() == mIPAddress;
+        return mLocal;
+    }
+
+    /*************************************************
+     * Connection
+     *************************************************/
+
+    public InetAddress getInetAddress(){
+        return mInetAddress;
+    }
+
+    public void setConnected(boolean connected){
+        if(connected) lastConnect = System.currentTimeMillis();
+
+        if(connected == mConnected) return;
+        mConnected = connected;
+        for(ElevatorNetworkListener listener : networkListeners){
+            listener.onConnectionChanged(mConnected);
+        }
+    }
+    public boolean isConnected(){
+        return mConnected;
+    }
+    public long getLastConnectTime(){
+        return lastConnect;
     }
 }

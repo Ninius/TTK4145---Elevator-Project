@@ -2,7 +2,7 @@ package com.gruppe78.driver;
 
 import com.gruppe78.model.Button;
 import com.gruppe78.model.Floor;
-import com.gruppe78.model.MotorDirection;
+import com.gruppe78.model.Direction;
 
 /**
  * DriverHandler works as a bridge between the driver library written in C and the rest of the application.
@@ -36,16 +36,16 @@ public class DriverHandler {
                 setButtonLamp(b, floor, false);
             }
         }
-        setMotorDirection(MotorDirection.STOP);
+        setMotorDirection(Direction.NONE);
         setStopLamp(false);
         setDoorOpenLamp(false);
         setFloorIndicator(Floor.FLOOR0);
         return true;
     }
 
-    public static void setMotorDirection(MotorDirection direction) {
+    public static void setMotorDirection(Direction direction) {
         switch (direction){
-            case STOP:
+            case NONE:
                 sDriver.io_write_analog(DriverChannels.MOTOR, 0);
                 return;
             case DOWN:

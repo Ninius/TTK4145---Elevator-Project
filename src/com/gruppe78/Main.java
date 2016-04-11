@@ -2,57 +2,61 @@ package com.gruppe78;
 
 import com.gruppe78.driver.DriverHandler;
 import com.gruppe78.model.Elevator;
-import com.gruppe78.model.Floor;
-import com.gruppe78.model.Model;
-import com.gruppe78.model.MotorDirection;
+import com.gruppe78.model.SystemData;
 import com.gruppe78.utilities.Log;
 import com.gruppe78.utilities.Utilities;
 
 
-import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
 
 public class Main {
     private static final String NAME = Main.class.getSimpleName();
-    private static final String[] elevatorAddressList = new String[]{};
 
-    private ConnectionManager connectionManager;
+    //System settings:
+    public static final String SYSTEM_ADDRESS_PREFIX = "129";
+    private static final String[] ELEVATOR_ADDRESS_LIST = new String[]{};
 
+    //References to components to prevent them from being garbage collected.
+    private static ConnectedManager connectedManager;
+    private static SystemData systemData;
 
     public static void main(String[] args) throws InterruptedException {
-        Log.i(Main.class.getSimpleName(), "System started");
+        Log.i(NAME, "System started");
 
-        DriverHandler.init(DriverHandler.ELEVATOR_DRIVER);
-
-        ArrayList<Elevator> elevators = new ArrayList<>();
-
-        String localAddress = Utilities.getLocalAddress();
-        if(localAddress == null){
-            Log.i(NAME,"Could not get local address, system shutting down.");
+        //Initializing driver
+        boolean initialized = DriverHandler.init(DriverHandler.ELEVATOR_DRIVER);
+        if(!initialized){
+            Log.i(NAME, "Could not initialize the driver. System shutting down.");
             return;
         }
-        Elevator localElevator = new Elevator(localAddress);
-        elevators.add(localElevator);
 
-        //Initialize potential other elevators:
-        for(String address : elevatorAddressList){
-            elevators.add(new Elevator(address));
+        //Retrieving the address of this machine. Maybe include a more safe/correct way to decide if connected?
+        InetAddress localAddress = Utilities.getLocalAddress(SYSTEM_ADDRESS_PREFIX);
+        while(localAddress == null){
+            Log.i(NAME, "Could not retrieve the IP address of this machine. System sleeping until connected.");
+            Thread.sleep(1000);
+            localAddress = Utilities.getLocalAddress(SYSTEM_ADDRESS_PREFIX);
         }
 
+        initializeData(localAddress);
 
-        Model.init(elevators);
-
-
-        ConnectionManager connectionManager = new ConnectionManager();
-        connectionManager.start();
+        connectedManager = ConnectedManager.get();
+        connectedManager.start();
 
         //Loading information on the system:
-        ElevatorEventHandler.init(localElevator);
-        ElevatorController.init(localElevator);
+        LocalElevatorIOChecker.init();
+        ElevatorController.init();
+    }
+
+    private static void initializeData(InetAddress localAddress){
+        ArrayList<Elevator> elevators = new ArrayList<>();
+        elevators.add(new Elevator(localAddress, true));
+        for(String address : ELEVATOR_ADDRESS_LIST){
+            InetAddress inetAddress = Utilities.getInetAddress(address);
+            if(!inetAddress.equals(localAddress)) elevators.add(new Elevator(inetAddress, false));
+        }
+        SystemData.init(elevators);
+        systemData = SystemData.get();
     }
 }

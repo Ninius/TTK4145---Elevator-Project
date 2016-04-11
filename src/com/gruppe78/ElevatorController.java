@@ -4,28 +4,29 @@ import com.gruppe78.driver.DriverHandler;
 import com.gruppe78.model.*;
 import com.gruppe78.utilities.Log;
 
-import java.sql.Driver;
-
 /**
  * Controls the elevator based on changes in model.
  */
 public class ElevatorController implements ElevatorEventListener {
     private static ElevatorController sElevatorController;
-    private Elevator localElevator;
     private volatile boolean timer;
-    private ElevatorController(Elevator elevator){
-        localElevator = elevator;
-        localElevator.addElevatorEventListener(this);
+    private final Elevator elevator;
+
+    private ElevatorController(){
+        elevator = SystemData.get().getLocalElevator();
+        elevator.addElevatorEventListener(this);
     }
 
-    public static void init(Elevator elevator){
+    public static void init(){
         if(sElevatorController != null) return;
-        sElevatorController = new ElevatorController(elevator);
+        sElevatorController = new ElevatorController();
     }
 
     public static ElevatorController get(){
         return sElevatorController;
     }
+
+
 
     public void startTimer(int time){
         Thread thread = new Thread(new Runnable() {
@@ -48,8 +49,8 @@ public class ElevatorController implements ElevatorEventListener {
     public void moveElevator(){
         if (!timer){
             DriverHandler.setDoorOpenLamp(false);
-            Order order = Model.get().getNextOrder();
-            MotorDirection  orderDirection = MotorDirection.values()[order.getFloor().index - localElevator.getFloor().index];
+            Order order = SystemData.get().getNextOrder(elevator);
+            Direction orderDirection = elevator.getFloor().directionTo(order.getFloor());
             DriverHandler.setMotorDirection(orderDirection);
         }
     }
@@ -60,17 +61,17 @@ public class ElevatorController implements ElevatorEventListener {
             DriverHandler.setFloorIndicator(newFloor);
         }
         //Temp
-        if (Model.get().getNextOrder().getFloor() == newFloor || Model.get().orderExists(newFloor)){
-            DriverHandler.setMotorDirection(MotorDirection.STOP);
+        if (SystemData.get().getNextOrder(elevator).getFloor() == newFloor || SystemData.get().isOrderOnFloor(newFloor, elevator)){
+            DriverHandler.setMotorDirection(Direction.NONE);
             DriverHandler.setDoorOpenLamp(true);
-            Model.get().getLocalElevator().clearInternalOrder(newFloor);
-            Model.get().clearGlobalOrder(newFloor);
+            SystemData.get().getLocalElevator().clearInternalOrder(newFloor);
+            SystemData.get().clearGlobalOrder(newFloor);
             for(Button button : Button.values()){
                 DriverHandler.setButtonLamp(button, newFloor, false);
             }
             startTimer(3*1000);
-            Model.get().getLocalElevator().clearInternalOrder(newFloor);
-            Model.get().clearGlobalOrder(newFloor);
+            elevator.clearInternalOrder(newFloor);
+            SystemData.get().clearGlobalOrder(newFloor);
         }
         moveElevator();
 
