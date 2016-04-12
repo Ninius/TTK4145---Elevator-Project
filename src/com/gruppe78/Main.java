@@ -20,7 +20,7 @@ public class Main {
     //References to components to prevent them from being garbage collected.
     private static ConnectedManager connectedManager;
     private static SystemData systemData;
-    private static AliveManager aliveManager;
+      //private static AliveManager aliveManager;
 
     public static void main(String[] args) throws InterruptedException {
         Log.i(NAME, "System started");
