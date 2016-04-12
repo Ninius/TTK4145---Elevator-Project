@@ -8,19 +8,19 @@ import com.gruppe78.model.SystemData;
  */
 
 //Implement as listener?
-public class AliveManager {
+public class OperativeManager {
     long lastEventTime;
-    private static AliveManager sAliveManager;
+    private static OperativeManager sOperativeManager;
     private Thread managerThread;
 
-    private AliveManager(){
+    private OperativeManager(){
         lastEventTime = System.currentTimeMillis();
     };
-    public static AliveManager get(){
-        if(sAliveManager == null){
-            sAliveManager = new AliveManager();
+    public static OperativeManager get(){
+        if(sOperativeManager == null){
+            sOperativeManager = new OperativeManager();
         }
-        return sAliveManager;
+        return sOperativeManager;
     }
     public void newEvent(){
         lastEventTime = System.currentTimeMillis();
@@ -35,10 +35,10 @@ public class AliveManager {
             try{
                 while (true){
                     if (System.currentTimeMillis()-lastEventTime > 4000){
-                        //SystemData.get().getLocalElevator().setAlive(false);
+                        SystemData.get().getLocalElevator().setOperable(false);
                     }
                     else{
-                        //SystemData.get().getLocalElevator().setAlive(true)
+                        SystemData.get().getLocalElevator().setOperable(true);
                     }
                     Thread.sleep(500);
                 }
