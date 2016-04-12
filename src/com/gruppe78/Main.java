@@ -20,6 +20,7 @@ public class Main {
     //References to components to prevent them from being garbage collected.
     private static ConnectedManager connectedManager;
     private static SystemData systemData;
+    private static AliveManager aliveManager;
 
     public static void main(String[] args) throws InterruptedException {
         Log.i(NAME, "System started");
@@ -52,6 +53,8 @@ public class Main {
 
         connectedManager = ConnectedManager.get();
         connectedManager.start();
+        aliveManager = AliveManager.get();
+        aliveManager.start();
 
         //Loading information on the system:
         LocalElevatorIOChecker.init();

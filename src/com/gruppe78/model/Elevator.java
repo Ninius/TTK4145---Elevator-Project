@@ -17,6 +17,9 @@ public class Elevator {
 
     //Status:
     private volatile boolean mConnected = false;
+
+
+
     private volatile boolean mOperable = true;
     private volatile long lastConnect = 0;
 
@@ -136,5 +139,10 @@ public class Elevator {
     }
     public long getLastConnectTime(){
         return lastConnect;
+    }
+
+    public boolean isOperable() {return mOperable;}
+    public void setOperable(boolean mOperable) {
+        this.mOperable = mOperable;
     }
 }
