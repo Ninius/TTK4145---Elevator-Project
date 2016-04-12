@@ -10,7 +10,7 @@ import java.util.List;
  * Created by oysteikh on 4/11/16.
  */
 public class OrderHandler {
-    public int getNumberOfGlobalOrders(Elevator elevator){
+    public static int getNumberOfGlobalOrders(Elevator elevator){
         int orders = 0;
         for (Floor floor : Floor.values()){
             for (Button button : Button.values()){
@@ -23,7 +23,7 @@ public class OrderHandler {
         return orders;
     }
 
-    public boolean isOrderOnFloor(Floor floor, Elevator elevator){
+    public static boolean isOrderOnFloor(Floor floor, Elevator elevator){
         if (elevator.getInternalOrder(floor) != null){
             return true;
         }
@@ -51,7 +51,7 @@ public class OrderHandler {
         }
     }
 
-    public Order getNextOrder(Elevator elevator){ //TODO: Check.
+    public static Order getNextOrder(Elevator elevator){ //TODO: Check.
         SystemData data = SystemData.get();
         Direction direction = elevator.getDirection();
         if (direction == Direction.NONE){
@@ -87,7 +87,7 @@ public class OrderHandler {
         }
         return null;
     }
-    public int getNumberOfInternalOrders(Elevator elevator){
+    public static int getNumberOfInternalOrders(Elevator elevator){
         int orders = 0;
         for (Floor floor : Floor.values()){
             if (elevator.getInternalOrder(floor) != null){

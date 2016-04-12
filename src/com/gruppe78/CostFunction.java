@@ -19,12 +19,12 @@ public class CostFunction {
         if (directionToOrder != localElevator.getDirection() && directionToOrder != Direction.NONE){
             cost += Floor.NUMBER_OF_FLOORS;
         }
-        if (!order.getType().matchDirection(localElevator.getDirection())){
+        if (!order.getButton().matchDirection(localElevator.getDirection())){
             cost += (Floor.NUMBER_OF_FLOORS-1);
         }
         cost += localElevator.getLastKnownFloor().lengthTo(order.getFloor());
-        cost += SystemData.get().getLocalElevator().getNumberOfInternalOrders()*Floor.NUMBER_OF_FLOORS/2;
-        cost += SystemData.get().getNumberOfGlobalOrders(localElevator)*Floor.NUMBER_OF_FLOORS/2;
+        cost += OrderHandler.getNumberOfInternalOrders(localElevator)*Floor.NUMBER_OF_FLOORS/2;
+        cost += OrderHandler.getNumberOfGlobalOrders(localElevator)*Floor.NUMBER_OF_FLOORS/2;
         return cost;
 
 

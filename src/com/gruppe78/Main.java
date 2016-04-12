@@ -39,7 +39,16 @@ public class Main {
             localAddress = Utilities.getLocalAddress(SYSTEM_ADDRESS_PREFIX);
         }
 
-        initializeData(localAddress);
+        //Creating Elevator Objects for all the external elevators:
+        ArrayList<Elevator> externalElevators = new ArrayList<>();
+        for(String address : ELEVATOR_ADDRESS_LIST){
+            InetAddress inetAddress = Utilities.getInetAddress(address);
+            if(!inetAddress.equals(localAddress)) externalElevators.add(new Elevator(inetAddress, false));
+        }
+
+        //Initializing the system data:
+        SystemData.init(externalElevators, new Elevator(localAddress, true));
+        systemData = SystemData.get();
 
         connectedManager = ConnectedManager.get();
         connectedManager.start();
@@ -50,13 +59,6 @@ public class Main {
     }
 
     private static void initializeData(InetAddress localAddress){
-        ArrayList<Elevator> elevators = new ArrayList<>();
-        elevators.add(new Elevator(localAddress, true));
-        for(String address : ELEVATOR_ADDRESS_LIST){
-            InetAddress inetAddress = Utilities.getInetAddress(address);
-            if(!inetAddress.equals(localAddress)) elevators.add(new Elevator(inetAddress, false));
-        }
-        SystemData.init(elevators);
-        systemData = SystemData.get();
+
     }
 }

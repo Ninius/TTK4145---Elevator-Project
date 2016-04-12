@@ -11,19 +11,26 @@ import java.util.List;
 public class SystemData {
     private static SystemData sSystemData;
     private final List<Elevator> mElevators;
-    private Order[][] globalOrders = new Order[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS - 1];
+    private final Elevator mLocalElevator;
+
+    private final Order[][] globalOrders = new Order[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS - 1];
+    private final ArrayList<OrderEventListener> orderEventListeners = new ArrayList<>();
 
     /****************************************************************************************************************
-     * Constructing and obtaining of reference. Initialization of elevators must be done before.
+     * Constructing and obtaining of reference. Needs to be initialized with a local elevator.
      ****************************************************************************************************************/
 
-    private SystemData(ArrayList<Elevator> elevators){
-        mElevators = Collections.unmodifiableList(elevators);
+    private SystemData(ArrayList<Elevator> externalElevators, Elevator localElevator){
+        if(localElevator == null) throw new NullPointerException();
+        externalElevators = new ArrayList<>(externalElevators);
+        externalElevators.add(localElevator);
+        mElevators = Collections.unmodifiableList(externalElevators);
+        mLocalElevator = localElevator;
     }
 
-    public static void init(ArrayList<Elevator> elevators) {
+    public static void init(ArrayList<Elevator> externalElevators, Elevator localElevator) {
         if (sSystemData != null) return;
-        sSystemData = new SystemData(elevators);
+        sSystemData = new SystemData(externalElevators, localElevator);
     }
 
     public static SystemData get(){
@@ -39,10 +46,7 @@ public class SystemData {
     }
 
     public Elevator getLocalElevator(){
-        for(Elevator elevator : mElevators){
-            if(elevator.isLocal()) return elevator;
-        }
-        return null;
+        return mLocalElevator;
     }
     public Elevator getElevator(InetAddress inetAddress){
         for(Elevator elevator : mElevators){
@@ -52,20 +56,67 @@ public class SystemData {
     }
 
     /***************************************************************************************************************
-     * Orders
+     * Listeners for order event.
      ***************************************************************************************************************/
-    public void addGlobalOrder(Order order){
-        if(order.getType() == Button.INTERNAL) return;
-        if(globalOrders[order.getFloor().index][order.getType().index] != null) return;
 
-        globalOrders[order.getFloor().index][order.getType().index] = order;
+    public void addOrderEventListener(OrderEventListener listener){
+        synchronized (orderEventListeners){
+            orderEventListeners.add(listener);
+        }
     }
-    public synchronized Order getGlobalOrder(Floor floor, Button button){
+    public void removeOrderEventListener(OrderEventListener listener){
+        synchronized (orderEventListeners) {
+            orderEventListeners.remove(listener);
+        }
+    }
+
+    /***************************************************************************************************************
+     * Orders - Add/Clear returns true if they were successful and listeners is called.
+     ***************************************************************************************************************/
+
+    public boolean addGlobalOrder(Order order){
+        if(order.getButton() == Button.INTERNAL) return false;
+        if(order.getFloor().isBottom() && order.getButton().isDown()) return false;
+        if(order.getFloor().isTop() && order.getButton().isUp()) return false;
+
+        synchronized (globalOrders){
+            if(globalOrders[order.getFloor().index][order.getButton().index] != null) return false;
+            globalOrders[order.getFloor().index][order.getButton().index] = order;
+        }
+
+        synchronized (orderEventListeners){
+            for(OrderEventListener listener : orderEventListeners){
+                listener.onOrderAdded(order);
+            }
+        }
+        return true;
+    }
+
+    public boolean clearGlobalOrder(Floor floor, Button button){
+        if(button == Button.INTERNAL) return false;
+
+        Order order;
+        synchronized (globalOrders){
+            order = globalOrders[floor.index][button.index];
+            globalOrders[floor.index][button.index] = null;
+        }
+
+        if(order == null) return false;
+
+        synchronized (orderEventListeners){
+            for(OrderEventListener listener : orderEventListeners){
+                listener.onOrderRemoved(order);
+            }
+        }
+        return true;
+    }
+
+    public Order getGlobalOrder(Floor floor, Button button){
         if(button == Button.INTERNAL) return null;
-        return globalOrders[floor.index][button.index];
+
+        synchronized (globalOrders){
+            return globalOrders[floor.index][button.index];
+        }
     }
-    public synchronized void clearGlobalOrder(Floor floor, Button button){
-        if(button == Button.INTERNAL) return;
-        globalOrders[floor.index][button.index] = null;
-    }
+
 }
