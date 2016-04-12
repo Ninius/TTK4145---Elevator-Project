@@ -1,9 +1,6 @@
 package com.gruppe78;
 
-import com.gruppe78.model.Button;
-import com.gruppe78.model.ElevatorEventListener;
-import com.gruppe78.model.Floor;
-import com.gruppe78.model.SystemData;
+import com.gruppe78.model.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 
 //Implement as listener?
-public class OperativeManager implements ElevatorEventListener{
+public class OperativeManager implements ElevatorPositionListener{
     AtomicLong lastEventTime;
     private static OperativeManager sOperativeManager;
     private Thread managerThread;
@@ -21,7 +18,6 @@ public class OperativeManager implements ElevatorEventListener{
 
     private OperativeManager(){
         SystemData.get().getLocalElevator().addElevatorEventListener(this);
-        lastEventTime = System.currentTimeMillis();
     };
     public static OperativeManager get(){
         if(sOperativeManager == null){
@@ -40,12 +36,24 @@ public class OperativeManager implements ElevatorEventListener{
     public void setActive(boolean Active){
         active.set(Active);
     }
+
     @Override
-    public void onButtonPressed(Floor floor, Button button, boolean newValue){};
+    public void onDoorOpenChanged(boolean newOpen){};
     @Override
     public void onFloorChanged(Floor newFloor) {
         newEvent();
     }
+    @Override
+    public void onMotorDirectionChanged(Direction newDirection){
+        if (newDirection != Direction.NONE){
+            setActive(true); newEvent();
+        }
+        else{
+            setActive(false); newEvent();
+        }
+    }
+    @Override
+    public void onOrderDirectionChanged(Direction newDirection){};
     private class ManagerThread extends Thread{
         @Override public void run(){
             try{
