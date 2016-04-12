@@ -1,6 +1,5 @@
-package com.gruppe78;
+package com.gruppe78.driver;
 
-import com.gruppe78.driver.DriverHandler;
 import com.gruppe78.model.*;
 
 /**
@@ -8,10 +7,9 @@ import com.gruppe78.model.*;
  */
 public class DriverController implements ElevatorPositionListener, OrderEventListener {
     private static DriverController sDriverController;
-    private final Elevator elevator;
 
     private DriverController(){
-        elevator = SystemData.get().getLocalElevator();
+        Elevator elevator = SystemData.get().getLocalElevator();
         elevator.addElevatorEventListener(this);
         elevator.addOrderEventListener(this);
         SystemData.get().addOrderEventListener(this);
@@ -28,12 +26,12 @@ public class DriverController implements ElevatorPositionListener, OrderEventLis
 
     @Override
     public void onFloorChanged(Floor newFloor) {
-        if(newFloor != null) DriverHandler.setFloorIndicator(newFloor);
+        if(newFloor != null) DriverHelper.setFloorIndicator(newFloor);
     }
 
     @Override
     public void onMotorDirectionChanged(Direction newDirection) {
-        DriverHandler.setMotorDirection(newDirection);
+        DriverHelper.setMotorDirection(newDirection);
     }
 
     @Override
@@ -43,16 +41,16 @@ public class DriverController implements ElevatorPositionListener, OrderEventLis
 
     @Override
     public void onDoorOpenChanged(boolean newOpen) {
-        DriverHandler.setDoorOpenLamp(newOpen);
+        DriverHelper.setDoorOpenLamp(newOpen);
     }
 
     @Override
     public void onOrderAdded(Order order) {
-        DriverHandler.setButtonLamp(order.getButton(), order.getFloor(), true);
+        DriverHelper.setButtonLamp(order.getButton(), order.getFloor(), true);
     }
 
     @Override
     public void onOrderRemoved(Order order) {
-        DriverHandler.setButtonLamp(order.getButton(), order.getFloor(), false);
+        DriverHelper.setButtonLamp(order.getButton(), order.getFloor(), false);
     }
 }

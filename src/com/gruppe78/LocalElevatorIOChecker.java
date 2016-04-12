@@ -1,6 +1,6 @@
 package com.gruppe78;
 
-import com.gruppe78.driver.DriverHandler;
+import com.gruppe78.driver.DriverHelper;
 import com.gruppe78.model.*;
 
 /**
@@ -19,7 +19,7 @@ public class LocalElevatorIOChecker {
 
     //Holds the last value such that the synchronized methods of the data object is only called upon change.
     private boolean[][] buttonPressed = new boolean[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS];
-    Floor lastFloor = DriverHandler.getElevatorFloor();
+    Floor lastFloor = DriverHelper.getElevatorFloor();
 
 
     /******************************************************************************************************
@@ -53,7 +53,7 @@ public class LocalElevatorIOChecker {
                             if(floor.isTop() && button == Button.OUTSIDE_UP) continue;
 
                             //Checks if something has changed to relieve stress on the synchronized data object.
-                            boolean pressed = DriverHandler.isButtonPressed(button, floor);
+                            boolean pressed = DriverHelper.isButtonPressed(button, floor);
                             if(buttonPressed[floor.index][button.index] != pressed){
                                 buttonPressed[floor.index][button.index] = pressed;
                                 mElevator.setButtonPressed(floor,button,pressed);
@@ -61,7 +61,7 @@ public class LocalElevatorIOChecker {
                         }
                     }
 
-                    Floor floor = DriverHandler.getElevatorFloor();
+                    Floor floor = DriverHelper.getElevatorFloor();
                     if(lastFloor != floor && floor != null){
                         lastFloor = floor;
                         mElevator.setFloor(floor);

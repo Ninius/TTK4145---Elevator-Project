@@ -1,6 +1,7 @@
 package com.gruppe78;
 
-import com.gruppe78.driver.DriverHandler;
+import com.gruppe78.driver.DriverController;
+import com.gruppe78.driver.DriverHelper;
 import com.gruppe78.model.Elevator;
 import com.gruppe78.model.SystemData;
 import com.gruppe78.utilities.Log;
@@ -32,7 +33,7 @@ public class Main {
         Log.i(NAME, "System started");
 
         //Initializing driver
-        boolean initialized = DriverHandler.init(DriverHandler.ELEVATOR_DRIVER);
+        boolean initialized = DriverHelper.init(DriverHelper.ELEVATOR_DRIVER);
         if(!initialized){
             Log.i(NAME, "Could not initialize the driver. System shutting down.");
             return;

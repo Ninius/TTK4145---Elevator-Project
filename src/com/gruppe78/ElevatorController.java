@@ -1,6 +1,6 @@
 package com.gruppe78;
 
-import com.gruppe78.driver.DriverHandler;
+import com.gruppe78.driver.DriverHelper;
 import com.gruppe78.model.*;
 import com.gruppe78.utilities.Log;
 
@@ -48,10 +48,10 @@ public class ElevatorController implements ElevatorPositionListener {
 
     public void moveElevator(){
         if (!timer){
-            DriverHandler.setDoorOpenLamp(false);
+            DriverHelper.setDoorOpenLamp(false);
             Order order = OrderHandler.getNextOrder(elevator);
             Direction orderDirection = elevator.getFloor().directionTo(order.getFloor());
-            DriverHandler.setMotorDirection(orderDirection);
+            DriverHelper.setMotorDirection(orderDirection);
             OperativeManager.get().newEvent();
             OperativeManager.get().setActive(true);
         }
@@ -61,12 +61,12 @@ public class ElevatorController implements ElevatorPositionListener {
     public void onFloorChanged(Floor newFloor) {
         //Temp
         if (OrderHandler.getNextOrder(elevator).getFloor() == newFloor || OrderHandler.isOrderOnFloor(newFloor, elevator)){
-            DriverHandler.setMotorDirection(Direction.NONE);
-            DriverHandler.setDoorOpenLamp(true);
+            DriverHelper.setMotorDirection(Direction.NONE);
+            DriverHelper.setDoorOpenLamp(true);
             SystemData.get().getLocalElevator().clearInternalOrder(newFloor);
             SystemData.get().clearGlobalOrder(newFloor);
             for(Button button : Button.values()){
-                DriverHandler.setButtonLamp(button, newFloor, false);
+                DriverHelper.setButtonLamp(button, newFloor, false);
             }
             startTimer(3*1000);
             elevator.clearInternalOrder(newFloor);
@@ -77,14 +77,10 @@ public class ElevatorController implements ElevatorPositionListener {
     }
 
     @Override
-    public void onMotorDirectionChanged(Direction newDirection) {
-
-    }
+    public void onMotorDirectionChanged(Direction newDirection) {}
 
     @Override
-    public void onOrderDirectionChanged(Direction newDirection) {
-
-    }
+    public void onOrderDirectionChanged(Direction newDirection) {}
 
     @Override
     public void onDoorOpenChanged(boolean newOpen) {
