@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 public class Elevator {
     private final InetAddress mInetAddress;
-    private final boolean mLocal;
 
     private Order[] internalOrders = new Order[Floor.NUMBER_OF_FLOORS];
     private boolean[][] mButtonPressed = new boolean[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS];
@@ -17,19 +16,16 @@ public class Elevator {
 
     //Status:
     private volatile boolean mConnected = false;
-
-
-
     private volatile boolean mOperable = true;
     private volatile long lastConnect = 0;
 
     //Listeners:
-    private ArrayList<ElevatorEventListener> listenerList = new ArrayList<>();
-    private ArrayList<ElevatorNetworkListener> networkListeners = new ArrayList<>();
+    private final ArrayList<ElevatorEventListener> listenerList = new ArrayList<>();
+    private final ArrayList<OrderEventListener> orderEventListeners = new ArrayList<>();
+    private final ArrayList<ElevatorNetworkListener> networkListeners = new ArrayList<>();
 
-    public Elevator(InetAddress InetAddress, boolean local){
+    public Elevator(InetAddress InetAddress){
         mInetAddress = InetAddress;
-        mLocal = local;
     }
 
     /****************************************************************************************************************
@@ -49,6 +45,16 @@ public class Elevator {
         networkListeners.remove(listener);
     }
 
+    public void addOrderEventListener(OrderEventListener listener){
+        synchronized (orderEventListeners){
+            orderEventListeners.add(listener);
+        }
+    }
+    public void removeOrderEventListener(OrderEventListener listener){
+        synchronized (orderEventListeners) {
+            orderEventListeners.remove(listener);
+        }
+    }
     /***************************************************************************************************************
      * Elevator specific implementations.
      ***************************************************************************************************************/
@@ -56,12 +62,6 @@ public class Elevator {
     public synchronized void setButtonPressed(Floor floor, Button button, boolean pressed){
         if(mButtonPressed[floor.index][button.index] == pressed) return;
         mButtonPressed[floor.index][button.index] = pressed;
-        if (button == Button.INTERNAL && pressed){
-            addInternalOrder(floor, button);
-        }
-        else{
-            SystemData.get().addGlobalOrder(new Order(this, button, floor));
-        }
         for(ElevatorEventListener listener : listenerList){
             listener.onButtonPressed(floor, button, pressed);
         }
@@ -89,6 +89,12 @@ public class Elevator {
             listener.onFloorChanged(newFloor);
         }
     }
+    public synchronized void setDirection(Direction direction){
+        mDirection = direction;
+    }
+    public synchronized Direction getDirection(){
+        return mDirection;
+    }
 
     /**************************************************************************************************************
      * Internal orders
@@ -97,15 +103,6 @@ public class Elevator {
     public Order getInternalOrder(Floor floor){
         return internalOrders[floor.index];
     }
-
-    public synchronized void setDirection(Direction direction){
-        mDirection = direction;
-    }
-    public synchronized Direction getDirection(){
-        return mDirection;
-    }
-
-    //Replace with floor type?
     public void addInternalOrder(Floor floor, Button button){
         internalOrders[floor.index] = new Order(this, button, floor);
     }
@@ -113,12 +110,8 @@ public class Elevator {
         internalOrders[floor.index] = null;
     }
 
-    public boolean isLocal(){
-        return mLocal;
-    }
-
     /*************************************************
-     * Connection
+     * Status - Connection and Operability
      *************************************************/
 
     public InetAddress getInetAddress(){
@@ -144,5 +137,8 @@ public class Elevator {
     public boolean isOperable() {return mOperable;}
     public void setOperable(boolean mOperable) {
         this.mOperable = mOperable;
+    }
+    public boolean isLocal(){
+        return this == SystemData.get().getLocalElevator();
     }
 }

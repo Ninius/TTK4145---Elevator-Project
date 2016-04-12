@@ -6,11 +6,11 @@ package com.gruppe78.model;
 public class Order {
     private final Elevator mOrderElevator;
     private final Floor mFloor;
-    private final Button mType;
+    private final Button mButton;
 
-    Order(Elevator orderElevator, Button buttonType, Floor floor){
+    Order(Elevator orderElevator, Button button, Floor floor){
         mOrderElevator = orderElevator;
-        mType = buttonType;
+        mButton = button;
         mFloor = floor;
     }
 
@@ -21,6 +21,6 @@ public class Order {
         return mFloor;
     }
     public Button getButton(){
-        return mType;
+        return mButton;
     }
 }

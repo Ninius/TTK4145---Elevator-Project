@@ -13,7 +13,7 @@ public class SystemData {
     private final List<Elevator> mElevators;
     private final Elevator mLocalElevator;
 
-    private final Order[][] globalOrders = new Order[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS - 1];
+    private final Order[][] globalOrders = new Order[Floor.NUMBER_OF_FLOORS][2];
     private final ArrayList<OrderEventListener> orderEventListeners = new ArrayList<>();
 
     /****************************************************************************************************************
@@ -92,15 +92,12 @@ public class SystemData {
         return true;
     }
 
-    public boolean clearGlobalOrder(Floor floor, Button button){
-        if(button == Button.INTERNAL) return false;
-
+    public boolean clearGlobalOrder(Floor floor, boolean buttonUp){
         Order order;
         synchronized (globalOrders){
-            order = globalOrders[floor.index][button.index];
-            globalOrders[floor.index][button.index] = null;
+            order = globalOrders[floor.index][buttonUp ? 0 : 1];
+            globalOrders[floor.index][buttonUp ? 0 : 1] = null;
         }
-
         if(order == null) return false;
 
         synchronized (orderEventListeners){
@@ -111,11 +108,9 @@ public class SystemData {
         return true;
     }
 
-    public Order getGlobalOrder(Floor floor, Button button){
-        if(button == Button.INTERNAL) return null;
-
+    public Order getGlobalOrder(Floor floor, boolean buttonUp){
         synchronized (globalOrders){
-            return globalOrders[floor.index][button.index];
+            return globalOrders[floor.index][buttonUp ? 0 : 1];
         }
     }
 
