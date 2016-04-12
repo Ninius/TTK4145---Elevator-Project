@@ -1,5 +1,7 @@
 package com.gruppe78;
 
+import com.gruppe78.model.Button;
+import com.gruppe78.model.ElevatorEventListener;
 import com.gruppe78.model.Floor;
 import com.gruppe78.model.SystemData;
 
@@ -11,13 +13,14 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 
 //Implement as listener?
-public class OperativeManager {
+public class OperativeManager implements ElevatorEventListener{
     AtomicLong lastEventTime;
     private static OperativeManager sOperativeManager;
     private Thread managerThread;
     private AtomicBoolean active;
 
     private OperativeManager(){
+        SystemData.get().getLocalElevator().addElevatorEventListener(this);
         lastEventTime = System.currentTimeMillis();
     };
     public static OperativeManager get(){
@@ -36,6 +39,12 @@ public class OperativeManager {
     }
     public void setActive(boolean Active){
         active.set(Active);
+    }
+    @Override
+    public void onButtonPressed(Floor floor, Button button, boolean newValue){};
+    @Override
+    public void onFloorChanged(Floor newFloor) {
+        newEvent();
     }
     private class ManagerThread extends Thread{
         @Override public void run(){

@@ -49,9 +49,11 @@ public class ElevatorController implements ElevatorEventListener {
     public void moveElevator(){
         if (!timer){
             DriverHandler.setDoorOpenLamp(false);
-            Order order = SystemData.get().getNextOrder(elevator);
+            Order order = OrderHandler.getNextOrder(elevator);
             Direction orderDirection = elevator.getFloor().directionTo(order.getFloor());
             DriverHandler.setMotorDirection(orderDirection);
+            OperativeManager.get().newEvent();
+            OperativeManager.get().setActive(true);
         }
     }
 
@@ -61,7 +63,7 @@ public class ElevatorController implements ElevatorEventListener {
             DriverHandler.setFloorIndicator(newFloor);
         }
         //Temp
-        if (SystemData.get().getNextOrder(elevator).getFloor() == newFloor || SystemData.get().isOrderOnFloor(newFloor, elevator)){
+        if (OrderHandler.getNextOrder(elevator).getFloor() == newFloor || OrderHandler.isOrderOnFloor(newFloor, elevator)){
             DriverHandler.setMotorDirection(Direction.NONE);
             DriverHandler.setDoorOpenLamp(true);
             SystemData.get().getLocalElevator().clearInternalOrder(newFloor);
