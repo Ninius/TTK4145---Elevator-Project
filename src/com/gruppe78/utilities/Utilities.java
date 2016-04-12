@@ -1,6 +1,9 @@
 package com.gruppe78.utilities;
 
+import com.gruppe78.model.Elevator;
+
 import java.net.*;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 public class Utilities {
@@ -33,7 +36,7 @@ public class Utilities {
         return null;
     }
 
-    public static InetAddress getLocalAddress(String prefix){
+    public static InetAddress getLocalIPV4Address(String prefix){
         try {
             Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
             while(interfaces.hasMoreElements()) {
@@ -46,6 +49,16 @@ public class Utilities {
             }
         } catch (SocketException e) {
             e.printStackTrace();
+        }
+        return null;
+    }
+    public static Elevator getConnectedElevator(ArrayList<Elevator> elevators){
+        for(Elevator elevator : elevators){
+            try {
+                if(NetworkInterface.getByInetAddress(elevator.getInetAddress()) != null) return elevator;
+            } catch (SocketException e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }

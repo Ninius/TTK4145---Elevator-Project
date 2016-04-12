@@ -5,10 +5,16 @@ package com.gruppe78.utilities;
  */
 public class Log {
     public static void i(String className, String msg){
-        System.out.println("INFO -- " + className + "("+Thread.currentThread().getName()+"): "+msg);
+        print("INFO",className,msg);
+    }
+    public static void e(String className, String msg){
+        print("ERROR",className,msg);
     }
     public static void e(String className, Exception ex){
-        System.out.println("ERROR -- " + className + "("+Thread.currentThread().getName()+"):");
+        e(className,"");
         System.out.println(ex);
+    }
+    private static void print(String prefix, String className, String msg){
+        System.out.println(prefix + " -- " + className + "("+Thread.currentThread().getName()+"): "+msg);
     }
 }

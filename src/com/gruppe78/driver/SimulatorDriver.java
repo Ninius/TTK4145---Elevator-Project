@@ -49,7 +49,7 @@ public class SimulatorDriver implements Driver{
             String message = new String(receivePacket.getData()).split(";")[0];
             return Integer.valueOf(message);
         } catch (SocketTimeoutException e) {
-            System.out.println("Receive timed out");
+            //System.out.println("Receive timed out");
             return -Integer.MAX_VALUE;
         } catch (IOException e) {
             e.printStackTrace();

@@ -5,7 +5,7 @@ import com.gruppe78.model.*;
 /**
  * Controls all lights of the local system.
  */
-public class DriverController implements ElevatorPositionListener, OrderEventListener {
+public class DriverController implements ElevatorPositionListener, OrderListener {
     private static DriverController sDriverController;
 
     private DriverController(){

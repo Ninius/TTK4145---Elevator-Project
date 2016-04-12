@@ -9,7 +9,9 @@ import com.gruppe78.utilities.Utilities;
 
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /***************************************************************************************************
  * System description:
@@ -22,7 +24,7 @@ public class Main {
 
     //System settings:
     public static final String SYSTEM_ADDRESS_PREFIX = "129";
-    private static final String[] ELEVATOR_ADDRESS_LIST = new String[]{};
+    private static final String[] ELEVATOR_IP_LIST = new String[]{"129.241.124.98", "129.241.124.97"};
 
     //References to components to prevent them from being garbage collected.
     private static ConnectedManager connectedManager;
@@ -33,40 +35,45 @@ public class Main {
         Log.i(NAME, "System started");
 
         //Initializing driver
-        boolean initialized = DriverHelper.init(DriverHelper.ELEVATOR_DRIVER);
+        boolean initialized = DriverHelper.init(DriverHelper.SIMULATOR_DRIVER);
         if(!initialized){
-            Log.i(NAME, "Could not initialize the driver. System shutting down.");
+            Log.i(NAME, "Could not initialize the driver. System exiting.");
             return;
+        }else{
+            Log.i(NAME, "Driver initialized");
         }
 
-        //Retrieving the address of this machine. Maybe include a more safe/correct way to decide if connected?
-        InetAddress localAddress = Utilities.getLocalAddress(SYSTEM_ADDRESS_PREFIX);
-        while(localAddress == null){
-            Log.i(NAME, "Could not retrieve the IP address of this machine. System sleeping until connected.");
-            Thread.sleep(1000);
-            localAddress = Utilities.getLocalAddress(SYSTEM_ADDRESS_PREFIX);
+
+        ArrayList<Elevator> elevators = new ArrayList<>();
+        for(String IP : ELEVATOR_IP_LIST){
+            InetAddress inetAddress = Utilities.getInetAddress(IP);
+            if(inetAddress == null) Log.e(NAME, "IP: "+IP+" was not a valid IP-address. Removing it from the system.");
+            else elevators.add(new Elevator(inetAddress));
         }
 
-        //Creating Elevator Objects for all the external elevators:
-        ArrayList<Elevator> externalElevators = new ArrayList<>();
-        for(String address : ELEVATOR_ADDRESS_LIST){
-            InetAddress inetAddress = Utilities.getInetAddress(address);
-            if(!inetAddress.equals(localAddress)) externalElevators.add(new Elevator(inetAddress));
+
+        Log.i(NAME, "Finding elevator that has IP-address connecting this machine...");
+        Elevator localElevator = Utilities.getConnectedElevator(elevators);
+        while(localElevator == null){
+            Thread.sleep(100);
+            localElevator = Utilities.getConnectedElevator(elevators);
         }
+        Log.i(NAME, "... This system is connected - Address found: " + localElevator.getInetAddress().getHostAddress());
 
         //Initializing the system data:
-        SystemData.init(externalElevators, new Elevator(localAddress));
+        SystemData.init(elevators, localElevator);
         systemData = SystemData.get();
+        Log.i(NAME, "System Data initialized");
 
-        connectedManager = ConnectedManager.get();
-        connectedManager.start();
-        DriverController.init();
+        //connectedManager = ConnectedManager.get();
+        //connectedManager.start();
+        //DriverController.init();
         //aliveManager = AliveManager.get();
         //aliveManager.start();
 
         //Loading information on the system:
-        LocalElevatorInputChecker.start();
-        ElevatorController.init();
+        //LocalElevatorInputChecker.get().start();
+        //ElevatorController.init();
     }
 
     private static void initializeData(InetAddress localAddress){

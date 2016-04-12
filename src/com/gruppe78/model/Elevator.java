@@ -20,7 +20,7 @@ public class Elevator {
 
     //Listeners:
     private final ArrayList<ElevatorPositionListener> listenerList = new ArrayList<>();
-    private final ArrayList<OrderEventListener> orderEventListeners = new ArrayList<>();
+    private final ArrayList<OrderListener> orderListeners = new ArrayList<>();
     private final ArrayList<ElevatorNetworkListener> networkListeners = new ArrayList<>();
 
     public Elevator(InetAddress InetAddress){
@@ -44,14 +44,14 @@ public class Elevator {
         networkListeners.remove(listener);
     }
 
-    public void addOrderEventListener(OrderEventListener listener){
-        synchronized (orderEventListeners){
-            orderEventListeners.add(listener);
+    public void addOrderEventListener(OrderListener listener){
+        synchronized (orderListeners){
+            orderListeners.add(listener);
         }
     }
-    public void removeOrderEventListener(OrderEventListener listener){
-        synchronized (orderEventListeners) {
-            orderEventListeners.remove(listener);
+    public void removeOrderEventListener(OrderListener listener){
+        synchronized (orderListeners) {
+            orderListeners.remove(listener);
         }
     }
 

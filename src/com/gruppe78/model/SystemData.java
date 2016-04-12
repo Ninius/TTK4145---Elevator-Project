@@ -14,23 +14,21 @@ public class SystemData {
     private final Elevator mLocalElevator;
 
     private final Order[][] globalOrders = new Order[Floor.NUMBER_OF_FLOORS][2];
-    private final ArrayList<OrderEventListener> orderEventListeners = new ArrayList<>();
+    private final ArrayList<OrderListener> orderListeners = new ArrayList<>();
 
     /****************************************************************************************************************
      * Constructing and obtaining of reference. Needs to be initialized with a local elevator.
      ****************************************************************************************************************/
 
-    private SystemData(ArrayList<Elevator> externalElevators, Elevator localElevator){
+    private SystemData(ArrayList<Elevator> elevators, Elevator localElevator){
         if(localElevator == null) throw new NullPointerException();
-        externalElevators = new ArrayList<>(externalElevators);
-        externalElevators.add(localElevator);
-        mElevators = Collections.unmodifiableList(externalElevators);
+        mElevators = Collections.unmodifiableList(elevators);
         mLocalElevator = localElevator;
     }
 
-    public static void init(ArrayList<Elevator> externalElevators, Elevator localElevator) {
+    public static void init(ArrayList<Elevator> elevators, Elevator localElevator) {
         if (sSystemData != null) return;
-        sSystemData = new SystemData(externalElevators, localElevator);
+        sSystemData = new SystemData(elevators, localElevator);
     }
 
     public static SystemData get(){
@@ -59,14 +57,14 @@ public class SystemData {
      * Listeners for order event.
      ***************************************************************************************************************/
 
-    public void addOrderEventListener(OrderEventListener listener){
-        synchronized (orderEventListeners){
-            orderEventListeners.add(listener);
+    public void addOrderEventListener(OrderListener listener){
+        synchronized (orderListeners){
+            orderListeners.add(listener);
         }
     }
-    public void removeOrderEventListener(OrderEventListener listener){
-        synchronized (orderEventListeners) {
-            orderEventListeners.remove(listener);
+    public void removeOrderEventListener(OrderListener listener){
+        synchronized (orderListeners) {
+            orderListeners.remove(listener);
         }
     }
 
@@ -84,8 +82,8 @@ public class SystemData {
             globalOrders[order.getFloor().index][order.getButton().isUp() ? 0 : 1] = order;
         }
 
-        synchronized (orderEventListeners){
-            for(OrderEventListener listener : orderEventListeners){
+        synchronized (orderListeners){
+            for(OrderListener listener : orderListeners){
                 listener.onOrderAdded(order);
             }
         }
@@ -100,8 +98,8 @@ public class SystemData {
         }
         if(order == null) return false;
 
-        synchronized (orderEventListeners){
-            for(OrderEventListener listener : orderEventListeners){
+        synchronized (orderListeners){
+            for(OrderListener listener : orderListeners){
                 listener.onOrderRemoved(order);
             }
         }

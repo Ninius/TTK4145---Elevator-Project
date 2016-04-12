@@ -7,8 +7,8 @@ import com.gruppe78.utilities.Log;
 /**
  * Controls the elevator based on changes in model.
  */
-public class ElevatorController implements ElevatorPositionListener {
-    private static ElevatorController sElevatorController;
+public class ElevatorController /*implements ElevatorPositionListener */{
+    /*private static ElevatorController sElevatorController;
     private volatile boolean timer;
     private final Elevator elevator;
 
@@ -86,4 +86,5 @@ public class ElevatorController implements ElevatorPositionListener {
     public void onDoorOpenChanged(boolean newOpen) {
         //Nothing
     }
+    */
 }
