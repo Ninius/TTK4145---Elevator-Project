@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 public class Elevator {
     private final InetAddress mInetAddress;
-
     private final Order[] internalOrders = new Order[Floor.NUMBER_OF_FLOORS];
 
     //Position and direction:

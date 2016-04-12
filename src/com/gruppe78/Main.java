@@ -65,7 +65,7 @@ public class Main {
         //aliveManager.start();
 
         //Loading information on the system:
-        LocalElevatorIOChecker.init();
+        LocalElevatorInputChecker.start();
         ElevatorController.init();
     }
 
