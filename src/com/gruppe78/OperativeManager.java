@@ -18,7 +18,6 @@ public class OperativeManager implements ElevatorPositionListener{
 
     private OperativeManager(){
         SystemData.get().getLocalElevator().addElevatorEventListener(this);
-        lastEventTime.set(System.currentTimeMillis());
     };
     public static OperativeManager get(){
         if(sOperativeManager == null){
@@ -37,26 +36,24 @@ public class OperativeManager implements ElevatorPositionListener{
     public void setActive(boolean Active){
         active.set(Active);
     }
+
+    @Override
+    public void onDoorOpenChanged(boolean newOpen){};
     @Override
     public void onFloorChanged(Floor newFloor) {
         newEvent();
     }
-
     @Override
-    public void onMotorDirectionChanged(Direction newDirection) {
-
+    public void onMotorDirectionChanged(Direction newDirection){
+        if (newDirection != Direction.NONE){
+            setActive(true); newEvent();
+        }
+        else{
+            setActive(false); newEvent();
+        }
     }
-
     @Override
-    public void onOrderDirectionChanged(Direction newDirection) {
-
-    }
-
-    @Override
-    public void onDoorOpenChanged(boolean newOpen) {
-
-    }
-
+    public void onOrderDirectionChanged(Direction newDirection){};
     private class ManagerThread extends Thread{
         @Override public void run(){
             try{
