@@ -53,8 +53,8 @@ public class Main {
 
         connectedManager = ConnectedManager.get();
         connectedManager.start();
-        aliveManager = AliveManager.get();
-        aliveManager.start();
+        //aliveManager = AliveManager.get();
+        //aliveManager.start();
 
         //Loading information on the system:
         LocalElevatorIOChecker.init();
