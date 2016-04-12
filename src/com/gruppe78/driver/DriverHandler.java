@@ -6,7 +6,6 @@ import com.gruppe78.model.Direction;
 
 /**
  * DriverHandler works as a bridge between the driver library written in C and the rest of the application.
- * It offers enum types and booleans to ensure that the rest of the application works within bounds of the elevator.
  *
  * GUIDE TO CREATING JNI:
  * 1) Make h-header.

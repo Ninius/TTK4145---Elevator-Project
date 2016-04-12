@@ -7,7 +7,7 @@ import com.gruppe78.utilities.Log;
 /**
  * Controls the elevator based on changes in model.
  */
-public class ElevatorController implements ElevatorEventListener {
+public class ElevatorController implements ElevatorPositionListener {
     private static ElevatorController sElevatorController;
     private volatile boolean timer;
     private final Elevator elevator;
@@ -59,9 +59,6 @@ public class ElevatorController implements ElevatorEventListener {
 
     @Override
     public void onFloorChanged(Floor newFloor) {
-        if(newFloor != null){
-            DriverHandler.setFloorIndicator(newFloor);
-        }
         //Temp
         if (OrderHandler.getNextOrder(elevator).getFloor() == newFloor || OrderHandler.isOrderOnFloor(newFloor, elevator)){
             DriverHandler.setMotorDirection(Direction.NONE);
@@ -80,8 +77,17 @@ public class ElevatorController implements ElevatorEventListener {
     }
 
     @Override
-    public void onButtonPressed(Floor floor, Button button, boolean newValue) {
-        DriverHandler.setButtonLamp(button, floor, true);
-        moveElevator();
+    public void onMotorDirectionChanged(Direction newDirection) {
+
+    }
+
+    @Override
+    public void onOrderDirectionChanged(Direction newDirection) {
+
+    }
+
+    @Override
+    public void onDoorOpenChanged(boolean newOpen) {
+        //Nothing
     }
 }

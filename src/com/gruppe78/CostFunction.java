@@ -16,10 +16,10 @@ public class CostFunction {
         Elevator localElevator = SystemData.get().getLocalElevator();
 
         Direction directionToOrder = localElevator.getLastKnownFloor().directionTo(order.getFloor());
-        if (directionToOrder != localElevator.getDirection() && directionToOrder != Direction.NONE){
+        if (directionToOrder != localElevator.getOrderDirection() && directionToOrder != Direction.NONE){
             cost += Floor.NUMBER_OF_FLOORS;
         }
-        if (!order.getButton().matchDirection(localElevator.getDirection())){
+        if (!order.getButton().matchDirection(localElevator.getOrderDirection())){
             cost += (Floor.NUMBER_OF_FLOORS-1);
         }
         cost += localElevator.getLastKnownFloor().lengthTo(order.getFloor());
@@ -33,7 +33,7 @@ public class CostFunction {
         int elevFloor; int elevDir;
         for (Elevator elevator : SystemData.get().getElevatorList()) {
             elevFloor = elevator.getFloor();
-            elevDir = elevator.getDirection();
+            elevDir = elevator.getOrderDirection();
             if (floor > elevFloor){
                 direction = 1;
             }

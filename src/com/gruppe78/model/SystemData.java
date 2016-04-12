@@ -71,7 +71,7 @@ public class SystemData {
     }
 
     /***************************************************************************************************************
-     * Orders - Add/Clear returns true if they were successful and listeners is called.
+     * Orders - Add/Clear/Replace returns true if they were successful and listeners is called.
      ***************************************************************************************************************/
 
     public boolean addGlobalOrder(Order order){
@@ -80,8 +80,8 @@ public class SystemData {
         if(order.getFloor().isTop() && order.getButton().isUp()) return false;
 
         synchronized (globalOrders){
-            if(globalOrders[order.getFloor().index][order.getButton().index] != null) return false;
-            globalOrders[order.getFloor().index][order.getButton().index] = order;
+            if(globalOrders[order.getFloor().index][order.getButton().isUp() ? 0 : 1] != null) return false;
+            globalOrders[order.getFloor().index][order.getButton().isUp() ? 0 : 1] = order;
         }
 
         synchronized (orderEventListeners){

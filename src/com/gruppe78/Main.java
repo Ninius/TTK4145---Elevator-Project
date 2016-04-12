@@ -10,6 +10,12 @@ import com.gruppe78.utilities.Utilities;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
+/***************************************************************************************************
+ * System description:
+ * - The backbone of the system is the data objects, which
+ *
+ ***************************************************************************************************/
+
 public class Main {
     private static final String NAME = Main.class.getSimpleName();
 
@@ -44,15 +50,16 @@ public class Main {
         ArrayList<Elevator> externalElevators = new ArrayList<>();
         for(String address : ELEVATOR_ADDRESS_LIST){
             InetAddress inetAddress = Utilities.getInetAddress(address);
-            if(!inetAddress.equals(localAddress)) externalElevators.add(new Elevator(inetAddress, false));
+            if(!inetAddress.equals(localAddress)) externalElevators.add(new Elevator(inetAddress));
         }
 
         //Initializing the system data:
-        SystemData.init(externalElevators, new Elevator(localAddress, true));
+        SystemData.init(externalElevators, new Elevator(localAddress));
         systemData = SystemData.get();
 
         connectedManager = ConnectedManager.get();
         connectedManager.start();
+        DriverController.init();
         //aliveManager = AliveManager.get();
         //aliveManager.start();
 
