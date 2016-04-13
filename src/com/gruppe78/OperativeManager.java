@@ -1,6 +1,7 @@
 package com.gruppe78;
 
 import com.gruppe78.model.*;
+import com.gruppe78.utilities.Log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -11,6 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 //Implement as listener?
 public class OperativeManager implements ElevatorPositionListener{
+    private static final String NAME = OperativeManager.class.getSimpleName();
     AtomicLong lastEventTime;
     private static OperativeManager sOperativeManager;
     private Thread managerThread;
@@ -35,21 +37,24 @@ public class OperativeManager implements ElevatorPositionListener{
     }
     public void setActive(boolean Active){
         active.set(Active);
-    }
+     }
 
     @Override
     public void onDoorOpenChanged(boolean newOpen){};
     @Override
     public void onFloorChanged(Floor newFloor) {
         newEvent();
+        Log.i(NAME, "New event detected")
     }
     @Override
     public void onMotorDirectionChanged(Direction newDirection){
         if (newDirection != Direction.NONE){
             setActive(true); newEvent();
+            Log.i(NAME, "Operative monitoring started.")
         }
         else{
             setActive(false); newEvent();
+            Log.i(NAME, "Operative monitoring finished. Elevator arrived at destination.")
         }
     }
     @Override
@@ -60,9 +65,11 @@ public class OperativeManager implements ElevatorPositionListener{
                 while (true){
                     if (System.currentTimeMillis()-lastEventTime.get() > 4000 && active.get()){
                         SystemData.get().getLocalElevator().setOperable(false);
+                        Log.i(NAME, "Event Timeout: Elevator not operable.")
                     }
                     else{
                         SystemData.get().getLocalElevator().setOperable(true);
+                        Log.i(NAME, "Elevator operable.")
                     }
                     Thread.sleep(500);
                 }
