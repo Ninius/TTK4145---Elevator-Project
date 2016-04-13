@@ -9,9 +9,9 @@ import com.gruppe78.model.*;
 //Move to Elevator class?
 public class CostFunction {
     static int costFunction(Order order){
-        /*if (SystemData.get().getLocalElevator().isActive()  == false){
+        if (SystemData.get().getLocalElevator().isOperable()  == false){
             return Integer.MAX_VALUE;
-        }*/
+        }
         int cost = 0;
         Elevator localElevator = SystemData.get().getLocalElevator();
 
