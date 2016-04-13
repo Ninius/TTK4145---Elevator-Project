@@ -1,4 +1,4 @@
-package com.gruppe78.model;
+package com.gruppe78.network;
 
 /**
  * Created by student on 08.04.16.

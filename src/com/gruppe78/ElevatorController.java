@@ -14,7 +14,7 @@ public class ElevatorController /*implements ElevatorPositionListener */{
 
     private ElevatorController(){
         elevator = SystemData.get().getLocalElevator();
-        elevator.addElevatorEventListener(this);
+        elevator.addElevatorMovementListener(this);
     }
 
     public static void init(){

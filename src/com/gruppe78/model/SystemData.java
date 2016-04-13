@@ -21,7 +21,7 @@ public class SystemData {
      ****************************************************************************************************************/
 
     private SystemData(ArrayList<Elevator> elevators, Elevator localElevator){
-        if(localElevator == null) throw new NullPointerException();
+        if(localElevator == null || elevators == null) throw new NullPointerException();
         mElevators = Collections.unmodifiableList(elevators);
         mLocalElevator = localElevator;
     }

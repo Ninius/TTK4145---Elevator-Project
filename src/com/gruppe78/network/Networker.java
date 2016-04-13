@@ -2,16 +2,22 @@ package com.gruppe78.network;
 
 import com.gruppe78.model.Elevator;
 import com.gruppe78.model.SystemData;
+import com.gruppe78.utilities.Log;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 
 
 public class Networker {
+    private static final String NAME = Networker.class.getSimpleName();
+    private static final int SERVER_PORT = 4300;
+
     private static Networker sNetworker;
 
-    private static final int SERVER_PORT = 4300;
+    private HashMap<Elevator, ElevatorConnection> connections = new HashMap<>();
     private WelcomeThread welcomeThread;
 
     /*****************************************
@@ -19,7 +25,9 @@ public class Networker {
      *****************************************/
 
     private Networker(){
-
+        for(Elevator elevator : SystemData.get().getElevatorList()){
+            //connections.put(elevator, new ElevatorConnection(elevator.getInetAddress()));
+        }
     }
     public static Networker get(){
         if(sNetworker == null){
@@ -36,10 +44,27 @@ public class Networker {
         welcomeThread.setName(WelcomeThread.class.getSimpleName());
         welcomeThread.start();
     }
+    public void startConnectingToElevators(){
+        Elevator localElevator = SystemData.get().getLocalElevator();
+        for(Elevator elevator : SystemData.get().getElevatorList()){
+            if(elevator == localElevator) continue;
+            if(elevator.hasHigherIDThan(localElevator)){
+                Log.i(NAME, localElevator + " connecting to " + elevator);
+                connectTo(elevator);
+            }
+        }
+    }
 
     private void connectTo(Elevator elevator){
         SystemData data = SystemData.get();
-        data.getLocalElevator().getInetAddress().getAddress();
+        Socket clientSocket = new Socket();
+        try {
+            clientSocket.connect(new InetSocketAddress(elevator.getInetAddress(), SERVER_PORT), 0);
+            Log.i(NAME, "Socket connecting to "+elevator+" created.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 

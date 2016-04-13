@@ -10,7 +10,7 @@ public class DriverController implements ElevatorPositionListener, OrderListener
 
     private DriverController(){
         Elevator elevator = SystemData.get().getLocalElevator();
-        elevator.addElevatorEventListener(this);
+        elevator.addElevatorMovementListener(this);
         elevator.addOrderEventListener(this);
         SystemData.get().addOrderEventListener(this);
     }

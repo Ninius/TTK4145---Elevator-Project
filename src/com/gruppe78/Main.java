@@ -4,6 +4,7 @@ import com.gruppe78.driver.DriverController;
 import com.gruppe78.driver.DriverHelper;
 import com.gruppe78.model.Elevator;
 import com.gruppe78.model.SystemData;
+import com.gruppe78.network.Networker;
 import com.gruppe78.utilities.Log;
 import com.gruppe78.utilities.Utilities;
 
@@ -24,11 +25,12 @@ public class Main {
 
     //System settings:
     public static final String SYSTEM_ADDRESS_PREFIX = "129";
-    private static final String[] ELEVATOR_IP_LIST = new String[]{"129.241.124.98", "129.241.124.97"};
+    private static final String[] ELEVATOR_IP_LIST = new String[]{"129.241.124.98", "129.241.124.99"};
 
     //References to components to prevent them from being garbage collected.
     private static ConnectedManager connectedManager;
     private static SystemData systemData;
+    private static Networker networker;
       //private static AliveManager aliveManager;
 
     public static void main(String[] args) throws InterruptedException {
@@ -64,6 +66,12 @@ public class Main {
         SystemData.init(elevators, localElevator);
         systemData = SystemData.get();
         Log.i(NAME, "System Data initialized");
+
+        //Establishing connections:
+        networker = Networker.get();
+        networker.startAcceptingConnections();
+        networker.startConnectingToElevators();
+
 
         //connectedManager = ConnectedManager.get();
         //connectedManager.start();
