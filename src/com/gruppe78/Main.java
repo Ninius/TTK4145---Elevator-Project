@@ -30,8 +30,8 @@ public class Main {
     //References to components to prevent them from being garbage collected.
     private static ConnectedManager connectedManager;
     private static SystemData systemData;
-    private static Networker networker;
-      //private static AliveManager aliveManager;
+      //private static Networker networker;
+      //private static OperativeManager operativeManager;
 
     public static void main(String[] args) throws InterruptedException {
         Log.i(NAME, "System started");
@@ -68,16 +68,16 @@ public class Main {
         Log.i(NAME, "System Data initialized");
 
         //Establishing connections:
-        networker = Networker.get();
-        networker.startAcceptingConnections();
-        networker.startConnectingToElevators();
+        //networker = Networker.get();
+        //networker.startAcceptingConnections();
+        //networker.startConnectingToElevators();
 
 
         //connectedManager = ConnectedManager.get();
         //connectedManager.start();
         //DriverController.init();
-        //aliveManager = AliveManager.get();
-        //aliveManager.start();
+        //operativeManager = OperativeManager.get();
+        //operativeManager.start();
 
         //Loading information on the system:
         //LocalElevatorInputChecker.get().start();

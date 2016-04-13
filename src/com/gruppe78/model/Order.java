@@ -8,7 +8,7 @@ public class Order {
     private final Floor mFloor;
     private final Button mButton;
 
-    Order(Elevator orderElevator, Button button, Floor floor){
+    public Order(Elevator orderElevator, Button button, Floor floor){
         mOrderElevator = orderElevator;
         mButton = button;
         mFloor = floor;
