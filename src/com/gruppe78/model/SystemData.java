@@ -111,5 +111,23 @@ public class SystemData {
             return globalOrders[floor.index][buttonUp ? 0 : 1];
         }
     }
+    public Order[][] getAllGlobalOrders(){
+        synchronized (globalOrders){
+            return globalOrders;
+        }
+    }
+    public void setAllGlobalOrders(Order[][] orders){
+        synchronized (globalOrders){
+            //Avoids repeated locking through calls to addGlobalOrder. Modify if needed, only called by SerializedGlobalOrders.
+            int i = 0; int j = 0;
+            for (Order[] floor: orders){
+                for (Order order : floor){
+                    globalOrders[i][j] = order;
+                    j++;
+                }
+                i++;
+            }
+        }
+    }
 
 }

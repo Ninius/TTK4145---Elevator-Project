@@ -32,4 +32,13 @@ public class SerializedOrder implements java.io.Serializable {
     public Order getOrder() {
         return new Order(SystemData.get().getElevator(mInetAddress), getButton(), getFloor());
     }
+    public void updateOrders(){
+        if (mInetAddress == null) return;
+        if (mButton == Button.INTERNAL){
+            SystemData.get().getElevator(mInetAddress).addInternalOrder(mFloor, mButton);
+        }
+        else{
+            SystemData.get().addGlobalOrder(getOrder());
+        }
+    }
 }
