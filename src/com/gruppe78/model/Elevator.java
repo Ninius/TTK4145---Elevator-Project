@@ -14,7 +14,7 @@ public class Elevator {
     private Floor mLastKnownFloor;
     private Direction mOrderDirection;
     private Direction mMotorDirection;
-    private volatile boolean mDoorOpen;
+    private boolean mDoorOpen;
 
     //Status:
     private volatile boolean mConnected = false;
@@ -85,6 +85,9 @@ public class Elevator {
     public synchronized void setOrderDirection(Direction direction){
         if(mOrderDirection == direction) return;
         mOrderDirection = direction;
+        for(ElevatorPositionListener listener : positionListeners){
+            listener.onOrderDirectionChanged(direction);
+        }
     }
     public synchronized Direction getOrderDirection(){
         return mOrderDirection;
