@@ -12,7 +12,7 @@ import java.net.InetAddress;
 public class SerializedOrderCost implements java.io.Serializable {
     private InetAddress mSender;
     private SerializedOrder mSerializedOrder;
-    private int mCost;
+    private Integer mCost; //Null when requesting cost, value when sending cost?
 
     public SerializedOrderCost(InetAddress sender, SerializedOrder serializedOrder, int cost){
         mSerializedOrder = serializedOrder;
@@ -30,6 +30,6 @@ public class SerializedOrderCost implements java.io.Serializable {
     }
     public void updateCost(){
         mCost = CostFunction.costFunction(mSerializedOrder.getOrder());
-        mSerializedOrder = new SerializedOrder(SystemData.get().getLocalElevator(), mSerializedOrder.getButton(), mSerializedOrder.getFloor());
+        mSender = SystemData.get().getLocalElevator().getInetAddress();
     }
 }
