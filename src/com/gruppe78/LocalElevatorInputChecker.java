@@ -8,9 +8,8 @@ import com.gruppe78.utilities.LoopThread;
 /**
  * Pings the driver for button and sensor events and sends info to SystemData if something has changed.
  *
- * Possibly start two independent threads for the pinging.
+ * //TODO: Separate into two classes?
  */
-@SuppressWarnings("InfiniteLoopStatement")
 public class LocalElevatorInputChecker {
     private static LocalElevatorInputChecker sLocalElevatorInputChecker;
     private Elevator mElevator;

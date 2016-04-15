@@ -4,10 +4,7 @@ import com.gruppe78.model.Elevator;
 import com.gruppe78.utilities.Log;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.SocketTimeoutException;
+import java.net.*;
 
 /**
  * Created by jespe on 15.04.2016.
@@ -26,15 +23,23 @@ class ConnectClient extends Thread{
 
     @Override public void run(){
         Socket socket = new Socket();
-        Log.i(this, "Trying to connect to " + mElevator);
+        Exception lastException = null;
         while (!isInterrupted()){
             try {
                 socket.connect(mConnectPoint, mSocketConnectTimeout);
                 Log.i(this, "Socket for: "+mElevator+" created. Thread stopping.");
                 Networker.get().getConnection(mElevator).setConnectedSocket(socket);
                 return;
-            } catch (SocketTimeoutException timeOutException){
+            } catch (SocketTimeoutException e) {
                 socket = new Socket();
+                if(lastException instanceof SocketTimeoutException) continue;
+                lastException = e;
+                Log.i(this, "Socket Timed out for "+mElevator+ ". Elevator is reachable, but is not responding.");
+            } catch (NoRouteToHostException e){
+                socket = new Socket();
+                if(lastException instanceof NoRouteToHostException) continue;
+                lastException = e;
+                Log.i(this, "NoRouteToHostException for "+mElevator+". Probably due to connection loss to router. Trying again.");
             } catch (IOException e) {
                 Log.e(this, e);
                 return;

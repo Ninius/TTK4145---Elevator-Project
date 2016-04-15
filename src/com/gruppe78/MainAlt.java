@@ -4,6 +4,7 @@ import com.gruppe78.driver.DriverController;
 import com.gruppe78.driver.DriverHelper;
 import com.gruppe78.model.Elevator;
 import com.gruppe78.model.SystemData;
+import com.gruppe78.network.NetworkException;
 import com.gruppe78.network.Networker;
 import com.gruppe78.utilities.Log;
 import com.gruppe78.utilities.Utilities;
@@ -50,7 +51,7 @@ public class MainAlt {
         }
 
         //Find the elevator that is this machine / Waiting on connection.
-        Elevator localElevator = Utilities.getConnectedElevator(elevators);
+        /*Elevator localElevator = Utilities.getConnectedElevator(elevators);
         if (localElevator == null)
             Log.i(NAME, "Local IP corresponding to the IP-list not found. Connection presumed to be down. Waiting...");
         while (localElevator == null) {
@@ -58,12 +59,21 @@ public class MainAlt {
             localElevator = Utilities.getConnectedElevator(elevators);
         }
         Log.i(NAME, "The system is connected - Local address: " + localElevator.getAddress().getHostAddress());
+        */
+        Elevator localElevator = elevators.get(0);
 
         //Initializing the system data:
         SystemData.init(elevators, localElevator);
         systemData = SystemData.get();
         Log.i(NAME, "System Data initialized, elevators in the system: " + SystemData.get().getElevatorList());
 
-        LocalElevatorInputChecker.get().start();
+        //Establishing connections:
+        networker = Networker.get();
+        try {
+            networker.createConnections(PORT, CONNECT_TIMEOUT);
+        } catch (NetworkException e) {
+            Log.e(NAME, e.getMessage() + ". System exiting");
+            return;
+        }
     }
 }

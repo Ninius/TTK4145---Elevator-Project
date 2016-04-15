@@ -22,7 +22,7 @@ public class Elevator {
     //Status:
     private volatile boolean mConnected = false;
     private volatile boolean mOperable = true;
-    private volatile long lastConnect = 0;
+    private volatile boolean mUpToDate = true; //TODO: Check initial value.
 
     //Listeners:
     private final ArrayList<ElevatorPositionListener> positionListeners = new ArrayList<>();
@@ -171,8 +171,6 @@ public class Elevator {
     }
 
     public synchronized void setConnected(boolean connected){
-        if(connected) lastConnect = System.currentTimeMillis();
-
         if(connected == mConnected) return;
         mConnected = connected;
         for(ElevatorStatusListener listener : statusListeners){
@@ -182,9 +180,6 @@ public class Elevator {
     public synchronized boolean isConnected(){
         return mConnected;
     }
-    public long getLastConnectTime(){
-        return lastConnect;
-    } //Possibly not needed.
 
     public synchronized boolean isOperable() {
         return mOperable;

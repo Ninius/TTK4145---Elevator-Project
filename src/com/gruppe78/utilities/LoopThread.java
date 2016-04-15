@@ -7,10 +7,11 @@ public abstract class LoopThread extends Thread {
 
     @Override public void run(){
         beforeLoop();
+        int sleepTime = getInterval();
         try{
             while(!interrupted()){
                 loopRun();
-                Thread.sleep(getInterval());
+                Thread.sleep(sleepTime);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

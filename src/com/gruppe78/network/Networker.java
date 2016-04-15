@@ -27,7 +27,7 @@ public class Networker {
         data = SystemData.get();
         LOCAL_ADDRESS = data.getLocalElevator().getAddress();
         for(Elevator elevator : data.getElevatorList()){
-            //if(elevator == data.getLocalElevator()) continue; //TODO: Comment in.
+            if(elevator == data.getLocalElevator()) continue;
             connections.put(elevator.getAddress(), new ElevatorConnection(elevator));
         }
     }
@@ -45,17 +45,15 @@ public class Networker {
             for(Elevator elevator : data.getElevatorList()) {
                 if (localElevator.getID() < elevator.getID()) {
                     Log.i(this, "Establishment of connection to " + elevator + ": Client.");
-                    if (connectors.get(elevator) != null) connectors.get(elevator).interrupt();
+
                     ConnectClient connectClient = new ConnectClient(port, elevator, connectTimeout);
-                    connectors.put(elevator, connectClient);
-                    connectClient.start();
-                } else if (localElevator == elevator) {
-                    //Log.i(this, "Establishment of connection to " + elevator + ": None (Local)."); //TODO: Comment in this and remove block underneath.
-                    Log.i(this, "Establishment of connection to " + elevator + ": Client and Server (Local).");
+
                     if (connectors.get(elevator) != null) connectors.get(elevator).interrupt();
-                    ConnectClient connectClient = new ConnectClient(port, elevator, connectTimeout);
                     connectors.put(elevator, connectClient);
+
                     connectClient.start();
+                } else if (localElevator.getID() == elevator.getID()) {
+                    Log.i(this, "Establishment of connection to " + elevator + ": None (Local).");
                 } else {
                     Log.i(this, "Establishment of connection to " + elevator + ": Server.");
                 }
@@ -71,6 +69,9 @@ public class Networker {
         }
     }
 
+    public ElevatorConnection getConnection(Elevator elevator){
+        return connections.get(elevator.getAddress());
+    }
     ElevatorConnection getConnection(InetAddress inetAddress){
         return connections.get(inetAddress);
     }
@@ -78,7 +79,7 @@ public class Networker {
     /*******************************************
      * Public API
      *******************************************/
-    public ElevatorConnection getConnection(Elevator elevator){
-        return connections.get(elevator.getAddress());
-    }
+
+
+
 }

@@ -12,18 +12,12 @@ import java.net.Socket;
  */
 public class ElevatorConnection {
     private static final int CONNECTION_CHECK_INTERVAL = 5000;
-    private static final int MESSAGE_READ_INTERVAL = 0;
     private static final String CHECK_MESSAGE = "group123";
 
     private final Elevator mElevator;
     private Socket mSocket;
     private BufferedReader mReader;
     private OutputStreamWriter mWriter;
-
-    private final Object writeLock = new Object();
-    private final Object readLock = new Object();
-
-    private boolean mConnection = false;
 
     private ConnectionChecker mConnectionChecker = new ConnectionChecker();
     private ConnectionReader mMessageReader = new ConnectionReader();
@@ -32,58 +26,53 @@ public class ElevatorConnection {
         mElevator = elevator;
     }
 
+    private boolean isValid(Socket socket){
+        return mSocket != null && (mSocket.isClosed() || !mSocket.isConnected());
+    }
+
     synchronized void setConnectedSocket(Socket socket){
-        Log.d(this, "setConnectedSocket called");
-        synchronized (writeLock){
-            if(socket == null || mSocket != null) return;
+        if(isValid(socket)){
+            Log.e(this, mElevator + ":Tried to set socket. Socket was not valid!");
+        }else if(isValid(mSocket)){
+            Log.e(this, mElevator + ":Tried to set socket. Valid socket already set!");
+        }else{
             try {
                 mSocket = socket;
                 mReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 mWriter = new OutputStreamWriter(socket.getOutputStream());
-                Log.i(this, "Socket successfully set up to "+mElevator);
+                Log.i(this, mElevator + ":Socket successfully set up to.");
                 mConnectionChecker.start();
                 mMessageReader.start();
             } catch (IOException e) {
-                setConnection(false);
+                setConnectionStatus(false);
                 e.printStackTrace();
             }
         }
     }
-    private void setConnection(boolean connection){
-        mConnection = connection;
+    private void setConnectionStatus(boolean status){
+        mElevator.setConnected(status);
     }
 
-    public boolean sendPrimitive(String message) {
-        Log.d(this, "Send primitive called.");
-        synchronized (writeLock){
-            try {
-                mWriter.write(message + "\n");
-                mWriter.flush();
-                setConnection(true);
-                return true;
-            } catch (IOException e) {
-                Log.i(this, "Could not send msg. Setting connection status to false.");
-                setConnection(false);
-                e.printStackTrace();
-                return false;
-            }
+    public synchronized boolean sendPrimitive(String message) {
+        try {
+            mWriter.write(message + "\n");
+            mWriter.flush();
+            setConnectionStatus(true);
+            return true;
+        } catch (IOException e) { //Todo, check different exception types. Test.
+            setConnectionStatus(false);
+            Log.i(this, "Could not send msg. Setting connection status to false.");
+            Log.e(this, e);
+            return false;
         }
     }
-    public String readPrimitive(){
-        Log.d(this, "Read primitive called.");
-        synchronized (readLock){
-            try {
-                Log.d(this, "Reading message..");
-                String message = mReader.readLine();
-                Log.d(this, "Message received: "+message);
-                //setConnection(true);
-                return message;
-            } catch (IOException e) {
-                Log.i(this, "Could not read msg. Setting connection status to false.");
-                setConnection(false);
-                e.printStackTrace();
-                return null;
-            }
+
+    private String readPrimitive(){
+        try {
+            return mReader.readLine(); //Blocking.
+        } catch (IOException e) {
+            Log.e(this, e);
+            return null;
         }
     }
 
@@ -97,16 +86,16 @@ public class ElevatorConnection {
             return CONNECTION_CHECK_INTERVAL;
         }
     }
+
     private class ConnectionReader extends LoopThread{
         @Override public void loopRun() {
-            Log.d(this, "Reading message from "+ mElevator);
             String message = readPrimitive();
-            if(message == null) return;
+            if(message == null || message.equals(CHECK_MESSAGE)) return;
             NetworkMessager.get().decodeMessage(message, mElevator);
         }
 
         @Override public int getInterval() {
-            return MESSAGE_READ_INTERVAL;
+            return 0;
         }
     }
 }
