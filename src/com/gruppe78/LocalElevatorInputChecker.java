@@ -55,11 +55,10 @@ public class LocalElevatorInputChecker {
         @Override
         public void loopRun() {
             Floor floor = DriverHelper.getElevatorFloor();
-            if(lastFloor == floor) return;
-
+            if(lastFloor == floor || floor == null) return;
             lastFloor = floor;
             mElevator.setFloor(floor);
-            //Log.i(this, "Floor changed: "+floor);
+            Log.i(this, "Floor changed: "+floor);
         }
 
         @Override

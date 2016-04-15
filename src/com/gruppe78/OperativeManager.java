@@ -13,14 +13,13 @@ import java.util.concurrent.atomic.AtomicLong;
 //Implement as listener?
 public class OperativeManager implements ElevatorPositionListener{
     private static final String NAME = OperativeManager.class.getSimpleName();
-    AtomicLong lastEventTime;
+    AtomicLong lastEventTime = new AtomicLong();
     private static OperativeManager sOperativeManager;
     private Thread managerThread;
-    private AtomicBoolean active;
+    private AtomicBoolean active = new AtomicBoolean();
 
     private OperativeManager(){
         SystemData.get().getLocalElevator().addElevatorMovementListener(this);
-        lastEventTime = new AtomicLong();
     };
     public static OperativeManager get(){
         if(sOperativeManager == null){
@@ -51,6 +50,9 @@ public class OperativeManager implements ElevatorPositionListener{
     @Override
     public void onMotorDirectionChanged(Direction newDirection){
         if (newDirection != Direction.NONE){
+            if (newDirection == null){
+                Log.i(this, "NullPointerDirection");
+            }
             setActive(true); newEvent();
             Log.i(NAME, "Operative monitoring started.");
         }
@@ -64,15 +66,22 @@ public class OperativeManager implements ElevatorPositionListener{
     private class ManagerThread extends Thread{
         @Override public void run(){
             try{
+                boolean operative = true;
+                SystemData.get().getLocalElevator().setOperable(true);
+                Log.i(NAME, "Elevator operable.");
                 while (true){
                     if (System.currentTimeMillis()-lastEventTime.get() > 4000 && active.get()){
                         SystemData.get().getLocalElevator().setOperable(false);
                         //Reassign global orders here
-                        Log.i(NAME, "Event Timeout: Elevator not operable.");
+                        if (operative){
+                            Log.i(NAME, "Event Timeout: Elevator not operable.");
+                        }
+                        operative = false;
                     }
                     else{
-                        SystemData.get().getLocalElevator().setOperable(true);
-                        Log.i(NAME, "Elevator operable.");
+                        if (operative == false){
+                            SystemData.get().getLocalElevator().setOperable(true);
+                        }
                     }
                     Thread.sleep(500);
                 }

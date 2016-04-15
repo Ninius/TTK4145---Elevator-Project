@@ -1,6 +1,7 @@
 package com.gruppe78.driver;
 
 import com.gruppe78.model.*;
+import com.gruppe78.utilities.Log;
 
 /**
  * Controls all lights of the local system.
@@ -51,6 +52,7 @@ public class DriverController implements ElevatorPositionListener, OrderListener
 
     @Override
     public void onOrderRemoved(Order order) {
+        Log.i(this, "Remove light" + order.getFloor()+ order.getButton());
         DriverHelper.setButtonLamp(order.getButton(), order.getFloor(), false);
     }
 }

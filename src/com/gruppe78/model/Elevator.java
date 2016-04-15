@@ -1,5 +1,7 @@
 package com.gruppe78.model;
 
+import com.gruppe78.utilities.Log;
+
 import java.net.InetAddress;
 import java.util.ArrayList;
 
@@ -13,7 +15,7 @@ public class Elevator {
     //Position and direction:
     private Floor mFloor;
     private Floor mLastKnownFloor;
-    private Direction mOrderDirection;
+    private Direction mOrderDirection = Direction.UP;
     private Direction mMotorDirection;
     private boolean mDoorOpen;
 
@@ -98,24 +100,38 @@ public class Elevator {
         return mOrderDirection;
     }
 
-    public synchronized void setMotorDirection(Direction direction) {
+    public void setMotorDirection(Direction direction) {
         if(direction == mMotorDirection) return;
-        mMotorDirection =  direction;
+        synchronized (positionListeners){
+            mMotorDirection =  direction;
+        }
+        Log.i(this, "Motor direction changed: "+  direction);
         for(ElevatorPositionListener listener : positionListeners){
             listener.onMotorDirectionChanged(direction);
         }
+        Log.i(this, "No deadlocks");
     }
-    public synchronized Direction getMotorDirection(Direction direction) { return mMotorDirection;}
+    public Direction getMotorDirection(Direction direction) {
+        synchronized (positionListeners){
+            return mMotorDirection;
+        }
 
-    public synchronized void setDoor(boolean open){
+    }
+
+    public void setDoor(boolean open){
         if(mDoorOpen == open) return;
-        mDoorOpen = open;
+        synchronized (statusListeners){
+            mDoorOpen = open;
+        }
         for(ElevatorPositionListener listener : positionListeners){
             listener.onDoorOpenChanged(open);
         }
     }
-    public synchronized boolean isDoorOpen(){
-        return mDoorOpen;
+    public boolean isDoorOpen(){
+        synchronized (statusListeners){
+            return mDoorOpen;
+        }
+
     }
 
     /**************************************************************************************************************
@@ -126,10 +142,24 @@ public class Elevator {
         return internalOrders[floor.index];
     }
     public void addInternalOrder(Floor floor, Button button){
-        internalOrders[floor.index] = new Order(this, button, floor);
+        synchronized (internalOrders){
+            internalOrders[floor.index] = new Order(this, button, floor);
+        }
+
+        Log.i(this, "Internal order added: " + floor);
+        for (OrderListener listener : orderListeners){
+            listener.onOrderAdded(internalOrders[floor.index]);
+        }
     }
     public void clearInternalOrder(Floor floor){
-        internalOrders[floor.index] = null;
+        Order order = internalOrders[floor.index];
+        for (OrderListener listener : orderListeners){
+            listener.onOrderRemoved(order);
+        }
+        synchronized (internalOrders){
+            internalOrders[floor.index] = null;
+        }
+        Log.i(this, "Internal order removed: " + floor);
     }
 
     /*************************************************

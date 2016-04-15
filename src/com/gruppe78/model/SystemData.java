@@ -1,5 +1,7 @@
 package com.gruppe78.model;
 
+import com.gruppe78.utilities.Log;
+
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,6 +82,7 @@ public class SystemData {
         synchronized (globalOrders){
             if(globalOrders[order.getFloor().index][order.getButton().isUp() ? 0 : 1] != null) return false;
             globalOrders[order.getFloor().index][order.getButton().isUp() ? 0 : 1] = order;
+            Log.i(this, "Global Order Added:" + order);
         }
 
         synchronized (orderListeners){
@@ -95,6 +98,7 @@ public class SystemData {
         synchronized (globalOrders){
             order = globalOrders[floor.index][buttonUp ? 0 : 1];
             globalOrders[floor.index][buttonUp ? 0 : 1] = null;
+            Log.i(this, "Global order cleared:" + floor);
         }
         if(order == null) return false;
 

@@ -3,20 +3,18 @@ package com.gruppe78;
 import com.gruppe78.model.*;
 import com.gruppe78.network.Networker;
 import com.gruppe78.utilities.Log;
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by oysteikh on 4/11/16.
  */
-public class OrderHandler implements ElevatorStatusListener{//TODO: Remove ElevatorStatusListener or change to Singleton
+public class OrderHandler implements ElevatorStatusListener, ElevatorPositionListener{//TODO: Remove ElevatorStatusListener or change to Singleton
 
     private static OrderHandler mOrderHandler;
     private OrderHandler (){
         for (Elevator elevator : SystemData.get().getElevatorList()){
             elevator.addElevatorStatusListener(this);
-
+            elevator.addElevatorMovementListener(this);
         }
     }
     public static OrderHandler get(){
@@ -34,8 +32,14 @@ public class OrderHandler implements ElevatorStatusListener{//TODO: Remove Eleva
         }
         else{
             SystemData.get().getLocalElevator().addInternalOrder(order.getFloor(), order.getButton());
-            Log.i("OrderHandler", "New External Order " + (order.getButton().isUp()? "Up" : "Down") + order.getFloor());
+            Log.i("OrderHandler", "New  " +order);
         }
+    }
+    public static void clearOrder(Floor floor){
+        SystemData.get().clearGlobalOrder(floor, true);
+        SystemData.get().clearGlobalOrder(floor, false);
+        SystemData.get().getLocalElevator().clearInternalOrder(floor);
+
     }
     private static void newGlobalOrder(Order order){//TODO: Implement/change to correct minCost function call. Refactoring might be needed depending on network
         Thread thread = new Thread(new Runnable() {
@@ -123,11 +127,11 @@ public class OrderHandler implements ElevatorStatusListener{//TODO: Remove Eleva
         if (direction == Direction.NONE){
             direction = Direction.UP;
         }
-        Floor nextFloor = elevator.getLastKnownFloor().getNextFloor(direction);
-        while(nextFloor != null){
-            Order order = getAnyOrder(elevator, nextFloor);
+        Floor floor = elevator.getLastKnownFloor();
+        while(floor != null){
+            Order order = getAnyOrder(elevator, floor);
             if(order != null) return order;
-            nextFloor = nextFloor.getNextFloor(direction);
+            floor = floor.getNextFloor(direction);
         }
         return null;
     }
@@ -154,4 +158,19 @@ public class OrderHandler implements ElevatorStatusListener{//TODO: Remove Eleva
         }
         return orders;
     }
+    @Override
+    public void onFloorChanged(Floor newFloor){};
+    @Override
+    public void onMotorDirectionChanged(Direction newDirection){
+        if (newDirection == Direction.NONE){
+            Log.i(this, "Clearing order");
+
+            clearOrder(SystemData.get().getLocalElevator().getFloor());
+            Log.i(this, "Cleared order");
+        }
+    };
+    @Override
+    public void onOrderDirectionChanged(Direction newDirection){};
+    @Override
+    public void onDoorOpenChanged(boolean newOpen){};
 }

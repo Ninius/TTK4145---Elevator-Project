@@ -1,5 +1,7 @@
 package com.gruppe78.model;
 
+import com.gruppe78.utilities.Log;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,7 +27,11 @@ public enum Floor {
     }
 
     public Direction directionTo(Floor floor){
-        if(floor == null) return Direction.NONE;
+
+        if(floor == null) {
+            Log.i(this, "Null floor");
+            return Direction.NONE;
+        }
         int diff = floor.index - index;
         if(diff > 0) return Direction.UP;
         if(diff < 0) return Direction.DOWN;
