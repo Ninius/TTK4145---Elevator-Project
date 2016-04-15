@@ -1,5 +1,7 @@
 package com.gruppe78.model;
 
+import com.gruppe78.SerializedOrder;
+
 /**
  * Created by student on 04.03.16.
  */
@@ -22,5 +24,8 @@ public class Order {
     }
     public Button getButton(){
         return mButton;
+    }
+    public SerializedOrder serialize(){
+        return new SerializedOrder(mOrderElevator, mButton, mFloor);
     }
 }

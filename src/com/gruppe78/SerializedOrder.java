@@ -13,10 +13,10 @@ public class SerializedOrder implements java.io.Serializable {
     private final InetAddress mInetAddress;
     private final Floor mFloor;
     private final Button mButton;
-
     public Floor getFloor(){
         return mFloor;
     }
+    
     public Button getButton(){
         return mButton;
     }

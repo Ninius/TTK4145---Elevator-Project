@@ -5,4 +5,5 @@ package com.gruppe78.model;
  */
 public interface ElevatorStatusListener {
     void onConnectionChanged(boolean connected);
+    void onOperableChanged(boolean operable);
 }

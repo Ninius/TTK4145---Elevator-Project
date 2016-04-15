@@ -1,11 +1,52 @@
 package com.gruppe78;
 
 import com.gruppe78.model.*;
+import com.gruppe78.network.Networker;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by oysteikh on 4/11/16.
  */
-public class OrderHandler {
+public class OrderHandler implements ElevatorStatusListener{//TODO: Remove ElevatorStatusListener or change to Singleton
+
+    public static void newGlobalOrder(Order order){//TODO: Implement/change to correct minCost function call. Refactoring might be needed depending on network
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //Elevator minCostElevator = Networker.getMinCostElevator(order); Change to correct function call
+                if (SystemData.get().getGlobalOrder(order.getFloor(), order.getButton().isUp()) == null){
+                    Elevator minCostElevator = SystemData.get().getLocalElevator();
+                    Order newOrder = new Order(minCostElevator, order.getButton(), order.getFloor());
+                    SystemData.get().addGlobalOrder(newOrder);
+                }
+
+            }
+        });
+        thread.setName("Get minCostElevator thread");
+        thread.start();
+    }
+
+    public void onConnectionChanged(boolean connected){
+        if (!connected){
+            List<Elevator> elevatorList = SystemData.get().getElevatorList();
+            Elevator maxElevator = elevatorList.get(0);
+            for (Elevator elevator : elevatorList){
+                if (maxElevator.hasHigherIDThan(elevator) && elevator.isConnected()){
+                    maxElevator = elevator;
+                }
+            }
+            if (maxElevator == SystemData.get().getLocalElevator()){
+                //reassignElevatorOrders(elevator);
+            }
+        }
+    }
+    public void onOperableChanged(boolean operable){
+        if (!operable){
+            reassignElevatorOrders(SystemData.get().getLocalElevator());
+        }
+    }
     public static int getNumberOfGlobalOrders(Elevator elevator){
         int orders = 0;
         for (Floor floor : Floor.values()){
@@ -40,7 +81,7 @@ public class OrderHandler {
                 if (data.getGlobalOrder(floor, button.isUp()) != null && data.getGlobalOrder(floor, button.isUp()).getElevator() == elevator){
                     Order tempOrder = data.getGlobalOrder(floor, button.isUp());
                     data.clearGlobalOrder(floor, button.isUp());
-                    data.addGlobalOrder(tempOrder);
+                    newGlobalOrder(tempOrder);
                     //Reassign order
                 }
             }

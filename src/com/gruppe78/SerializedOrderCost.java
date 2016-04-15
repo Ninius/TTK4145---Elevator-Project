@@ -10,6 +10,8 @@ import java.net.InetAddress;
 
 //First draft, please change if needed.
 public class SerializedOrderCost implements java.io.Serializable {
+    //Sender field required for return message?
+
     private InetAddress mSender;
     private SerializedOrder mSerializedOrder;
     private Integer mCost; //Null when requesting cost, value when sending cost?
@@ -27,6 +29,13 @@ public class SerializedOrderCost implements java.io.Serializable {
     }
     public InetAddress getSender(){
         return mSender;
+    }
+    public boolean equals(SerializedOrderCost orderCost){
+        SerializedOrder order = orderCost.getSerializedOrder();
+        if (mSerializedOrder.getFloor() == order.getFloor() && mSerializedOrder.getButton() == order.getButton()){
+            return true;
+        }
+        return false;
     }
     public void updateCost(){
         mCost = CostFunction.costFunction(mSerializedOrder.getOrder());
