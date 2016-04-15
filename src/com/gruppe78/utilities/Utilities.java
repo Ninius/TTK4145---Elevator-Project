@@ -55,7 +55,7 @@ public class Utilities {
     public static Elevator getConnectedElevator(ArrayList<Elevator> elevators){
         for(Elevator elevator : elevators){
             try {
-                if(NetworkInterface.getByInetAddress(elevator.getInetAddress()) != null) return elevator;
+                if(NetworkInterface.getByInetAddress(elevator.getAddress()) != null) return elevator;
             } catch (SocketException e) {
                 e.printStackTrace();
             }

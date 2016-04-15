@@ -1,18 +1,16 @@
 package com.gruppe78;
 
-import com.gruppe78.driver.DriverController;
 import com.gruppe78.driver.DriverHelper;
 import com.gruppe78.model.Elevator;
 import com.gruppe78.model.SystemData;
+import com.gruppe78.network.NetworkException;
 import com.gruppe78.network.Networker;
 import com.gruppe78.utilities.Log;
 import com.gruppe78.utilities.Utilities;
 
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /***************************************************************************************************
  * System description:
@@ -24,13 +22,14 @@ public class Main {
     private static final String NAME = Main.class.getSimpleName();
 
     //System settings:
-    public static final String SYSTEM_ADDRESS_PREFIX = "129";
     private static final String[] ELEVATOR_IP_LIST = new String[]{"129.241.124.98", "129.241.124.99"};
+    private static final int PORT = 5000;
+    private static final int CONNECT_TIMEOUT = 1000;
 
     //References to components to prevent them from being garbage collected.
     private static ConnectedManager connectedManager;
     private static SystemData systemData;
-      //private static Networker networker;
+    private static Networker networker;
       //private static OperativeManager operativeManager;
 
     public static void main(String[] args) throws InterruptedException {
@@ -45,32 +44,36 @@ public class Main {
             Log.i(NAME, "Driver initialized");
         }
 
-
+        //Creating elevator objects from IP-list:
         ArrayList<Elevator> elevators = new ArrayList<>();
-        for(String IP : ELEVATOR_IP_LIST){
-            InetAddress inetAddress = Utilities.getInetAddress(IP);
-            if(inetAddress == null) Log.e(NAME, "IP: "+IP+" was not a valid IP-address. Removing it from the system.");
-            else elevators.add(new Elevator(inetAddress));
+        for(int i = 0; i < ELEVATOR_IP_LIST.length; i++){
+            InetAddress inetAddress = Utilities.getInetAddress(ELEVATOR_IP_LIST[i]);
+            if(inetAddress == null) Log.e(NAME, "IP: "+ELEVATOR_IP_LIST[i]+" was not a valid IP-address. Removing it from the system.");
+            else elevators.add(new Elevator(inetAddress, i));
         }
 
-
-        Log.i(NAME, "Finding elevator that has IP-address connecting this machine...");
+        //Find the elevator that is this machine / Waiting on connection.
         Elevator localElevator = Utilities.getConnectedElevator(elevators);
+        if(localElevator == null) Log.i(NAME, "Local IP corresponding to the IP-list not found. Connection presumed to be down. Waiting...");
         while(localElevator == null){
             Thread.sleep(100);
             localElevator = Utilities.getConnectedElevator(elevators);
         }
-        Log.i(NAME, "... This system is connected - Address found: " + localElevator.getInetAddress().getHostAddress());
+        Log.i(NAME, "The system is connected - Local address: " + localElevator.getAddress().getHostAddress());
 
         //Initializing the system data:
         SystemData.init(elevators, localElevator);
         systemData = SystemData.get();
-        Log.i(NAME, "System Data initialized");
+        Log.i(NAME, "System Data initialized, elevators in the system: "+SystemData.get().getElevatorList());
 
         //Establishing connections:
-        //networker = Networker.get();
-        //networker.startAcceptingConnections();
-        //networker.startConnectingToElevators();
+        networker = Networker.get();
+        try {
+            networker.createConnections(PORT, CONNECT_TIMEOUT);
+        } catch (NetworkException e) {
+            Log.e(NAME, e.getMessage() + ". System exiting");
+            return;
+        }
 
 
         //connectedManager = ConnectedManager.get();

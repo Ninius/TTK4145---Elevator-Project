@@ -48,7 +48,7 @@ public class SystemData {
     }
     public Elevator getElevator(InetAddress inetAddress){
         for(Elevator elevator : mElevators){
-            if(elevator.getInetAddress().equals(inetAddress)) return elevator;
+            if(elevator.getAddress().equals(inetAddress)) return elevator;
         }
         return null;
     }

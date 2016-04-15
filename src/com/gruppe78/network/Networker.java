@@ -5,28 +5,30 @@ import com.gruppe78.model.SystemData;
 import com.gruppe78.utilities.Log;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.HashMap;
 
 
 public class Networker {
-    private static final String NAME = Networker.class.getSimpleName();
-    private static final int SERVER_PORT = 4300;
+    private final InetAddress LOCAL_ADDRESS;
+    private SystemData data;
 
     private static Networker sNetworker;
 
-    private HashMap<Elevator, ElevatorConnection> connections = new HashMap<>();
-    private WelcomeThread welcomeThread;
+    private HashMap<InetAddress, ElevatorConnection> connections = new HashMap<>();
+    private ConnectServer connectionServer;
+    private HashMap<Elevator, ConnectClient> connectors = new HashMap<>();
 
     /*****************************************
      * Initialization
      *****************************************/
 
     private Networker(){
-        for(Elevator elevator : SystemData.get().getElevatorList()){
-            //connections.put(elevator, new ElevatorConnection(elevator.getInetAddress()));
+        data = SystemData.get();
+        LOCAL_ADDRESS = data.getLocalElevator().getAddress();
+        for(Elevator elevator : data.getElevatorList()){
+            //if(elevator == data.getLocalElevator()) continue; //TODO: Comment in.
+            connections.put(elevator.getAddress(), new ElevatorConnection(elevator));
         }
     }
     public static Networker get(){
@@ -36,58 +38,47 @@ public class Networker {
         return sNetworker;
     }
 
+    public void createConnections(int connectTimeout, int port) throws NetworkException {
+        try {
+            //Starting clients:
+            Elevator localElevator = data.getLocalElevator();
+            for(Elevator elevator : data.getElevatorList()) {
+                if (localElevator.getID() < elevator.getID()) {
+                    Log.i(this, "Establishment of connection to " + elevator + ": Client.");
+                    if (connectors.get(elevator) != null) connectors.get(elevator).interrupt();
+                    ConnectClient connectClient = new ConnectClient(port, elevator, connectTimeout);
+                    connectors.put(elevator, connectClient);
+                    connectClient.start();
+                } else if (localElevator == elevator) {
+                    //Log.i(this, "Establishment of connection to " + elevator + ": None (Local)."); //TODO: Comment in this and remove block underneath.
+                    Log.i(this, "Establishment of connection to " + elevator + ": Client and Server (Local).");
+                    if (connectors.get(elevator) != null) connectors.get(elevator).interrupt();
+                    ConnectClient connectClient = new ConnectClient(port, elevator, connectTimeout);
+                    connectors.put(elevator, connectClient);
+                    connectClient.start();
+                } else {
+                    Log.i(this, "Establishment of connection to " + elevator + ": Server.");
+                }
+            }
+
+            //Starting server:
+            if(connectionServer != null) connectionServer.interrupt();
+            connectionServer = new ConnectServer(port, LOCAL_ADDRESS);
+            connectionServer.start();
+
+        } catch (IOException e) {
+            throw new NetworkException("Could not bind server to: " + LOCAL_ADDRESS + ":" + port);
+        }
+    }
+
+    ElevatorConnection getConnection(InetAddress inetAddress){
+        return connections.get(inetAddress);
+    }
+
     /*******************************************
      * Public API
      *******************************************/
-    public void startAcceptingConnections(){
-        welcomeThread = new WelcomeThread();
-        welcomeThread.setName(WelcomeThread.class.getSimpleName());
-        welcomeThread.start();
-    }
-    public void startConnectingToElevators(){
-        Elevator localElevator = SystemData.get().getLocalElevator();
-        for(Elevator elevator : SystemData.get().getElevatorList()){
-            if(elevator == localElevator) continue;
-            if(elevator.hasHigherIDThan(localElevator)){
-                Log.i(NAME, localElevator + " connecting to " + elevator);
-                connectTo(elevator);
-            }
-        }
-    }
-
-    private void connectTo(Elevator elevator){
-        SystemData data = SystemData.get();
-        Socket clientSocket = new Socket();
-        try {
-            clientSocket.connect(new InetSocketAddress(elevator.getInetAddress(), SERVER_PORT), 0);
-            Log.i(NAME, "Socket connecting to "+elevator+" created.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-
-    private class WelcomeThread extends Thread{
-        private ServerSocket serverSocket;
-
-        @Override public void run(){
-            Socket clientSocket = null;
-            try{
-                serverSocket = new ServerSocket(SERVER_PORT);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            while(true){
-                try {
-                    clientSocket = serverSocket.accept();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                Thread clientThread = new SocketReader(clientSocket);
-                clientThread.setName(SocketReader.class.getSimpleName());
-                clientThread.start();
-            }
-        }
+    public ElevatorConnection getConnection(Elevator elevator){
+        return connections.get(elevator.getAddress());
     }
 }

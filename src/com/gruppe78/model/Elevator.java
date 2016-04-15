@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 public class Elevator {
     private final InetAddress mInetAddress; //Also serves as ID.
+    private final int mID;
 
     //Orders:
     private final Order[] internalOrders = new Order[Floor.NUMBER_OF_FLOORS];
@@ -26,8 +27,12 @@ public class Elevator {
     private final ArrayList<OrderListener> orderListeners = new ArrayList<>();
     private final ArrayList<ElevatorStatusListener> statusListeners = new ArrayList<>();
 
-    public Elevator(InetAddress InetAddress){
-        mInetAddress = InetAddress;
+    public Elevator(InetAddress inetAddress){
+        this(inetAddress,-1);
+    }
+    public Elevator(InetAddress inetAddress, int ID){
+        mInetAddress = inetAddress;
+        mID = ID;
     }
 
     /****************************************************************************************************************
@@ -131,7 +136,7 @@ public class Elevator {
      * Status - Connection and Operability
      *************************************************/
 
-    public InetAddress getInetAddress(){
+    public InetAddress getAddress(){
         return mInetAddress;
     }
 
@@ -169,17 +174,10 @@ public class Elevator {
     public boolean isLocal(){
         return this == SystemData.get().getLocalElevator();
     }
-    public boolean hasHigherIDThan(Elevator elevator){
-        byte[] thisAddress = this.getInetAddress().getAddress();
-        byte[] otherAddress = elevator.getInetAddress().getAddress();
-        for(int i = 0; i < thisAddress.length || i < otherAddress.length; i++){
-            if(thisAddress[i] > otherAddress[i]) return false;
-        }
-        return true;
-    }
+    public int getID(){ return mID;}
 
     @Override
     public String toString(){
-        return "E("+getInetAddress().getHostAddress()+")";
+        return "E"+mID+"("+ getAddress().getHostAddress()+")";
     }
 }

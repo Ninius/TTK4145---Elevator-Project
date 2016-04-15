@@ -1,7 +1,6 @@
 package com.gruppe78;
 
 import com.gruppe78.model.*;
-import com.sun.xml.internal.ws.transport.http.server.ServerAdapter;
 
 import java.net.InetAddress;
 
@@ -25,7 +24,7 @@ public class SerializedOrder implements java.io.Serializable {
     }
 
     public SerializedOrder(Elevator elevator, Button button, Floor floor){
-        mInetAddress = elevator.getInetAddress();
+        mInetAddress = elevator.getAddress();
         mButton = button;
         mFloor = floor;
     }

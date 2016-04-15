@@ -53,7 +53,7 @@ public class ConnectedManager {
                 while(true){
                     for(Elevator elevator: SystemData.get().getElevatorList()){
                         if(elevator.isLocal()) continue;
-                        DatagramPacket packet = new DatagramPacket(message, message.length, elevator.getInetAddress(), PORT);
+                        DatagramPacket packet = new DatagramPacket(message, message.length, elevator.getAddress(), PORT);
                         sendingSocket.send(packet);
                     }
                     Thread.sleep(SEND_INTERVAL);
