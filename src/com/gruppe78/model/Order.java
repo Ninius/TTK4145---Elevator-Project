@@ -28,4 +28,9 @@ public class Order {
     public SerializedOrder serialize(){
         return new SerializedOrder(mOrderElevator, mButton, mFloor);
     }
+
+    @Override
+    public String toString(){
+        return "O(F:"+mFloor.index +", B:"+mButton + ", "+mOrderElevator+")";
+    }
 }

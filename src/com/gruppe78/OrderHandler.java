@@ -30,7 +30,7 @@ public class OrderHandler implements ElevatorStatusListener{//TODO: Remove Eleva
     public static void addOrder(Order order){
         if (order.getButton() != Button.INTERNAL){
             newGlobalOrder(order);
-            Log.i("OrderHandler", "New Internal Order " + order.getFloor().index);
+            Log.i("OrderHandler", "New "+order);
         }
         else{
             SystemData.get().getLocalElevator().addInternalOrder(order.getFloor(), order.getButton());

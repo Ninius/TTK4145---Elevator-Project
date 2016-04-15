@@ -23,7 +23,7 @@ public class DriverHelper {
      * PUBLIC API
      ****************************************************/
 
-    public static boolean init(int type) {
+    public synchronized static boolean init(int type) {
         sDriver = (type == 1) ? ElevatorDriver.get() : SimulatorDriver.get();
         if(!sDriver.io_init()){
             return false;
@@ -40,11 +40,11 @@ public class DriverHelper {
         return true;
     }
 
-    public static boolean isButtonPressed(Button button, Floor floor) {
+    public synchronized static boolean isButtonPressed(Button button, Floor floor) {
         return sDriver.io_read_bit(DriverChannels.BUTTON_CHANNEL_MATRIX[floor.index][button.index]) == 1;
     }
 
-    public static Floor getElevatorFloor() {
+    public synchronized static Floor getElevatorFloor() {
         if (sDriver.io_read_bit(DriverChannels.SENSOR_FLOOR1) == 1) {
             return Floor.FLOOR0;
         } else if (sDriver.io_read_bit(DriverChannels.SENSOR_FLOOR2) == 1) {
@@ -58,11 +58,11 @@ public class DriverHelper {
         }
     }
 
-    public static boolean isStopPressed() {
+    public synchronized static boolean isStopPressed() {
         return sDriver.io_read_bit(DriverChannels.STOP) == 1;
     }
 
-    public static boolean isObstructionPressed() {
+    public synchronized static boolean isObstructionPressed() {
         return sDriver.io_read_bit(DriverChannels.OBSTRUCTION) == 1;
     }
 
@@ -70,7 +70,7 @@ public class DriverHelper {
      * PACKAGE-PRIVATE API - Changes to driver not allowed outside package.
      ****************************************************/
 
-    static void setMotorDirection(Direction direction) {
+    static synchronized void setMotorDirection(Direction direction) {
         switch (direction){
             case NONE:
                 sDriver.io_write_analog(DriverChannels.MOTOR, 0);
@@ -86,7 +86,7 @@ public class DriverHelper {
     }
 
 
-    static void setButtonLamp(Button button, Floor floor, boolean turnOn) {
+    static synchronized void setButtonLamp(Button button, Floor floor, boolean turnOn) {
         if (turnOn) {
             sDriver.io_set_bit(DriverChannels.LAMP_CHANNEL_MATRIX[floor.index][button.index]);
         } else {
@@ -95,7 +95,7 @@ public class DriverHelper {
     }
 
 
-    static void setFloorIndicator(Floor floor) {
+    static synchronized void setFloorIndicator(Floor floor) {
         if(floor == null) return;
 
         // Binary encoding. One light must always be on.
@@ -113,7 +113,7 @@ public class DriverHelper {
     }
 
 
-    static void setDoorOpenLamp(boolean turnOn) {
+    static synchronized void setDoorOpenLamp(boolean turnOn) {
         if (turnOn) {
             sDriver.io_set_bit(DriverChannels.LIGHT_DOOR_OPEN);
         } else {
@@ -122,7 +122,7 @@ public class DriverHelper {
     }
 
 
-    static void setStopLamp(boolean turnOn) {
+    static synchronized void setStopLamp(boolean turnOn) {
         if (turnOn) {
             sDriver.io_set_bit(DriverChannels.LIGHT_STOP);
         } else {

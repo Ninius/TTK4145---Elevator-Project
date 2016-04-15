@@ -59,7 +59,7 @@ public class LocalElevatorInputChecker {
 
             lastFloor = floor;
             mElevator.setFloor(floor);
-            Log.i(this, "Floor changed: "+floor);
+            //Log.i(this, "Floor changed: "+floor);
         }
 
         @Override
@@ -82,7 +82,7 @@ public class LocalElevatorInputChecker {
 
                     buttonPressed[floor.index][button.index] = pressed;
 
-                    Log.i(this, "Button changed:"+button+ " on floor "+floor+" - pressed: "+pressed);
+                    //Log.i(this, "Button changed:"+button+ " on floor "+floor+" - pressed: "+pressed);
 
                     if(pressed) OrderHandler.addOrder(new Order(SystemData.get().getLocalElevator(), button, floor));
                 }
