@@ -10,16 +10,26 @@ import java.util.List;
  * Created by oysteikh on 4/11/16.
  */
 public class OrderHandler implements ElevatorStatusListener{//TODO: Remove ElevatorStatusListener or change to Singleton
-
-    public static void newGlobalOrder(Order order){//TODO: Implement/change to correct minCost function call. Refactoring might be needed depending on network
+    public static void addOrder(Order order){
+        if (order.getButton() != Button.INTERNAL){
+            newGlobalOrder(order);
+        }
+        else{
+            SystemData.get().getLocalElevator().addInternalOrder(order.getFloor(), order.getButton());
+        }
+    }
+    private static void newGlobalOrder(Order order){//TODO: Implement/change to correct minCost function call. Refactoring might be needed depending on network
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                //Elevator minCostElevator = Networker.getMinCostElevator(order); Change to correct function call
-                if (SystemData.get().getGlobalOrder(order.getFloor(), order.getButton().isUp()) == null){
-                    Elevator minCostElevator = SystemData.get().getLocalElevator();
-                    Order newOrder = new Order(minCostElevator, order.getButton(), order.getFloor());
-                    SystemData.get().addGlobalOrder(newOrder);
+                SystemData data = SystemData.get();
+                if (data.getGlobalOrder(order.getFloor(), order.getButton().isUp()) == null){
+                    //Elevator minCostElevator = Networker.getMinCostElevator(order); Change to correct function call
+                    Elevator minCostElevator = data.getLocalElevator();
+                    data.addGlobalOrder(new Order(minCostElevator, order.getButton(), order.getFloor()));
+                }
+                else if(!data.getLocalElevator().isConnected()){
+                    data.addGlobalOrder(new Order(data.getLocalElevator(), order.getButton(), order.getFloor()));
                 }
 
             }
@@ -28,22 +38,22 @@ public class OrderHandler implements ElevatorStatusListener{//TODO: Remove Eleva
         thread.start();
     }
 
-    public void onConnectionChanged(boolean connected){
+    public void onConnectionChanged(Elevator elevator, boolean connected){
         if (!connected){
             List<Elevator> elevatorList = SystemData.get().getElevatorList();
             Elevator maxElevator = elevatorList.get(0);
-            for (Elevator elevator : elevatorList){
-                if (maxElevator.hasHigherIDThan(elevator) && elevator.isConnected()){
-                    maxElevator = elevator;
+            for (Elevator mElevator : elevatorList){
+                if (maxElevator.hasHigherIDThan(mElevator) && mElevator != elevator){
+                    maxElevator = mElevator;
                 }
             }
             if (maxElevator == SystemData.get().getLocalElevator()){
-                //reassignElevatorOrders(elevator);
+                reassignElevatorOrders(elevator);
             }
         }
     }
-    public void onOperableChanged(boolean operable){
-        if (!operable){
+    public void onOperableChanged(Elevator elevator, boolean operable){
+        if (!operable && elevator == SystemData.get().getLocalElevator()){
             reassignElevatorOrders(SystemData.get().getLocalElevator());
         }
     }

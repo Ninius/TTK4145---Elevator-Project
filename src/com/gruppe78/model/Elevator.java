@@ -135,25 +135,31 @@ public class Elevator {
         return mInetAddress;
     }
 
-    public void setConnected(boolean connected){
+    public synchronized void setConnected(boolean connected){
         if(connected) lastConnect = System.currentTimeMillis();
 
         if(connected == mConnected) return;
         mConnected = connected;
         for(ElevatorStatusListener listener : statusListeners){
-            listener.onConnectionChanged(mConnected);
+            listener.onConnectionChanged(this, mConnected);
         }
     }
-    public boolean isConnected(){
+    public synchronized boolean isConnected(){
         return mConnected;
     }
     public long getLastConnectTime(){
         return lastConnect;
     } //Possibly not needed.
 
-    public boolean isOperable() {return mOperable;}
-    public void setOperable(boolean mOperable) {
-        this.mOperable = mOperable;
+    public synchronized boolean isOperable() {
+        return mOperable;
+    }
+    public synchronized void setOperable(boolean operable) {
+        if (mOperable == operable) return;
+        mOperable = operable;
+        for (ElevatorStatusListener listener : statusListeners){
+            listener.onOperableChanged(this, mOperable);
+        }
     }
 
     /************************************************************
