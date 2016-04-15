@@ -33,21 +33,19 @@ public class ElevatorConnection {
     }
 
     synchronized void setConnectedSocket(Socket socket){
-        if(socket == null || mSocket != null) return;
         Log.d(this, "setConnectedSocket called");
         synchronized (writeLock){
-            synchronized (readLock){
-                try {
-                    mSocket = socket;
-                    mReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    mWriter = new OutputStreamWriter(socket.getOutputStream());
-                    Log.i(this, "Socket successfully set up to "+mElevator);
-                    mConnectionChecker.start();
-                    mMessageReader.start();
-                } catch (IOException e) {
-                    setConnection(false);
-                    e.printStackTrace();
-                }
+            if(socket == null || mSocket != null) return;
+            try {
+                mSocket = socket;
+                mReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                mWriter = new OutputStreamWriter(socket.getOutputStream());
+                Log.i(this, "Socket successfully set up to "+mElevator);
+                mConnectionChecker.start();
+                mMessageReader.start();
+            } catch (IOException e) {
+                setConnection(false);
+                e.printStackTrace();
             }
         }
     }
@@ -77,6 +75,7 @@ public class ElevatorConnection {
             try {
                 Log.d(this, "Reading message..");
                 String message = mReader.readLine();
+                Log.d(this, "Message received: "+message);
                 //setConnection(true);
                 return message;
             } catch (IOException e) {

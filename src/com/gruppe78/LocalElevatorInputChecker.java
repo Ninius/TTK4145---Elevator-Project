@@ -2,6 +2,8 @@ package com.gruppe78;
 
 import com.gruppe78.driver.DriverHelper;
 import com.gruppe78.model.*;
+import com.gruppe78.utilities.Log;
+import com.gruppe78.utilities.LoopThread;
 
 /**
  * Pings the driver for button and sensor events and sends info to SystemData if something has changed.
@@ -16,8 +18,8 @@ public class LocalElevatorInputChecker {
     private FloorCheckThread floorCheckThread;
 
     //Settings:
-    private static final long FLOOR_SLEEP_TIME = 400;
-    private static final long BUTTON_SLEEP_TIME = 100;
+    private static final int FLOOR_SLEEP_TIME = 200;
+    private static final int BUTTON_SLEEP_TIME = 100;
 
 
     /******************************************************************************************************
@@ -47,46 +49,49 @@ public class LocalElevatorInputChecker {
      * Checker Threads
      **************************************************************/
 
-    private class FloorCheckThread extends Thread{
-        @Override public void run(){
-            try {
-                Floor lastFloor = DriverHelper.getElevatorFloor();
-                while(true){
-                    Floor floor = DriverHelper.getElevatorFloor();
-                    if(lastFloor != floor && floor != null){
-                        lastFloor = floor;
-                        mElevator.setFloor(floor);
-                    }
-                    Thread.sleep(FLOOR_SLEEP_TIME);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    private class FloorCheckThread extends LoopThread{
+        private Floor lastFloor = DriverHelper.getElevatorFloor();
+
+        @Override
+        public void loopRun() {
+            Floor floor = DriverHelper.getElevatorFloor();
+            if(lastFloor == floor) return;
+
+            lastFloor = floor;
+            mElevator.setFloor(floor);
+            Log.i(this, "Floor changed: "+floor);
+        }
+
+        @Override
+        public int getInterval() {
+            return FLOOR_SLEEP_TIME;
         }
     }
-    private class ButtonCheckThread extends Thread{
-        @Override public void run(){
-            try{
-                boolean[][] buttonPressed = new boolean[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS];
-                while(true) {
-                    for (Button button : Button.values()) {
-                        for (Floor floor : Floor.values()) {
-                            if (floor.isBottom() && button == Button.OUTSIDE_DOWN) continue;
-                            if (floor.isTop() && button == Button.OUTSIDE_UP) continue;
+    private class ButtonCheckThread extends LoopThread{
+        private boolean[][] buttonPressed = new boolean[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS];
 
-                            boolean pressed = DriverHelper.isButtonPressed(button, floor);
-                            if (buttonPressed[floor.index][button.index] != pressed) {
-                                buttonPressed[floor.index][button.index] = pressed;
-                                if (pressed) OrderHandler.addOrder(new Order(SystemData.get().getLocalElevator(), button, floor));
-                                //TODO: Do something.
-                            }
-                        }
-                    }
-                    Thread.sleep(BUTTON_SLEEP_TIME);
+        @Override
+        public void loopRun() {
+            for (Button button : Button.values()) {
+                for (Floor floor : Floor.values()) {
+                    if (floor.isBottom() && button == Button.OUTSIDE_DOWN) continue;
+                    if (floor.isTop() && button == Button.OUTSIDE_UP) continue;
+
+                    boolean pressed = DriverHelper.isButtonPressed(button, floor);
+                    if(buttonPressed[floor.index][button.index] == pressed) continue;
+
+                    buttonPressed[floor.index][button.index] = pressed;
+
+                    Log.i(this, "Button changed:"+button+ " on floor "+floor+" - pressed: "+pressed);
+
+                    if(pressed) OrderHandler.addOrder(new Order(SystemData.get().getLocalElevator(), button, floor));
                 }
-            }catch(InterruptedException e) {
-                e.printStackTrace();
             }
+        }
+
+        @Override
+        public int getInterval() {
+            return BUTTON_SLEEP_TIME;
         }
     }
 }
