@@ -1,5 +1,6 @@
 package com.gruppe78;
 
+import com.gruppe78.driver.DriverController;
 import com.gruppe78.driver.DriverHelper;
 import com.gruppe78.model.Elevator;
 import com.gruppe78.model.SystemData;
@@ -7,6 +8,7 @@ import com.gruppe78.network.NetworkException;
 import com.gruppe78.network.Networker;
 import com.gruppe78.utilities.Log;
 import com.gruppe78.utilities.Utilities;
+import com.sun.org.apache.xpath.internal.operations.Or;
 
 
 import java.net.InetAddress;
@@ -22,15 +24,17 @@ public class Main {
     private static final String NAME = Main.class.getSimpleName();
 
     //System settings:
-    private static final String[] ELEVATOR_IP_LIST = new String[]{"129.241.124.98", "129.241.124.99"};
+    private static final String[] ELEVATOR_IP_LIST = new String[]{"127.0.0.1"};
     private static final int PORT = 5000;
     private static final int CONNECT_TIMEOUT = 1000;
 
     //References to components to prevent them from being garbage collected.
-    private static ConnectedManager connectedManager;
+    //private static ConnectedManager connectedManager;
     private static SystemData systemData;
-    private static Networker networker;
-      //private static OperativeManager operativeManager;
+    //private static Networker networker;
+    private static DriverController driverController;
+    private static OperativeManager operativeManager;
+    private static OrderHandler orderHandler;
 
     public static void main(String[] args) throws InterruptedException {
         Log.i(NAME, "System started");
@@ -67,23 +71,27 @@ public class Main {
         Log.i(NAME, "System Data initialized, elevators in the system: "+SystemData.get().getElevatorList());
 
         //Establishing connections:
-        networker = Networker.get();
+        /*networker = Networker.get();
         try {
             networker.createConnections(PORT, CONNECT_TIMEOUT);
         } catch (NetworkException e) {
             Log.e(NAME, e.getMessage() + ". System exiting");
             return;
-        }
+        }*/
 
 
         //connectedManager = ConnectedManager.get();
         //connectedManager.start();
-        //DriverController.init();
-        //operativeManager = OperativeManager.get();
-        //operativeManager.start();
-
+        driverController = DriverController.get();
+        DriverController.init();
+        operativeManager = OperativeManager.get();
+        operativeManager.start();
+        orderHandler = OrderHandler.get();
+        ElevatorController eC = ElevatorController.get();
+        eC.init();
+        LocalElevatorInputChecker local = LocalElevatorInputChecker.get();
         //Loading information on the system:
-        //LocalElevatorInputChecker.get().start();
+        local.get().start();
         //ElevatorController.init();
     }
 

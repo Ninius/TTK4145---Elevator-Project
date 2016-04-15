@@ -151,7 +151,7 @@ public class Elevator {
             listener.onOrderAdded(internalOrders[floor.index]);
         }
     }
-    public void clearInternalOrder(Floor floor){
+    public void clearInternalOrder(Floor floor){//TODO: Fix nullpointerexception in Driver
         Order order = internalOrders[floor.index];
         for (OrderListener listener : orderListeners){
             listener.onOrderRemoved(order);
