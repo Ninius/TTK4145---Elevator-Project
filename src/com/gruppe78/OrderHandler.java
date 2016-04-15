@@ -2,6 +2,7 @@ package com.gruppe78;
 
 import com.gruppe78.model.*;
 import com.gruppe78.network.Networker;
+import com.gruppe78.utilities.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,12 +11,30 @@ import java.util.List;
  * Created by oysteikh on 4/11/16.
  */
 public class OrderHandler implements ElevatorStatusListener{//TODO: Remove ElevatorStatusListener or change to Singleton
+
+    private static OrderHandler mOrderHandler;
+    private OrderHandler (){
+        for (Elevator elevator : SystemData.get().getElevatorList()){
+            elevator.addElevatorStatusListener(this);
+
+        }
+    }
+    public static OrderHandler get(){
+        if (mOrderHandler == null){
+            mOrderHandler = new OrderHandler();
+        }
+        return mOrderHandler;
+    }
+
+
     public static void addOrder(Order order){
         if (order.getButton() != Button.INTERNAL){
             newGlobalOrder(order);
+            Log.i("OrderHandler", "New Internal Order " + order.getFloor().index);
         }
         else{
             SystemData.get().getLocalElevator().addInternalOrder(order.getFloor(), order.getButton());
+            Log.i("OrderHandler", "New External Order " + (order.getButton().isUp()? "Up" : "Down") + order.getFloor());
         }
     }
     private static void newGlobalOrder(Order order){//TODO: Implement/change to correct minCost function call. Refactoring might be needed depending on network
@@ -43,7 +62,7 @@ public class OrderHandler implements ElevatorStatusListener{//TODO: Remove Eleva
             List<Elevator> elevatorList = SystemData.get().getElevatorList();
             Elevator maxElevator = elevatorList.get(0);
             for (Elevator mElevator : elevatorList){
-                if (maxElevator.hasHigherIDThan(mElevator) && mElevator != elevator){
+                if (mElevator.getID()>maxElevator.getID() && mElevator != elevator){
                     maxElevator = mElevator;
                 }
             }

@@ -7,14 +7,15 @@ import com.gruppe78.utilities.Log;
 /**
  * Controls the elevator based on changes in model.
  */
-public class ElevatorController /*implements ElevatorPositionListener */{
-    /*private static ElevatorController sElevatorController;
+public class ElevatorController implements ElevatorPositionListener, OrderListener {
+    private static ElevatorController sElevatorController;
     private volatile boolean timer;
     private final Elevator elevator;
 
     private ElevatorController(){
         elevator = SystemData.get().getLocalElevator();
         elevator.addElevatorMovementListener(this);
+        elevator.addOrderEventListener(this);
     }
 
     public static void init(){
@@ -27,15 +28,16 @@ public class ElevatorController /*implements ElevatorPositionListener */{
     }
 
 
-
     public void startTimer(int time){
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     timer = true;
+                    elevator.setDoor(true);
                     Thread.sleep(time);
                     timer = false;
+                    elevator.setDoor(false);
                     moveElevator();
                 } catch (InterruptedException ex) {
                     Log.e(getClass().getName(), ex);
@@ -48,12 +50,9 @@ public class ElevatorController /*implements ElevatorPositionListener */{
 
     public void moveElevator(){
         if (!timer){
-            DriverHelper.setDoorOpenLamp(false);
             Order order = OrderHandler.getNextOrder(elevator);
             Direction orderDirection = elevator.getFloor().directionTo(order.getFloor());
-            DriverHelper.setMotorDirection(orderDirection);
-            OperativeManager.get().newEvent();
-            OperativeManager.get().setActive(true);
+            elevator.setMotorDirection(orderDirection);
         }
     }
 
@@ -61,19 +60,9 @@ public class ElevatorController /*implements ElevatorPositionListener */{
     public void onFloorChanged(Floor newFloor) {
         //Temp
         if (OrderHandler.getNextOrder(elevator).getFloor() == newFloor || OrderHandler.isOrderOnFloor(newFloor, elevator)){
-            DriverHelper.setMotorDirection(Direction.NONE);
-            DriverHelper.setDoorOpenLamp(true);
-            SystemData.get().getLocalElevator().clearInternalOrder(newFloor);
-            SystemData.get().clearGlobalOrder(newFloor);
-            for(Button button : Button.values()){
-                DriverHelper.setButtonLamp(button, newFloor, false);
-            }
+            elevator.setMotorDirection(Direction.NONE);
             startTimer(3*1000);
-            elevator.clearInternalOrder(newFloor);
-            SystemData.get().clearGlobalOrder(newFloor);
         }
-        moveElevator();
-
     }
 
     @Override
@@ -86,5 +75,9 @@ public class ElevatorController /*implements ElevatorPositionListener */{
     public void onDoorOpenChanged(boolean newOpen) {
         //Nothing
     }
-    */
+    @Override
+    public void onOrderAdded(Order order){moveElevator();}
+    public void onOrderRemoved(Order order){};
+
+
 }

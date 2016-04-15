@@ -39,6 +39,6 @@ public class SerializedOrderCost implements java.io.Serializable {
     }
     public void updateCost(){
         mCost = CostFunction.costFunction(mSerializedOrder.getOrder());
-        mSender = SystemData.get().getLocalElevator().getInetAddress();
+        mSender = SystemData.get().getLocalElevator().getAddress();
     }
 }

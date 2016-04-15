@@ -20,6 +20,7 @@ public class OperativeManager implements ElevatorPositionListener{
 
     private OperativeManager(){
         SystemData.get().getLocalElevator().addElevatorMovementListener(this);
+        lastEventTime = new AtomicLong();
     };
     public static OperativeManager get(){
         if(sOperativeManager == null){
@@ -43,6 +44,7 @@ public class OperativeManager implements ElevatorPositionListener{
     public void onDoorOpenChanged(boolean newOpen){};
     @Override
     public void onFloorChanged(Floor newFloor) {
+        if (newFloor == null) return;
         newEvent();
         Log.i(NAME, "New event detected");
     }

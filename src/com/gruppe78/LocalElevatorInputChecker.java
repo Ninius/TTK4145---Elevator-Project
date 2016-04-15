@@ -53,7 +53,7 @@ public class LocalElevatorInputChecker {
                 Floor lastFloor = DriverHelper.getElevatorFloor();
                 while(true){
                     Floor floor = DriverHelper.getElevatorFloor();
-                    if(lastFloor != floor){
+                    if(lastFloor != floor && floor != null){
                         lastFloor = floor;
                         mElevator.setFloor(floor);
                     }
@@ -77,7 +77,7 @@ public class LocalElevatorInputChecker {
                             boolean pressed = DriverHelper.isButtonPressed(button, floor);
                             if (buttonPressed[floor.index][button.index] != pressed) {
                                 buttonPressed[floor.index][button.index] = pressed;
-                                OrderHandler.addOrder(new Order(SystemData.get().getLocalElevator(), button, floor));
+                                if (pressed) OrderHandler.addOrder(new Order(SystemData.get().getLocalElevator(), button, floor));
                                 //TODO: Do something.
                             }
                         }
