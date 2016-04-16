@@ -95,12 +95,13 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
 
     public static boolean isOrderOnFloor(Floor floor, Elevator elevator){
         if (elevator.getInternalOrder(floor) != null){
+
             return true;
         }
-        if (SystemData.get().getGlobalOrder(floor, true) != null && elevator.getOrderDirection() == Direction.UP && SystemData.get().getGlobalOrder(floor, true).getElevator() == elevator){
+        if (SystemData.get().getGlobalOrder(floor, true) != null && elevator.getMotorDirection() == Direction.UP && SystemData.get().getGlobalOrder(floor, true).getElevator() == elevator){
             return true;
         }
-        if (SystemData.get().getGlobalOrder(floor, false) != null && elevator.getOrderDirection() == Direction.DOWN && SystemData.get().getGlobalOrder(floor, false).getElevator() == elevator){
+        if (SystemData.get().getGlobalOrder(floor, false) != null && elevator.getMotorDirection() == Direction.DOWN && SystemData.get().getGlobalOrder(floor, false).getElevator() == elevator){
             return true;
         }
         return false;
@@ -123,13 +124,15 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
 
     public static Order getNextOrder(Elevator elevator){ //TODO: Check
         SystemData data = SystemData.get();
-        Direction direction = elevator.getOrderDirection();
-        if (direction == Direction.NONE){
-            direction = Direction.UP;
-        }
-        Floor floor = elevator.getLastKnownFloor();
+        Order order = null;
+        Floor floor = Floor.FLOOR0;
+        Direction direction = elevator.getMotorDirection() != Direction.NONE ? elevator.getMotorDirection() : elevator.getOrderDirection();
+        floor = (direction == Direction.UP ? floor.getLastFloor() : Floor.FLOOR0);
+        if (direction == Direction.UP || direction == Direction.NONE) direction = Direction.DOWN;
+        else direction = Direction.UP;
+
         while(floor != null){
-            Order order = getAnyOrder(elevator, floor);
+            order = getAnyOrder(elevator, floor);
             if(order != null) return order;
             floor = floor.getNextFloor(direction);
         }

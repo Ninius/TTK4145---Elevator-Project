@@ -25,7 +25,9 @@ public enum Floor {
     public boolean isTop(){
         return index + 1 == NUMBER_OF_FLOORS;
     }
-
+    public Floor getLastFloor(){
+        return Floor.FLOOR3;
+    }
     public Direction directionTo(Floor floor){
 
         if(floor == null) {
@@ -43,6 +45,7 @@ public enum Floor {
         return diff > 0 ? diff : -diff;
     }
     public Floor getNextFloor(Direction direction){
+        if (direction == null) return null;
         if(direction == Direction.NONE) return null;
         if(direction == Direction.UP && this.isTop()) return null;
         if(direction == Direction.DOWN && this.isBottom()) return null;

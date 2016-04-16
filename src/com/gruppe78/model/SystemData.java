@@ -103,6 +103,7 @@ public class SystemData {
     }
 
     public Order getGlobalOrder(Floor floor, boolean buttonUp){
+        if (floor == null) return null;
         synchronized (globalOrders){
             return globalOrders[floor.index][buttonUp ? 0 : 1];
         }

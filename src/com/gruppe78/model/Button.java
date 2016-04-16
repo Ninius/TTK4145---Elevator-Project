@@ -27,4 +27,9 @@ public enum Button{
     public boolean isDown(){
         return down;
     }
+    public Direction getDirection(){
+        if (up) return Direction.UP;
+        else if (down) return Direction.DOWN;
+        else return Direction.NONE;
+    }
 }

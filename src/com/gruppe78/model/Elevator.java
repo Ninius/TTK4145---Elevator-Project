@@ -100,7 +100,6 @@ public class Elevator {
     }
 
     public void setMotorDirection(Direction direction) {
-        if(direction == mMotorDirection) return;
         synchronized (positionListeners){
             mMotorDirection =  direction;
         }
@@ -108,7 +107,7 @@ public class Elevator {
             listener.onMotorDirectionChanged(direction);
         }
     }
-    public Direction getMotorDirection(Direction direction) {
+    public synchronized Direction getMotorDirection() {
         return mMotorDirection;
     }
 

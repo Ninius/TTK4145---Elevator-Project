@@ -30,9 +30,6 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
         SystemData.get().addOrderEventListener(this);
     }
 
-
-
-
     public void startTimer(int time){
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -56,9 +53,10 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
     }
 
     public void moveElevator(){//TODO: Refactor? Double identical null checks.
-        if (!timer.get()){
+        if (!timer.get() && elevator.getMotorDirection() == Direction.NONE){
             Log.d(this, "Moving Elevator");
             Order nextOrder = OrderHandler.getNextOrder(elevator);
+            Log.d(this, "Order" + nextOrder);
             if (nextOrder == null) {
                 Log.d(this, "Null order detected");
                 return;
@@ -67,6 +65,7 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
             Direction orderDirection = elevator.getFloor().directionTo(nextOrder.getFloor());
             Log.d(this, "New order direction: "+orderDirection);
             elevator.setMotorDirection(orderDirection);
+            elevator.setOrderDirection(nextOrder.getButton().getDirection());
             if (orderDirection== Direction.NONE){
                 startTimer(3000);
             }
