@@ -3,6 +3,11 @@ package com.gruppe78;
 import com.gruppe78.model.*;
 import com.gruppe78.utilities.Log;
 
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -10,12 +15,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ElevatorController implements ElevatorPositionListener, OrderListener {
     private static ElevatorController sElevatorController;
-    private static final int DOOR_OPEN_TIME = 3000;
 
-    private volatile AtomicBoolean timer = new AtomicBoolean(false);
     private Elevator localElevator;
-    private DoorTimer mDoorTimer;
     private SystemData systemData;
+
+    private static final long DOOR_OPEN_TIME = 3000;
+    private DoorTimer mDoorTimer = new DoorTimer();
 
     private ElevatorController(){}
     public static ElevatorController get(){
@@ -31,8 +36,6 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
         localElevator.addElevatorMovementListener(this);
         localElevator.addOrderEventListener(this);
         systemData.addOrderEventListener(this);
-        mDoorTimer = new DoorTimer();
-        mDoorTimer.setName("DoorTimer");
     }
 
     @Override
@@ -54,41 +57,52 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
     public void onDoorOpenChanged(boolean open){
         if(open){
             mDoorTimer.start();
-        }else if(!mDoorTimer.isRunning() && localElevator.getMotorDirection() == Direction.NONE) {
-            Order nextOrder = OrderHandler.getNextOrder(localElevator);
-            Log.d(this, "Next order: " + nextOrder);
-            if (nextOrder == null) return;
-
-            Direction orderDirection = localElevator.getFloor().directionTo(nextOrder.getFloor());
-            Log.d(this, "New order direction: "+orderDirection);
-            localElevator.setMotorDirection(orderDirection);
-            localElevator.setOrderDirection(nextOrder.getButton().getDirection());
-
-            if (orderDirection== Direction.NONE) mDoorTimer.start();
+        }else{
+            moveElevator();
         }
 
+    }
+
+    @Override
+    public void onOrderAdded(Order order){
+        moveElevator();
+    }
+
+    public void moveElevator(){
+        if (mDoorTimer.isRunning() || localElevator.getMotorDirection() != Direction.NONE) return;
+
+        Order nextOrder = OrderHandler.getNextOrder(localElevator);
+        if (nextOrder == null) return;
+
+        Direction orderDirection = localElevator.getFloor().directionTo(nextOrder.getFloor());
+        localElevator.setMotorDirection(orderDirection);
+        localElevator.setOrderDirection(nextOrder.getButton().getDirection());
+
+        if (orderDirection== Direction.NONE) mDoorTimer.start();
     }
 
     private void onDoorTimerFinished(){
         localElevator.setDoor(false);
     }
 
-    private class DoorTimer extends Thread{
-        private AtomicBoolean running = new AtomicBoolean(false);
+    private class DoorTimer implements Runnable {
+        private ExecutorService mThread = Executors.newFixedThreadPool(1);
+        private volatile boolean running = false;
         @Override public void run() {
+            running = true;
             try {
-                running.set(true);
-                Thread.sleep(DOOR_OPEN_TIME);
-                running.set(false);
-                onDoorTimerFinished();
-            } catch (InterruptedException ex) {
-                running.set(false);
-                onDoorTimerFinished();
-                Log.e(this, ex);
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+            running = false;
+            onDoorTimerFinished();
         }
-        public boolean isRunning(){
-            return running.get();
+        boolean isRunning(){
+            return running;
+        }
+        void start(){
+            mThread.execute(this);
         }
     }
 }
