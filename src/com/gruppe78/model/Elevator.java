@@ -121,7 +121,6 @@ public class Elevator {
     }
     public boolean isDoorOpen(){
         return mDoorOpen.get();
-
     }
 
     /**************************************************************************************************************
@@ -139,8 +138,6 @@ public class Elevator {
         synchronized (internalOrders){
             internalOrders[floor.index] = new Order(this, button, floor);
         }
-
-        Log.i(this, "Internal order added: " + floor);
         for (OrderListener listener : orderListeners){
             listener.onOrderAdded(internalOrders[floor.index]);
         }
@@ -155,8 +152,6 @@ public class Elevator {
         for (OrderListener listener : orderListeners){
             listener.onOrderRemoved(order);
         }
-
-        Log.i(this, "Internal order removed: " + floor);
     }
 
     /*************************************************
@@ -170,6 +165,7 @@ public class Elevator {
     public void setConnected(boolean connected){
         if(connected == mConnected.get()) return;
         mConnected.set(connected);
+        Log.i(this, "Elevator connection status changed. " + this + " is now " + (connected? "connected" : "disconnected"));
         for(ElevatorStatusListener listener : statusListeners){
             listener.onConnectionChanged(this, connected);
         }
@@ -184,6 +180,7 @@ public class Elevator {
     public void setOperable(boolean operable) {
         if (mOperable.get() == operable) return;
         mOperable.set(operable);
+        Log.i(this, "Operable status changed. Elevator is now "+ (operable? "operable" : "non-operable"));
         for (ElevatorStatusListener listener : statusListeners){
             listener.onOperableChanged(this, operable);
         }

@@ -87,8 +87,8 @@ public class Main {
         localElevatorInputChecker = LocalElevatorInputChecker.get();
         localElevatorInputChecker.start();
 
-        //operativeManager = OperativeManager.get();
-        //operativeManager.start();
+        operativeManager = OperativeManager.get();
+        operativeManager.start();
 
         //Initializing the elevator to a known floor:
         Log.i(NAME, "Initializing elevator to a floor.");
@@ -106,7 +106,6 @@ public class Main {
     private static void onPositionInitFinished(){
         Log.i(NAME, "Elevator is initialized to a floor.");
         orderHandler = OrderHandler.get();
-
         elevatorController = ElevatorController.get();
         elevatorController.init();
     }

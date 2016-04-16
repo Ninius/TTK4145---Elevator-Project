@@ -79,7 +79,6 @@ public class SystemData {
         synchronized (globalOrders){
             if(globalOrders[order.getFloor().index][order.getButton().isUp() ? 0 : 1] != null) return false;
             globalOrders[order.getFloor().index][order.getButton().isUp() ? 0 : 1] = order;
-            Log.i(this, "Global Order Added:" + order);
         }
         for(OrderListener listener : orderListeners){
             listener.onOrderAdded(order);
@@ -92,7 +91,6 @@ public class SystemData {
         synchronized (globalOrders){
             order = globalOrders[floor.index][buttonUp ? 0 : 1];
             globalOrders[floor.index][buttonUp ? 0 : 1] = null;
-            Log.i(this, "Global order cleared:" + floor);
         }
         if(order == null) return false;
 

@@ -35,13 +35,11 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
             @Override
             public void run() {
                 try {
-                    Log.d(this, "Timer started");
                     timer.set(true);
                     elevator.setDoor(true);
                     Thread.sleep(time);
                     timer.set(false);
                     elevator.setDoor(false);
-                    Log.d(this, "Timer finished");
                     moveElevator();
                 } catch (InterruptedException ex) {
                     Log.e(getClass().getName(), ex);
@@ -54,16 +52,11 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
 
     public void moveElevator(){//TODO: Refactor? Double identical null checks.
         if (!timer.get() && elevator.getMotorDirection() == Direction.NONE){
-            Log.d(this, "Moving Elevator");
             Order nextOrder = OrderHandler.getNextOrder(elevator);
-            Log.d(this, "Order" + nextOrder);
             if (nextOrder == null) {
-                Log.d(this, "Null order detected");
                 return;
             }
-            Log.d(this, "Order floor" + nextOrder.getFloor());
             Direction orderDirection = elevator.getFloor().directionTo(nextOrder.getFloor());
-            Log.d(this, "New order direction: "+orderDirection);
             elevator.setMotorDirection(orderDirection);
             elevator.setOrderDirection(nextOrder.getButton().getDirection());
             if (orderDirection== Direction.NONE){
@@ -80,10 +73,6 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
         if (nextOrder.getFloor() == newFloor || OrderHandler.isOrderOnFloor(newFloor, elevator) || newFloor.index == Floor.NUMBER_OF_FLOORS-1 || newFloor == Floor.FLOOR0){
             elevator.setMotorDirection(Direction.NONE);
             startTimer(3*1000);
-            Log.d(this, "Elevator stopped on floor" + newFloor);
-        }
-        else {
-            Log.d(this, "Order not on floor");
         }
     }
 

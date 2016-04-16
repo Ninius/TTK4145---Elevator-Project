@@ -28,11 +28,9 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
         Order order = new Order(SystemData.get().getLocalElevator(), button, floor);
         if (order.getButton() != Button.INTERNAL){
             newGlobalOrder(order);
-            Log.d("OrderHandler", "New "+order);
         }
         else{
             SystemData.get().getLocalElevator().addInternalOrder(order.getFloor(), order.getButton());
-            Log.d("OrderHandler", "New  " +order);
         }
     }
     public static void clearOrder(Floor floor){
@@ -60,7 +58,7 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
         thread.setName("Get minCostElevator thread");
         thread.start();
     }
-
+    @Override
     public void onConnectionChanged(Elevator elevator, boolean connected){
         if (!connected){
             List<Elevator> elevatorList = SystemData.get().getElevatorList();
@@ -75,6 +73,7 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
             }
         }
     }
+    @Override
     public void onOperableChanged(Elevator elevator, boolean operable){
         if (!operable && elevator == SystemData.get().getLocalElevator()){
             reassignElevatorOrders(SystemData.get().getLocalElevator());
@@ -94,10 +93,7 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
     }
 
     public static boolean isOrderOnFloor(Floor floor, Elevator elevator){
-        if (elevator.getInternalOrder(floor) != null){
-
-            return true;
-        }
+        if (elevator.getInternalOrder(floor) != null) return true;
         if (SystemData.get().getGlobalOrder(floor, true) != null && elevator.getMotorDirection() == Direction.UP && SystemData.get().getGlobalOrder(floor, true).getElevator() == elevator){
             return true;
         }
@@ -124,7 +120,7 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
 
     public static Order getNextOrder(Elevator elevator){ //TODO: Check
         SystemData data = SystemData.get();
-        Order order = null;
+        Order order;
         Floor floor = Floor.FLOOR0;
         Direction direction = elevator.getMotorDirection() != Direction.NONE ? elevator.getMotorDirection() : elevator.getOrderDirection();
         floor = (direction == Direction.UP ? floor.getLastFloor() : Floor.FLOOR0);
@@ -165,10 +161,7 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
     @Override
     public void onMotorDirectionChanged(Direction newDirection){
         if (newDirection == Direction.NONE){
-            Log.d(this, "Clearing order");
-
             clearOrder(SystemData.get().getLocalElevator().getFloor());
-            Log.d(this, "Cleared order");
         }
-    };
+    }
 }
