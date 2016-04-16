@@ -8,8 +8,7 @@ import java.util.List;
 /**
  * Created by oysteikh on 4/11/16.
  */
-public class OrderHandler implements ElevatorStatusListener, ElevatorPositionListener{//TODO: Remove ElevatorStatusListener or change to Singleton
-
+public class OrderHandler implements ElevatorStatusListener, ElevatorPositionListener{
     private static OrderHandler mOrderHandler;
     private OrderHandler (){
         for (Elevator elevator : SystemData.get().getElevatorList()){
@@ -29,11 +28,11 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
         Order order = new Order(SystemData.get().getLocalElevator(), button, floor);
         if (order.getButton() != Button.INTERNAL){
             newGlobalOrder(order);
-            Log.i("OrderHandler", "New "+order);
+            Log.d("OrderHandler", "New "+order);
         }
         else{
             SystemData.get().getLocalElevator().addInternalOrder(order.getFloor(), order.getButton());
-            Log.i("OrderHandler", "New  " +order);
+            Log.d("OrderHandler", "New  " +order);
         }
     }
     public static void clearOrder(Floor floor){
@@ -122,7 +121,7 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
         }
     }
 
-    public static Order getNextOrder(Elevator elevator){ //TODO: Check.
+    public static Order getNextOrder(Elevator elevator){ //TODO: Check
         SystemData data = SystemData.get();
         Direction direction = elevator.getOrderDirection();
         if (direction == Direction.NONE){
@@ -164,14 +163,10 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
     @Override
     public void onMotorDirectionChanged(Direction newDirection){
         if (newDirection == Direction.NONE){
-            Log.i(this, "Clearing order");
+            Log.d(this, "Clearing order");
 
             clearOrder(SystemData.get().getLocalElevator().getFloor());
-            Log.i(this, "Cleared order");
+            Log.d(this, "Cleared order");
         }
     };
-    @Override
-    public void onOrderDirectionChanged(Direction newDirection){};
-    @Override
-    public void onDoorOpenChanged(boolean newOpen){};
 }

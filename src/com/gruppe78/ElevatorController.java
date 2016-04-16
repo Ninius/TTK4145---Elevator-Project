@@ -57,15 +57,15 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
 
     public void moveElevator(){
         if (!timer.get()){
-            Log.i(this, "Moving Elevator");
+            Log.d(this, "Moving Elevator");
             Order order = OrderHandler.getNextOrder(elevator);
             if (order == null) {
-                Log.i(this, "Null order detected");
+                Log.d(this, "Null order detected");
                 return;
             }
-            Log.i(this, "Order floor" + order.getFloor());
+            Log.d(this, "Order floor" + order.getFloor());
             Direction orderDirection = elevator.getFloor().directionTo(order.getFloor());
-            Log.i(this, "New order direction: "+orderDirection);
+            Log.d(this, "New order direction: "+orderDirection);
             elevator.setMotorDirection(orderDirection);
         }
     }
@@ -78,26 +78,13 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
         if (nextOrder.getFloor() == newFloor || OrderHandler.isOrderOnFloor(newFloor, elevator)){
             elevator.setMotorDirection(Direction.NONE);
             startTimer(3*1000);
-            Log.i(this, "Order on floor");
+            Log.d(this, "Order on floor");
         }
         else {
-            Log.i(this, "Order not on floor");
+            Log.d(this, "Order not on floor");
         }
     }
 
     @Override
-    public void onMotorDirectionChanged(Direction newDirection) {}
-
-    @Override
-    public void onOrderDirectionChanged(Direction newDirection) {}
-
-    @Override
-    public void onDoorOpenChanged(boolean newOpen) {
-        //Nothing
-    }
-    @Override
     public void onOrderAdded(Order order){moveElevator();}
-    public void onOrderRemoved(Order order){};
-
-
 }
