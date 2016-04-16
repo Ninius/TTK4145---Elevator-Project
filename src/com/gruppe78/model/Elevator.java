@@ -5,6 +5,7 @@ import com.gruppe78.utilities.Log;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Elevator {
     private final InetAddress mInetAddress; //Also serves as ID.
@@ -18,11 +19,11 @@ public class Elevator {
     private Floor mLastKnownFloor;
     private Direction mOrderDirection = Direction.UP;
     private Direction mMotorDirection;
-    private boolean mDoorOpen;
+    private AtomicBoolean mDoorOpen = new AtomicBoolean(false);
 
     //Status:
-    private volatile boolean mConnected = false;
-    private volatile boolean mOperable = true;
+    private AtomicBoolean mConnected = new AtomicBoolean(false);
+    private AtomicBoolean mOperable =  new AtomicBoolean(true);
     private volatile boolean mUpToDate = true; //TODO: Check initial value.
 
     //Listeners:
@@ -112,18 +113,15 @@ public class Elevator {
     }
 
     public void setDoor(boolean open){
-        if(mDoorOpen == open) return;
-        synchronized (statusListeners){
-            mDoorOpen = open;
-        }
+        if(mDoorOpen.get() == open) return;
+        mDoorOpen.set(open);
+
         for(ElevatorPositionListener listener : positionListeners){
             listener.onDoorOpenChanged(open);
         }
     }
     public boolean isDoorOpen(){
-        synchronized (statusListeners){
-            return mDoorOpen;
-        }
+        return mDoorOpen.get();
 
     }
 
@@ -170,25 +168,25 @@ public class Elevator {
         return mInetAddress;
     }
 
-    public synchronized void setConnected(boolean connected){
-        if(connected == mConnected) return;
-        mConnected = connected;
+    public void setConnected(boolean connected){
+        if(connected == mConnected.get()) return;
+        mConnected.set(connected);
         for(ElevatorStatusListener listener : statusListeners){
-            listener.onConnectionChanged(this, mConnected);
+            listener.onConnectionChanged(this, connected);
         }
     }
-    public synchronized boolean isConnected(){
-        return mConnected;
+    public boolean isConnected(){
+        return mConnected.get();
     }
 
-    public synchronized boolean isOperable() {
-        return mOperable;
+    public boolean isOperable() {
+        return mOperable.get();
     }
-    public synchronized void setOperable(boolean operable) {
-        if (mOperable == operable) return;
-        mOperable = operable;
+    public void setOperable(boolean operable) {
+        if (mOperable.get() == operable) return;
+        mOperable.set(operable);
         for (ElevatorStatusListener listener : statusListeners){
-            listener.onOperableChanged(this, mOperable);
+            listener.onOperableChanged(this, operable);
         }
     }
 
