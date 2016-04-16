@@ -2,8 +2,7 @@ package com.gruppe78;
 
 import com.gruppe78.driver.DriverController;
 import com.gruppe78.driver.DriverHelper;
-import com.gruppe78.model.Elevator;
-import com.gruppe78.model.SystemData;
+import com.gruppe78.model.*;
 import com.gruppe78.network.NetworkException;
 import com.gruppe78.network.Networker;
 import com.gruppe78.utilities.Log;
@@ -33,6 +32,8 @@ public class Main {
     private static SystemData systemData;
     //private static Networker networker;
     private static DriverController driverController;
+    private static LocalElevatorInputChecker localElevatorInputChecker;
+    private static ElevatorController elevatorController;
     private static OperativeManager operativeManager;
     private static OrderHandler orderHandler;
 
@@ -40,12 +41,12 @@ public class Main {
         Log.i(NAME, "System started");
 
         //Initializing driver
-        boolean initialized = DriverHelper.init(DriverHelper.SIMULATOR_DRIVER);
-        if(!initialized){
-            Log.i(NAME, "Could not initialize the driver. System exiting.");
+        try {
+            DriverHelper.init(DriverHelper.SIMULATOR_DRIVER);
+            Log.i(NAME, "Driver initialized.");
+        } catch (Exception e) {
+            Log.s(NAME, e);
             return;
-        }else{
-            Log.i(NAME, "Driver initialized");
         }
 
         //Creating elevator objects from IP-list:
@@ -79,23 +80,35 @@ public class Main {
             return;
         }*/
 
-
-        //connectedManager = ConnectedManager.get();
-        //connectedManager.start();
+        //Connecting system model of the elevator to the physical elevator.
         driverController = DriverController.get();
-        DriverController.init();
-        operativeManager = OperativeManager.get();
-        operativeManager.start();
+        driverController.init();
+
+        localElevatorInputChecker = LocalElevatorInputChecker.get();
+        localElevatorInputChecker.start();
+
+        //operativeManager = OperativeManager.get();
+        //operativeManager.start();
+
+        //Initializing the elevator to a known floor:
+        Log.i(NAME, "Initializing elevator to a floor.");
+        ElevatorPositionListener elevatorFloorListener = new ElevatorPositionListener() {
+            @Override public void onFloorChanged(Floor newFloor) {
+                SystemData.get().getLocalElevator().removeElevatorMovementListener(this);
+                SystemData.get().getLocalElevator().setMotorDirection(Direction.NONE);
+                Main.onPositionInitFinished();
+            }
+        };
+        localElevator.addElevatorMovementListener(elevatorFloorListener);
+        localElevator.setMotorDirection(Direction.DOWN);
+    }
+
+    private static void onPositionInitFinished(){
+        Log.i(NAME, "Elevator is initialized to a floor.");
         orderHandler = OrderHandler.get();
-        ElevatorController eC = ElevatorController.get();
-        eC.init();
-        LocalElevatorInputChecker local = LocalElevatorInputChecker.get();
-        //Loading information on the system:
-        local.get().start();
-        //ElevatorController.init();
+
+        elevatorController = ElevatorController.get();
+        elevatorController.init();
     }
 
-    private static void initializeData(InetAddress localAddress){
-
-    }
 }

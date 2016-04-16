@@ -1,10 +1,7 @@
 package com.gruppe78.driver;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketTimeoutException;
+import java.net.*;
 
 /**
  * The frontend interface to communicate with the simulator.
@@ -17,6 +14,7 @@ public class SimulatorDriver implements Driver{
     private static final int RECEIVE_PACKET_SIZE = 1024;
     private static final int RECEIVE_TIMEOUT = 50;
     private static final int simulatorPortNumber = 9078;
+    private static final int localPortNumber = 9077;
 
     private SimulatorDriver(){}
 
@@ -63,11 +61,10 @@ public class SimulatorDriver implements Driver{
 
     public boolean io_init(){
         try {
-            simulatorSocket = new DatagramSocket();
+            simulatorSocket = new DatagramSocket(localPortNumber);
             simulatorSocket.setSoTimeout(RECEIVE_TIMEOUT);
             simulatorAddress = InetAddress.getByName("localhost");
         } catch (IOException e) {
-            e.printStackTrace();
             return false;
         }
         return true;

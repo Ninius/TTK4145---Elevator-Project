@@ -13,39 +13,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ElevatorController implements ElevatorPositionListener, OrderListener {
     private static ElevatorController sElevatorController;
     private volatile AtomicBoolean timer = new AtomicBoolean(false);
-    private final Elevator elevator;
+    private Elevator elevator;
 
-    private ElevatorController(){
-        elevator = SystemData.get().getLocalElevator();
-        elevator.addElevatorMovementListener(this);
-        elevator.addOrderEventListener(this);
-        SystemData.get().addOrderEventListener(this);
-    }
-
-    public void init(){
-        Log.i(this, "Initializing");
-        DriverController.get().onMotorDirectionChanged(Direction.DOWN);
-        try{
-            while (DriverHelper.getElevatorFloor() != Floor.FLOOR0){
-                Thread.sleep(50);
-            }
-        }
-        catch(Exception e){
-
-        }
-
-        DriverController.get().onMotorDirectionChanged(Direction.NONE);
-        elevator.setFloor(Floor.FLOOR0);
-
-        Log.i(this, "Initializing Done");
-    }
-
+    private ElevatorController(){}
     public static ElevatorController get(){
         if (sElevatorController == null){
             sElevatorController = new ElevatorController();
         }
         return sElevatorController;
     }
+
+    public void init(){
+        elevator = SystemData.get().getLocalElevator();
+        elevator.addElevatorMovementListener(this);
+        elevator.addOrderEventListener(this);
+        SystemData.get().addOrderEventListener(this);
+    }
+
+
 
 
     public void startTimer(int time){

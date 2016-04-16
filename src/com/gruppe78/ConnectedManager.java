@@ -7,7 +7,7 @@ import com.gruppe78.utilities.Log;
 import java.io.IOException;
 import java.net.*;
 
-public class ConnectedManager {
+public class ConnectedManager {/*
     private static final String NAME = ConnectedManager.class.getSimpleName();
     private static final byte[] message = "Hello I'm Alive".getBytes();
     private static final int PORT = 6300;
@@ -17,7 +17,7 @@ public class ConnectedManager {
 
     /*************************************
      * Singleton
-     ************************************/
+     ************************************//*
     private static ConnectedManager sConnectedManager;
     private ConnectedManager(){}
     public static ConnectedManager get(){
@@ -114,5 +114,5 @@ public class ConnectedManager {
                 e.printStackTrace();
             }
         }
-    }
+    }*/
 }

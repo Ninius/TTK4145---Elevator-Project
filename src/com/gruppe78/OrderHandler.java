@@ -25,7 +25,8 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
     }
 
 
-    public static void addOrder(Order order){
+    public static void onButtonPressed(Button button, Floor floor){
+        Order order = new Order(SystemData.get().getLocalElevator(), button, floor);
         if (order.getButton() != Button.INTERNAL){
             newGlobalOrder(order);
             Log.i("OrderHandler", "New "+order);

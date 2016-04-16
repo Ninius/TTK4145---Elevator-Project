@@ -23,10 +23,11 @@ public class DriverHelper {
      * PUBLIC API
      ****************************************************/
 
-    public synchronized static boolean init(int type) {
+    public synchronized static void init(int type) throws Exception {
         sDriver = (type == 1) ? ElevatorDriver.get() : SimulatorDriver.get();
         if(!sDriver.io_init()){
-            return false;
+            if(type == 1) throw new Exception("Could not initialize the Elevator driver. Unknown.");
+            else throw new Exception("Could not initialize the Simulator driver. Socket already bound.");
         }
         for (Floor floor : Floor.values()) {
             for(Button b : Button.values()){
@@ -37,7 +38,6 @@ public class DriverHelper {
         setStopLamp(false);
         setDoorOpenLamp(false);
         setFloorIndicator(Floor.FLOOR0);
-        return true;
     }
 
     public synchronized static boolean isButtonPressed(Button button, Floor floor) {

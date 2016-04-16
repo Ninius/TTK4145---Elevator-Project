@@ -2,7 +2,6 @@ package com.gruppe78;
 
 import com.gruppe78.driver.DriverHelper;
 import com.gruppe78.model.*;
-import com.gruppe78.utilities.Log;
 import com.gruppe78.utilities.LoopThread;
 
 /**
@@ -13,8 +12,8 @@ import com.gruppe78.utilities.LoopThread;
 public class LocalElevatorInputChecker {
     private static LocalElevatorInputChecker sLocalElevatorInputChecker;
     private Elevator mElevator;
-    private ButtonCheckThread buttonCheckThread;
-    private FloorCheckThread floorCheckThread;
+    private ButtonCheck buttonCheck;
+    private FloorCheck floorCheck;
 
     //Settings:
     private static final int FLOOR_SLEEP_TIME = 200;
@@ -35,29 +34,28 @@ public class LocalElevatorInputChecker {
         return sLocalElevatorInputChecker;
     }
     public void start(){
-        buttonCheckThread = new ButtonCheckThread();
-        buttonCheckThread.setName(ButtonCheckThread.class.getSimpleName());
-        buttonCheckThread.start();
+        buttonCheck = new ButtonCheck();
+        buttonCheck.setName(ButtonCheck.class.getSimpleName());
+        buttonCheck.start();
 
-        floorCheckThread = new FloorCheckThread();
-        floorCheckThread.setName(FloorCheckThread.class.getSimpleName());
-        floorCheckThread.start();
+        floorCheck = new FloorCheck();
+        floorCheck.setName(FloorCheck.class.getSimpleName());
+        floorCheck.start();
     }
 
     /**************************************************************
      * Checker Threads
      **************************************************************/
 
-    private class FloorCheckThread extends LoopThread{
-        private Floor lastFloor = DriverHelper.getElevatorFloor();
+    private class FloorCheck extends LoopThread{
+        private Floor lastFloor = SystemData.get().getLocalElevator().getFloor();
 
         @Override
         public void loopRun() {
             Floor floor = DriverHelper.getElevatorFloor();
-            if(lastFloor == floor || floor == null) return;
+            if(lastFloor == floor || floor == null) return; //TODO: Is null valid floor?
             lastFloor = floor;
             mElevator.setFloor(floor);
-            Log.i(this, "Floor changed: "+floor);
         }
 
         @Override
@@ -65,7 +63,7 @@ public class LocalElevatorInputChecker {
             return FLOOR_SLEEP_TIME;
         }
     }
-    private class ButtonCheckThread extends LoopThread{
+    private class ButtonCheck extends LoopThread{
         private boolean[][] buttonPressed = new boolean[Floor.NUMBER_OF_FLOORS][Button.NUMBER_OF_BUTTONS];
 
         @Override
@@ -80,9 +78,7 @@ public class LocalElevatorInputChecker {
 
                     buttonPressed[floor.index][button.index] = pressed;
 
-                    //Log.i(this, "Button changed:"+button+ " on floor "+floor+" - pressed: "+pressed);
-
-                    if(pressed) OrderHandler.addOrder(new Order(SystemData.get().getLocalElevator(), button, floor));
+                    if(pressed) OrderHandler.onButtonPressed(button, floor);
                 }
             }
         }

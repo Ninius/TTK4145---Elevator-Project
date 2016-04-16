@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Because SystemData is synchronized there should be as little interaction with it as possible.
@@ -16,7 +17,7 @@ public class SystemData {
     private final Elevator mLocalElevator;
 
     private final Order[][] globalOrders = new Order[Floor.NUMBER_OF_FLOORS][2];
-    private final ArrayList<OrderListener> orderListeners = new ArrayList<>();
+    private final CopyOnWriteArrayList<OrderListener> orderListeners = new CopyOnWriteArrayList<>();
 
     /****************************************************************************************************************
      * Constructing and obtaining of reference. Needs to be initialized with a local elevator.
@@ -60,14 +61,10 @@ public class SystemData {
      ***************************************************************************************************************/
 
     public void addOrderEventListener(OrderListener listener){
-        synchronized (orderListeners){
-            orderListeners.add(listener);
-        }
+        orderListeners.add(listener);
     }
     public void removeOrderEventListener(OrderListener listener){
-        synchronized (orderListeners) {
-            orderListeners.remove(listener);
-        }
+        orderListeners.remove(listener);
     }
 
     /***************************************************************************************************************
@@ -84,11 +81,8 @@ public class SystemData {
             globalOrders[order.getFloor().index][order.getButton().isUp() ? 0 : 1] = order;
             Log.i(this, "Global Order Added:" + order);
         }
-
-        synchronized (orderListeners){
-            for(OrderListener listener : orderListeners){
-                listener.onOrderAdded(order);
-            }
+        for(OrderListener listener : orderListeners){
+            listener.onOrderAdded(order);
         }
         return true;
     }
@@ -102,10 +96,8 @@ public class SystemData {
         }
         if(order == null) return false;
 
-        synchronized (orderListeners){
-            for(OrderListener listener : orderListeners){
-                listener.onOrderRemoved(order);
-            }
+        for(OrderListener listener : orderListeners){
+            listener.onOrderRemoved(order);
         }
         return true;
     }
@@ -115,14 +107,14 @@ public class SystemData {
             return globalOrders[floor.index][buttonUp ? 0 : 1];
         }
     }
-    public Order[][] getAllGlobalOrders(){
+    public Order[][] getAllGlobalOrders(){ //TODO: MUST COPY ARRAY!
         synchronized (globalOrders){
             return globalOrders;
         }
     }
     public void setAllGlobalOrders(Order[][] orders){
         synchronized (globalOrders){
-            //Avoids repeated locking through calls to addGlobalOrder. Modify if needed, only called by SerializedGlobalOrders.
+            //TODO: Avoids repeated locking through calls to addGlobalOrder. Modify if needed, only called by SerializedGlobalOrders.
             int i = 0; int j = 0;
             for (Order[] floor: orders){
                 for (Order order : floor){

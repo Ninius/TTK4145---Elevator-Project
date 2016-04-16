@@ -20,7 +20,19 @@ public class Log {
         print("ERROR",className,"", false);
         System.out.println(ex);
     }
+    public static void s(String className, Exception ex){
+        print("SYSEXIT",className,"",false);
+        System.out.println(ex);
+    }
+
+    private static String lastPrefix = "";
+    private static String lastClassThreadName = "";
+
+    private static StringBuilder builder = new StringBuilder();
+
     private static void print(String prefix, String className, String msg, boolean newline){
-        System.out.print(prefix + " -- " + className + "("+Thread.currentThread().getName()+") -- "+msg + (newline ? "\n" : ""));
+        prefix = String.format("%-7s", prefix);
+        String classNameThread = String.format("%20s", className + "("+Thread.currentThread().getName()+")");
+        System.out.print(prefix + " - " + classNameThread+" - "+msg + (newline ? "\n" : ""));
     }
 }

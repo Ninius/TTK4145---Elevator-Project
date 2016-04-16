@@ -4,6 +4,7 @@ import com.gruppe78.utilities.Log;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Elevator {
     private final InetAddress mInetAddress; //Also serves as ID.
@@ -25,9 +26,9 @@ public class Elevator {
     private volatile boolean mUpToDate = true; //TODO: Check initial value.
 
     //Listeners:
-    private final ArrayList<ElevatorPositionListener> positionListeners = new ArrayList<>();
-    private final ArrayList<OrderListener> orderListeners = new ArrayList<>();
-    private final ArrayList<ElevatorStatusListener> statusListeners = new ArrayList<>();
+    private final CopyOnWriteArrayList<ElevatorPositionListener> positionListeners = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<OrderListener> orderListeners = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<ElevatorStatusListener> statusListeners = new CopyOnWriteArrayList<>();
 
     public Elevator(InetAddress inetAddress){
         this(inetAddress,-1);
@@ -41,28 +42,25 @@ public class Elevator {
      * Adding and removing of listeners.
      ****************************************************************************************************************/
 
-    public synchronized void addElevatorMovementListener(ElevatorPositionListener listener){
+    public void addElevatorMovementListener(ElevatorPositionListener listener){
         positionListeners.add(listener);
     }
-    public synchronized void removeElevatorMovementListener(ElevatorPositionListener listener){
+    public void removeElevatorMovementListener(ElevatorPositionListener listener){
         positionListeners.remove(listener);
     }
-    public synchronized void addElevatorStatusListener(ElevatorStatusListener listener){
+
+    public void addElevatorStatusListener(ElevatorStatusListener listener){
         statusListeners.add(listener);
     }
-    public synchronized void removeElevatorStatusListener(ElevatorStatusListener listener){
+    public void removeElevatorStatusListener(ElevatorStatusListener listener){
         statusListeners.remove(listener);
     }
 
     public void addOrderEventListener(OrderListener listener){
-        synchronized (orderListeners){
-            orderListeners.add(listener);
-        }
+        orderListeners.add(listener);
     }
     public void removeOrderEventListener(OrderListener listener){
-        synchronized (orderListeners) {
-            orderListeners.remove(listener);
-        }
+        orderListeners.remove(listener);
     }
 
     /**************************************************************************************************************
@@ -105,17 +103,12 @@ public class Elevator {
         synchronized (positionListeners){
             mMotorDirection =  direction;
         }
-        Log.i(this, "Motor direction changed: "+  direction);
         for(ElevatorPositionListener listener : positionListeners){
             listener.onMotorDirectionChanged(direction);
         }
-        Log.i(this, "No deadlocks");
     }
     public Direction getMotorDirection(Direction direction) {
-        synchronized (positionListeners){
-            return mMotorDirection;
-        }
-
+        return mMotorDirection;
     }
 
     public void setDoor(boolean open){
@@ -139,9 +132,13 @@ public class Elevator {
      **************************************************************************************************************/
 
     public Order getInternalOrder(Floor floor){
-        return internalOrders[floor.index];
+        if(floor == null) return null;
+        synchronized (internalOrders) {
+            return internalOrders[floor.index];
+        }
     }
     public void addInternalOrder(Floor floor, Button button){
+        if(floor == null) return;
         synchronized (internalOrders){
             internalOrders[floor.index] = new Order(this, button, floor);
         }
@@ -152,13 +149,16 @@ public class Elevator {
         }
     }
     public void clearInternalOrder(Floor floor){//TODO: Fix nullpointerexception in Driver
-        Order order = internalOrders[floor.index];
+        Order order;
+        synchronized (internalOrders){
+            order = internalOrders[floor.index];
+            if(order == null) return;
+            internalOrders[floor.index] = null;
+        }
         for (OrderListener listener : orderListeners){
             listener.onOrderRemoved(order);
         }
-        synchronized (internalOrders){
-            internalOrders[floor.index] = null;
-        }
+
         Log.i(this, "Internal order removed: " + floor);
     }
 

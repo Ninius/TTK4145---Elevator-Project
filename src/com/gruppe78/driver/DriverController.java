@@ -9,20 +9,20 @@ import com.gruppe78.utilities.Log;
 public class DriverController implements ElevatorPositionListener, OrderListener {
     private static DriverController sDriverController;
 
-    private DriverController(){
+    private DriverController(){}
+
+    public static DriverController get(){
+        if(sDriverController == null){
+            sDriverController = new DriverController();
+        }
+        return sDriverController;
+    }
+
+    public void init(){
         Elevator elevator = SystemData.get().getLocalElevator();
         elevator.addElevatorMovementListener(this);
         elevator.addOrderEventListener(this);
         SystemData.get().addOrderEventListener(this);
-    }
-
-    public static void init(){
-        if(sDriverController != null) return;
-        sDriverController = new DriverController();
-    }
-
-    public static DriverController get(){
-        return sDriverController;
     }
 
     @Override
@@ -52,7 +52,6 @@ public class DriverController implements ElevatorPositionListener, OrderListener
 
     @Override
     public void onOrderRemoved(Order order) {
-        Log.i(this, "Remove light" + order.getFloor()+ order.getButton());
         DriverHelper.setButtonLamp(order.getButton(), order.getFloor(), false);
     }
 }
