@@ -15,14 +15,14 @@ public class CostFunction {
         int cost = 0;
         Elevator localElevator = SystemData.get().getLocalElevator();
 
-        Direction directionToOrder = localElevator.getLastKnownFloor().directionTo(order.getFloor());
+        Direction directionToOrder = localElevator.getFloor().directionTo(order.getFloor());
         if (directionToOrder != localElevator.getOrderDirection() && directionToOrder != Direction.NONE){
             cost += Floor.NUMBER_OF_FLOORS;
         }
         if (!order.getButton().matchDirection(localElevator.getOrderDirection())){
             cost += (Floor.NUMBER_OF_FLOORS-1);
         }
-        cost += localElevator.getLastKnownFloor().lengthTo(order.getFloor());
+        cost += localElevator.getFloor().lengthTo(order.getFloor());
         cost += OrderHandler.getNumberOfInternalOrders(localElevator)*Floor.NUMBER_OF_FLOORS/2;
         cost += OrderHandler.getNumberOfGlobalOrders(localElevator)*Floor.NUMBER_OF_FLOORS/2;
         return cost;

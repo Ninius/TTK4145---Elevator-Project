@@ -32,7 +32,7 @@ public class Log {
 
     private static void print(String prefix, String className, String msg, boolean newline){
         prefix = String.format("%-7s", prefix);
-        String classNameThread = String.format("%20s", className + "("+Thread.currentThread().getName()+")");
+        String classNameThread = String.format("%25s", className + "("+Thread.currentThread().getName()+")");
         System.out.print(prefix + " - " + classNameThread+" - "+msg + (newline ? "\n" : ""));
     }
 }

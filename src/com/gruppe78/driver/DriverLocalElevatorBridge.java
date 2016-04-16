@@ -1,6 +1,6 @@
-package com.gruppe78;
+package com.gruppe78.driver;
 
-import com.gruppe78.driver.DriverHelper;
+import com.gruppe78.OrderHandler;
 import com.gruppe78.model.*;
 import com.gruppe78.utilities.LoopThread;
 
@@ -9,8 +9,8 @@ import com.gruppe78.utilities.LoopThread;
  *
  * //TODO: Separate into two classes?
  */
-public class LocalElevatorInputChecker {
-    private static LocalElevatorInputChecker sLocalElevatorInputChecker;
+public class DriverLocalElevatorBridge {
+    private static DriverLocalElevatorBridge sDriverLocalElevatorBridge;
     private Elevator mElevator;
     private ButtonCheck buttonCheck;
     private FloorCheck floorCheck;
@@ -24,14 +24,14 @@ public class LocalElevatorInputChecker {
      * Constructing, initializing and referencing
      ******************************************************************************************************/
 
-    private LocalElevatorInputChecker(){
+    private DriverLocalElevatorBridge(){
         mElevator = SystemData.get().getLocalElevator();
     }
-    public static LocalElevatorInputChecker get(){
-        if(sLocalElevatorInputChecker == null){
-            sLocalElevatorInputChecker = new LocalElevatorInputChecker();
+    public static DriverLocalElevatorBridge get(){
+        if(sDriverLocalElevatorBridge == null){
+            sDriverLocalElevatorBridge = new DriverLocalElevatorBridge();
         }
-        return sLocalElevatorInputChecker;
+        return sDriverLocalElevatorBridge;
     }
     public void start(){
         buttonCheck = new ButtonCheck();

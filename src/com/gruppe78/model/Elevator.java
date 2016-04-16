@@ -16,7 +16,6 @@ public class Elevator {
 
     //Position and direction:
     private Floor mFloor;
-    private Floor mLastKnownFloor;
     private Direction mOrderDirection = Direction.UP;
     private Direction mMotorDirection;
     private AtomicBoolean mDoorOpen = new AtomicBoolean(false);
@@ -24,7 +23,7 @@ public class Elevator {
     //Status:
     private AtomicBoolean mConnected = new AtomicBoolean(false);
     private AtomicBoolean mOperable =  new AtomicBoolean(true);
-    private volatile boolean mUpToDate = true; //TODO: Check initial value.
+    private AtomicBoolean mUpToDate = new AtomicBoolean(true); //TODO: Check initial value.
 
     //Listeners:
     private final CopyOnWriteArrayList<ElevatorPositionListener> positionListeners = new CopyOnWriteArrayList<>();
@@ -68,26 +67,19 @@ public class Elevator {
      * Movement
      **************************************************************************************************************/
 
-    public synchronized Floor getLastKnownFloor(){
-        return mLastKnownFloor;
-    }
     public synchronized Floor getFloor(){
         return mFloor;
     }
-    public synchronized void setFloor(Floor newFloor){
-        if(newFloor == mFloor) return;
-        if(newFloor == null){
-            mLastKnownFloor = mFloor;
-        }else{
-            mLastKnownFloor = newFloor;
-        }
-        mFloor = newFloor;
+    public synchronized void setFloor(Floor floor){
+        if(floor == mFloor || floor == null) return;
+        mFloor = floor;
 
         for(ElevatorPositionListener listener : positionListeners){
-            listener.onFloorChanged(newFloor);
+            listener.onFloorChanged(floor);
         }
     }
 
+    //TODO: Needed?
     public synchronized void setOrderDirection(Direction direction){
         if(mOrderDirection == direction) return;
         mOrderDirection = direction;

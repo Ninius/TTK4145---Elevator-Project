@@ -1,21 +1,20 @@
 package com.gruppe78.driver;
 
 import com.gruppe78.model.*;
-import com.gruppe78.utilities.Log;
 
 /**
  * Controls all lights of the local system.
  */
-public class DriverController implements ElevatorPositionListener, OrderListener {
-    private static DriverController sDriverController;
+public class LocalElevatorDriverBridge implements ElevatorPositionListener, OrderListener {
+    private static LocalElevatorDriverBridge sLocalElevatorDriverBridge;
 
-    private DriverController(){}
+    private LocalElevatorDriverBridge(){}
 
-    public static DriverController get(){
-        if(sDriverController == null){
-            sDriverController = new DriverController();
+    public static LocalElevatorDriverBridge get(){
+        if(sLocalElevatorDriverBridge == null){
+            sLocalElevatorDriverBridge = new LocalElevatorDriverBridge();
         }
-        return sDriverController;
+        return sLocalElevatorDriverBridge;
     }
 
     public void init(){
@@ -33,11 +32,6 @@ public class DriverController implements ElevatorPositionListener, OrderListener
     @Override
     public void onMotorDirectionChanged(Direction newDirection) {
         DriverHelper.setMotorDirection(newDirection);
-    }
-
-    @Override
-    public void onOrderDirectionChanged(Direction newDirection) {
-        //Ignore
     }
 
     @Override

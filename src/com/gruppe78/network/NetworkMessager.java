@@ -18,5 +18,6 @@ public class NetworkMessager {
 
     void decodeMessage(String message, Elevator sender){
         Log.i(this, "Message received from "+sender+":"+message);
-    }
+
 }
+        }

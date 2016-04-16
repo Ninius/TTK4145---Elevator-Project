@@ -23,7 +23,7 @@ public class DriverHelper {
      * PUBLIC API
      ****************************************************/
 
-    public synchronized static void init(int type) throws Exception {
+    public static synchronized void init(int type) throws Exception {
         sDriver = (type == 1) ? ElevatorDriver.get() : SimulatorDriver.get();
         if(!sDriver.io_init()){
             if(type == 1) throw new Exception("Could not initialize the Elevator driver. Unknown.");
@@ -40,11 +40,11 @@ public class DriverHelper {
         setFloorIndicator(Floor.FLOOR0);
     }
 
-    public synchronized static boolean isButtonPressed(Button button, Floor floor) {
+    static synchronized boolean isButtonPressed(Button button, Floor floor) {
         return sDriver.io_read_bit(DriverChannels.BUTTON_CHANNEL_MATRIX[floor.index][button.index]) == 1;
     }
 
-    public synchronized static Floor getElevatorFloor() {
+    static synchronized Floor getElevatorFloor() {
         if (sDriver.io_read_bit(DriverChannels.SENSOR_FLOOR1) == 1) {
             return Floor.FLOOR0;
         } else if (sDriver.io_read_bit(DriverChannels.SENSOR_FLOOR2) == 1) {
@@ -58,17 +58,13 @@ public class DriverHelper {
         }
     }
 
-    public synchronized static boolean isStopPressed() {
+    static synchronized boolean isStopPressed() {
         return sDriver.io_read_bit(DriverChannels.STOP) == 1;
     }
 
-    public synchronized static boolean isObstructionPressed() {
+    static synchronized boolean isObstructionPressed() {
         return sDriver.io_read_bit(DriverChannels.OBSTRUCTION) == 1;
     }
-
-    /****************************************************
-     * PACKAGE-PRIVATE API - Changes to driver not allowed outside package.
-     ****************************************************/
 
     static synchronized void setMotorDirection(Direction direction) {
         switch (direction){
