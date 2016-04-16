@@ -68,13 +68,13 @@ public class OperativeManager implements ElevatorPositionListener{
             try{
                 boolean operative = true;
                 SystemData.get().getLocalElevator().setOperable(true);
-                Log.i(NAME, "Elevator operable.");
+                Log.d(NAME, "Elevator operable.");
                 while (true){
                     if (System.currentTimeMillis()-lastEventTime.get() > 4000 && active.get()){
                         SystemData.get().getLocalElevator().setOperable(false);
                         //Reassign global orders here
                         if (operative){
-                            Log.i(NAME, "Event Timeout: Elevator not operable.");
+                            Log.d(NAME, "Event Timeout: Elevator not operable.");
                         }
                         operative = false;
                     }

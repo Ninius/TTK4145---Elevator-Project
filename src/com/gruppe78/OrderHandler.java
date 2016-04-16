@@ -158,8 +158,7 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
         }
         return orders;
     }
-    @Override
-    public void onFloorChanged(Floor newFloor){};
+
     @Override
     public void onMotorDirectionChanged(Direction newDirection){
         if (newDirection == Direction.NONE){
