@@ -22,10 +22,13 @@ public class LocalElevatorBroadcaster implements ElevatorPositionListener, Eleva
     public void initBroadcasting(){
         localElevator = data.getLocalElevator();
         localElevator.addElevatorPositionListener(this);
-        localElevator.addElevatorStatusListener(this);
         localElevator.addOrderEventListener(this);
         data.addOrderEventListener(this);
         networker = Networker.get();
+
+        for(Elevator elevator : SystemData.get().getElevatorList()){
+            elevator.addElevatorStatusListener(this);
+        }
     }
 
     public void decodeMessage(NetworkMessage message, Elevator sender){
@@ -88,12 +91,12 @@ public class LocalElevatorBroadcaster implements ElevatorPositionListener, Eleva
                 if (order == null) continue;
                 sendMessage(new NetworkMessage("OrderAdded", new NetworkOrder(order)));
             }
-
         }
     }
 
     @Override
     public void onOperableChanged(Elevator elevator, boolean operable) {
+        if(elevator != SystemData.get().getLocalElevator()) return;
         sendMessage(new NetworkMessage("OperableChanged", operable));
     }
 
