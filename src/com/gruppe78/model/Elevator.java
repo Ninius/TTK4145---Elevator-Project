@@ -144,7 +144,12 @@ public class Elevator {
             listener.onOrderRemoved(order);
         }
     }
-
+    public Order[] getAllInternalOrders(){
+        Order[] internalOrdersCopy = internalOrders.clone();
+        synchronized (internalOrders) {
+            return internalOrdersCopy;
+        }
+    }
     /*************************************************
      * Status - Connection, Operable
      *************************************************/
