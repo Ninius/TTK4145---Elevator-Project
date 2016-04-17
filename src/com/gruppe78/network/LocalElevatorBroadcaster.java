@@ -85,9 +85,10 @@ public class LocalElevatorBroadcaster implements ElevatorPositionListener, Eleva
     public void onConnectionChanged(Elevator elevator, boolean connected) {
         if (elevator != SystemData.get().getLocalElevator() && connected){
             for (Order order : elevator.getAllInternalOrders()){
+                if (order == null) continue;
                 sendMessage(new NetworkMessage("OrderAdded", new NetworkOrder(order)));
             }
-            
+
         }
     }
 
