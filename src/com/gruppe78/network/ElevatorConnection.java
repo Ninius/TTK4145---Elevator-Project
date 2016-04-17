@@ -1,8 +1,10 @@
 package com.gruppe78.network;
 
 import com.gruppe78.model.Elevator;
+import com.gruppe78.model.SystemData;
 import com.gruppe78.utilities.Log;
 import com.gruppe78.utilities.LoopThread;
+import com.gruppe78.utilities.Utilities;
 
 import java.io.*;
 import java.net.Socket;
@@ -15,6 +17,8 @@ public class ElevatorConnection {
     private static final NetworkMessage CHECK_MESSAGE = new NetworkMessage("check","check");
 
     private final Elevator mElevator;
+    private final Elevator mLocalElevator;
+    private boolean mClient;
     private Socket mSocket;
     private ObjectInputStream mReader;
     private ObjectOutputStream mWriter;
@@ -22,8 +26,10 @@ public class ElevatorConnection {
     private ConnectionChecker mConnectionChecker = new ConnectionChecker();
     private ConnectionReader mMessageReader = new ConnectionReader();
 
-    ElevatorConnection(Elevator elevator){
+    ElevatorConnection(Elevator elevator, boolean client){
         mElevator = elevator;
+        mLocalElevator = SystemData.get().getLocalElevator();
+        mClient = client;
     }
 
     private boolean isValid(Socket socket){
@@ -49,8 +55,19 @@ public class ElevatorConnection {
             }
         }
     }
-    private void setConnectionStatus(boolean status){
-        mElevator.setConnected(status);
+
+    //Only set false if
+    private void setConnectionStatus(boolean connected){
+        if(!connected){
+            if(Utilities.isElevatorLocalConnected(mLocalElevator)){
+                mElevator.setConnected(connected);
+            }else{
+                mLocalElevator.setConnected(connected);
+            }
+        }else{
+            mElevator.setConnected(true);
+            mLocalElevator.setConnected(true);
+        }
     }
 
     public synchronized boolean sendMessage(NetworkMessage message) {

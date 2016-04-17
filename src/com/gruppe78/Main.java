@@ -67,7 +67,7 @@ public class Main {
 
             //Establishing connections:
             networker = Networker.get();
-            networker.createConnections(PORT, CONNECT_TIMEOUT);
+            networker.createConnections(CONNECT_TIMEOUT, PORT);
 
             //Connecting system model of the elevator to the physical elevator.
             localElevatorDriverBridge = LocalElevatorDriverBridge.get();

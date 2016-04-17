@@ -56,7 +56,7 @@ public class LocalElevatorBroadcaster implements ElevatorPositionListener, Eleva
         }
     }
 
-    private synchronized void sendMessage(NetworkMessage message){ //TODO: Create thread.
+    public synchronized void sendMessage(NetworkMessage message){ //TODO: Create thread.
         for(Elevator elevator : data.getElevatorList()){
             if(elevator == localElevator) continue;
             ElevatorConnection connection = networker.getConnection(elevator);

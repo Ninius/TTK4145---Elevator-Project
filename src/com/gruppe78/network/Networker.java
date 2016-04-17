@@ -26,9 +26,17 @@ public class Networker {
     private Networker(){
         data = SystemData.get();
         LOCAL_ADDRESS = data.getLocalElevator().getAddress();
+        Elevator localElevator = data.getLocalElevator();
         for(Elevator elevator : data.getElevatorList()){
-            if(elevator == data.getLocalElevator()) continue;
-            connections.put(elevator.getAddress(), new ElevatorConnection(elevator));
+            if (localElevator.getID() < elevator.getID()) {
+                Log.i(this, "Establishment of connection to " + elevator + ": Client.");
+                connections.put(elevator.getAddress(), new ElevatorConnection(elevator, true));
+            } else if (localElevator.getID() == elevator.getID()) {
+                Log.i(this, "Establishment of connection to " + elevator + ": None (Local).");
+            } else {
+                Log.i(this, "Establishment of connection to " + elevator + ": Server.");
+                connections.put(elevator.getAddress(), new ElevatorConnection(elevator, false));
+            }
         }
     }
     public static Networker get(){
@@ -43,20 +51,14 @@ public class Networker {
             //Starting clients:
             Elevator localElevator = data.getLocalElevator();
             for(Elevator elevator : data.getElevatorList()) {
-                if (localElevator.getID() < elevator.getID()) {
-                    Log.i(this, "Establishment of connection to " + elevator + ": Client.");
+                if (localElevator.getID() >= elevator.getID()) continue;
 
-                    ConnectClient connectClient = new ConnectClient(port, elevator, connectTimeout);
+                ConnectClient connectClient = new ConnectClient(port, elevator, connectTimeout);
 
-                    if (connectors.get(elevator) != null) connectors.get(elevator).interrupt();
-                    connectors.put(elevator, connectClient);
+                if (connectors.get(elevator) != null) connectors.get(elevator).interrupt();
+                connectors.put(elevator, connectClient);
 
-                    connectClient.start();
-                } else if (localElevator.getID() == elevator.getID()) {
-                    Log.i(this, "Establishment of connection to " + elevator + ": None (Local).");
-                } else {
-                    Log.i(this, "Establishment of connection to " + elevator + ": Server.");
-                }
+                connectClient.start();
             }
 
             //Starting server:
@@ -75,10 +77,6 @@ public class Networker {
     ElevatorConnection getConnection(InetAddress inetAddress){
         return connections.get(inetAddress);
     }
-
-    /*******************************************
-     * Public API
-     *******************************************/
 
 
 

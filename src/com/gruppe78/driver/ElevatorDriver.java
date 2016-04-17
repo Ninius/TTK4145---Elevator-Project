@@ -1,5 +1,9 @@
 package com.gruppe78.driver;
 
+import com.gruppe78.Main;
+
+import java.io.File;
+
 /**
  * Created by student on 05.02.16.
  *
@@ -12,14 +16,16 @@ package com.gruppe78.driver;
  */
 class ElevatorDriver implements Driver {
     private static ElevatorDriver sDriver;
-    private static final String LIBRARY_PATH = "/home/student/Gruppe123/IntellijProjects/src/libElevatorDriver.so";
+    private static final String LIBRARY_NAME = "libElevatorDriver.so";
 
     private ElevatorDriver(){
+        File jarPath = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        String libraryPath = new File(jarPath.getParent(), LIBRARY_NAME).getAbsolutePath();
         try{
-            System.load(LIBRARY_PATH);
-            System.out.println("Loaded driver library");
+            System.load(libraryPath);
+            System.out.println("Loaded driver library at "+libraryPath);
         }catch (UnsatisfiedLinkError error){
-            System.out.println("Could not locate driver library at: "+LIBRARY_PATH);
+            System.out.println("Could not locate driver library at: "+libraryPath);
         }
     }
 

@@ -50,7 +50,6 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
     }
 
 
-
     @Override
     public void onOrderAdded(Order order){
         moveElevator();
