@@ -34,9 +34,9 @@ public class SerializedElevator implements java.io.Serializable {
         mFloor = elevator.getFloor();
         mOrderDirection = elevator.getOrderDirection();
         mMotorDirection = elevator.getMotorDirection();
-        mDoorOpen = new Boolean(elevator.isDoorOpen());
-        mConnected = new Boolean(elevator.isConnected());
-        mOperable = new Boolean(elevator.isOperable());
+        mDoorOpen = elevator.isDoorOpen();
+        mConnected = elevator.isConnected();
+        mOperable = elevator.isOperable();
 
     }
     public void updateElevator() {

@@ -106,10 +106,14 @@ public class SystemData {
             return globalOrders[floor.index][buttonUp ? 0 : 1];
         }
     }
-    public Order[][] getAllGlobalOrders(){ //TODO: MUST COPY ARRAY!
+    public Order[][] getAllGlobalOrders(){
+        Order[][] globalOrdersCopy = new Order[Floor.NUMBER_OF_FLOORS][2];
         synchronized (globalOrders){
-            return globalOrders;
+            for (int i = 0; i < globalOrders.length; i++){
+                globalOrdersCopy[i] = globalOrders[i].clone();
+            }
         }
+        return globalOrdersCopy;
     }
     public void setAllGlobalOrders(Order[][] orders){
         synchronized (globalOrders){

@@ -5,7 +5,7 @@ package com.gruppe78.model;
  */
 public interface ElevatorPositionListener {
     default void onFloorChanged(Floor newFloor){}
-    default void onMotorDirectionChanged(Direction newDirection){};
-    default void onOrderDirectionChanged(Direction newDirection){};
-    default void onDoorOpenChanged(boolean newOpen){};
+    default void onMotorDirectionChanged(Direction newDirection){}
+    default void onOrderDirectionChanged(Direction newDirection){}
+    default void onDoorOpenChanged(boolean newOpen){}
 }

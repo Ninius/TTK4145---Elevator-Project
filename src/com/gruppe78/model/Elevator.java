@@ -18,12 +18,12 @@ public class Elevator {
     private Floor mFloor;
     private Direction mOrderDirection = Direction.UP;
     private Direction mMotorDirection;
-    private AtomicBoolean mDoorOpen = new AtomicBoolean(false);
+    private final AtomicBoolean mDoorOpen = new AtomicBoolean(false);
 
     //Status:
-    private AtomicBoolean mConnected = new AtomicBoolean(false);
-    private AtomicBoolean mOperable =  new AtomicBoolean(true);
-    private AtomicBoolean mUpToDate = new AtomicBoolean(true); //TODO: Check initial value.
+    private final AtomicBoolean mConnected = new AtomicBoolean(false);
+    private final AtomicBoolean mOperable =  new AtomicBoolean(true);
+    private final AtomicBoolean mUpToDate = new AtomicBoolean(true); //TODO: Check initial value.
 
     //Listeners:
     private final CopyOnWriteArrayList<ElevatorPositionListener> positionListeners = new CopyOnWriteArrayList<>();

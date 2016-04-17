@@ -2,11 +2,6 @@ package com.gruppe78.model;
 
 import com.gruppe78.utilities.Log;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 public enum Floor {
     FLOOR0(0),
     FLOOR1(1),
@@ -25,8 +20,8 @@ public enum Floor {
     public boolean isTop(){
         return index + 1 == NUMBER_OF_FLOORS;
     }
-    public Floor getLastFloor(){
-        return Floor.FLOOR3;
+    public static Floor getLastFloor(){
+        return Floor.values()[Floor.NUMBER_OF_FLOORS-1];
     }
     public Direction directionTo(Floor floor){
 

@@ -1,7 +1,5 @@
 package com.gruppe78.model;
 
-import com.gruppe78.SerializedOrder;
-
 /**
  * Created by student on 04.03.16.
  */
