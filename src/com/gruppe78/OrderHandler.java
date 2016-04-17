@@ -45,8 +45,7 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
             public void run() {
                 SystemData data = SystemData.get();
                 if (data.getGlobalOrder(order.getFloor(), order.getButton().isUp()) == null){
-                    //Elevator minCostElevator = Networker.getMinCostElevator(order); Change to correct function call
-                    Elevator minCostElevator = data.getLocalElevator();
+                    Elevator minCostElevator = CostFunction.getMinCostElevator(order);
                     data.addGlobalOrder(new Order(minCostElevator, order.getButton(), order.getFloor()));
                 }
                 else if(!data.getLocalElevator().isConnected()){

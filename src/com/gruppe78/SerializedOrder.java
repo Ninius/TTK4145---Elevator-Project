@@ -36,7 +36,7 @@ public class SerializedOrder implements java.io.Serializable {
     public Order getOrder() {
         return new Order(SystemData.get().getElevator(mInetAddress), mButton, mFloor);
     }
-    public void updateOrders(){
+    public void updateOrder(){
         if (mInetAddress == null) return;
         if (mButton == Button.INTERNAL){
             if (mClearOrder) SystemData.get().getElevator(mInetAddress).clearInternalOrder(mFloor);

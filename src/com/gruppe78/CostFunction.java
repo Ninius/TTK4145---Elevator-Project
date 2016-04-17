@@ -7,14 +7,13 @@ import com.gruppe78.model.*;
  */
 
 //Move to Elevator class?
-public class CostFunction {
-    static int costFunction(Order order){
-        if (SystemData.get().getLocalElevator().isOperable()  == false){
+public class CostFunction {//TODO: Test
+    private static int costFunction(Elevator elevator, Order order){
+        if (!elevator.isOperable() || !elevator.isConnected()){
             return Integer.MAX_VALUE;
         }
         int cost = 0;
         Elevator localElevator = SystemData.get().getLocalElevator();
-
         Direction directionToOrder = localElevator.getFloor().directionTo(order.getFloor());
         if (directionToOrder != localElevator.getOrderDirection() && directionToOrder != Direction.NONE){
             cost += Floor.NUMBER_OF_FLOORS;
@@ -27,35 +26,20 @@ public class CostFunction {
         cost += OrderHandler.getNumberOfGlobalOrders(localElevator)*Floor.NUMBER_OF_FLOORS/2;
         return cost;
 
+    }
 
-        /* Old implementation */
-        /*int cost = 0; int direction = 0;
-        int elevFloor; int elevDir;
+    public static Elevator getMinCostElevator(Order order){
+        Elevator minCostElevator = SystemData.get().getLocalElevator();
+        int minCost = Integer.MAX_VALUE; int cost;
         for (Elevator elevator : SystemData.get().getElevatorList()) {
-            elevFloor = elevator.getFloor();
-            elevDir = elevator.getOrderDirection();
-            if (floor > elevFloor){
-                direction = 1;
+            if (elevator.isOperable() && (elevator.isConnected() || elevator.isLocal())) {
+                cost = costFunction(elevator, order);
+                if (cost < minCost) {
+                    minCost = cost;
+                    minCostElevator = elevator;
+                }
             }
-            else if (floor == elevFloor){
-                direction = 0;
-            }
-            else {
-                direction = -1;
-            }
-            if (elevDir == 0 || elevDir == direction){
-                cost += 1;
-            }
-            else if (direction != elevDir && elevDir != 0){
-                cost += Floor.NUMBER_OF_FLOORS;
-            }
-            cost += Math.abs(elevFloor-floor);
-            if (cost < minCost){
-                minCost = cost;
-                minCostElevator = elevator;
-            }
-            cost = 0;
         }
-        return minCostElevator;*/
+        return minCostElevator;
     }
 }
