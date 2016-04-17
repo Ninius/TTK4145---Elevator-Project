@@ -30,6 +30,8 @@ public class CostFunction {//TODO: Test
 
     public static Elevator getMinCostElevator(Button button, Floor floor){
         Elevator minCostElevator = SystemData.get().getLocalElevator();
+        if(!minCostElevator.isConnected()) return minCostElevator;
+        
         int minCost = Integer.MAX_VALUE; int cost;
         for (Elevator elevator : SystemData.get().getElevatorList()) {
             if (elevator.isOperable() && (elevator.isConnected() || elevator.isLocal())) {
