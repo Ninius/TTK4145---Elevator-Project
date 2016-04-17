@@ -33,7 +33,7 @@ public class ElevatorConnection {
     }
 
     private boolean isValid(Socket socket){
-        return mSocket != null && (mSocket.isClosed() || !mSocket.isConnected());
+        return socket != null && (socket.isClosed() || !socket.isConnected());
     }
 
     synchronized void setConnectedSocket(Socket socket){
@@ -71,6 +71,7 @@ public class ElevatorConnection {
     }
 
     public synchronized boolean sendMessage(NetworkMessage message) {
+        if(mSocket == null) return false;
         try {
             mWriter.writeObject(message);
             mWriter.flush();

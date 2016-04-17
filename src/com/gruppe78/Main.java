@@ -4,6 +4,7 @@ import com.gruppe78.driver.DriverLocalElevatorBridge;
 import com.gruppe78.driver.LocalElevatorDriverBridge;
 import com.gruppe78.driver.DriverHelper;
 import com.gruppe78.model.*;
+import com.gruppe78.network.LocalElevatorBroadcaster;
 import com.gruppe78.network.Networker;
 import com.gruppe78.utilities.Log;
 import com.gruppe78.utilities.Utilities;
@@ -22,12 +23,11 @@ public class Main {
     private static final String NAME = Main.class.getSimpleName();
 
     //System settings:
-    private static final String[] ELEVATOR_IP_LIST = new String[]{"127.0.0.1"};
+    private static final String[] ELEVATOR_IP_LIST = new String[]{"127.0.0.1", "200.200.200.200"};
     private static final int PORT = 1000;
     private static final int CONNECT_TIMEOUT = 5000;
 
     //References to components to prevent them from being garbage collected.
-    private static SystemData systemData;
     private static Networker networker;
     private static LocalElevatorDriverBridge localElevatorDriverBridge;
     private static DriverLocalElevatorBridge driverLocalElevatorBridge;
@@ -59,10 +59,10 @@ public class Main {
                 localElevator = Utilities.getConnectedElevator(elevators);
             }
             Log.i(NAME, "The system is connected - Local address: " + localElevator.getAddress().getHostAddress());
+            localElevator.setConnected(true);
 
             //Initializing the system data:
             SystemData.init(elevators, localElevator);
-            systemData = SystemData.get();
             Log.i(NAME, "System Data initialized, elevators in the system: "+SystemData.get().getElevatorList());
 
             //Establishing connections:
@@ -76,8 +76,15 @@ public class Main {
             driverLocalElevatorBridge = DriverLocalElevatorBridge.get();
             driverLocalElevatorBridge.start();
 
+            //Monitoring that the physical elevator is responding
             operativeManager = OperativeManager.get();
             operativeManager.start();
+
+            //Sending data to other elevators:
+            LocalElevatorBroadcaster.get().initBroadcasting();
+
+            //Monitoring state of elevators and reassigning orders.
+            OrderHandler.get().init();
 
             initiateLocalElevatorPosition(localElevator);
         } catch (Exception e) {

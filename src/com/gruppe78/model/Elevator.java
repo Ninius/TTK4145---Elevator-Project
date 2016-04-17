@@ -126,11 +126,12 @@ public class Elevator {
     }
     void addInternalOrder(Floor floor){
         if(floor == null) return;
+        Order order = new Order(this, Button.INTERNAL, floor);
         synchronized (internalOrders){
-            internalOrders[floor.index] = new Order(this, Button.INTERNAL, floor);
+            internalOrders[floor.index] = order;
         }
         for (OrderListener listener : orderListeners){
-            listener.onOrderAdded(internalOrders[floor.index]);
+            listener.onOrderAdded(order);
         }
     }
     void clearInternalOrder(Floor floor){

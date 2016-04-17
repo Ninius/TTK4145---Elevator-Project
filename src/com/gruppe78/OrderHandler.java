@@ -9,17 +9,18 @@ import java.util.List;
  */
 public class OrderHandler implements ElevatorStatusListener, ElevatorPositionListener{
     private static OrderHandler mOrderHandler;
-    private OrderHandler (){
-        for (Elevator elevator : SystemData.get().getElevatorList()){
-            elevator.addElevatorStatusListener(this);
-            elevator.addElevatorPositionListener(this);
-        }
-    }
+    private OrderHandler (){}
     public static OrderHandler get(){
         if (mOrderHandler == null){
             mOrderHandler = new OrderHandler();
         }
         return mOrderHandler;
+    }
+    public void init(){
+        for (Elevator elevator : SystemData.get().getElevatorList()){
+            elevator.addElevatorStatusListener(this);
+            elevator.addElevatorPositionListener(this);
+        }
     }
 
     public static void onButtonPressed(Button button, Floor floor){

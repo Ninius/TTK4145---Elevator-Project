@@ -5,6 +5,5 @@ package com.gruppe78.model;
  */
 public interface OrderListener {
     default void onOrderAdded(Order order){}
-
     default void onOrderRemoved(Order order){}
 }
