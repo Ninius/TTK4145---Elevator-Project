@@ -9,9 +9,10 @@ import java.net.InetAddress;
  */
 //First draft, please change if needed.
 public class SerializedOrder implements java.io.Serializable {
-    private final InetAddress mInetAddress;
-    private final Floor mFloor;
-    private final Button mButton;
+    private InetAddress mInetAddress;
+    private Floor mFloor;
+    private Button mButton;
+    private boolean mClearOrder;
     public Floor getFloor(){
         return mFloor;
     }
@@ -23,21 +24,27 @@ public class SerializedOrder implements java.io.Serializable {
         return mInetAddress;
     }
 
-    public SerializedOrder(Elevator elevator, Button button, Floor floor){
-        mInetAddress = elevator.getAddress();
-        mButton = button;
-        mFloor = floor;
+    public SerializedOrder(Order order, boolean clearOrder){
+        if (order != null){
+            mInetAddress = order.getElevator().getAddress();
+            mButton = order.getButton();
+            mFloor = order.getFloor();
+            mClearOrder = clearOrder;
+
+        }
     }
     public Order getOrder() {
-        return new Order(SystemData.get().getElevator(mInetAddress), getButton(), getFloor());
+        return new Order(SystemData.get().getElevator(mInetAddress), mButton, mFloor);
     }
     public void updateOrders(){
         if (mInetAddress == null) return;
         if (mButton == Button.INTERNAL){
-            SystemData.get().getElevator(mInetAddress).addInternalOrder(mFloor, mButton);
+            if (mClearOrder) SystemData.get().getElevator(mInetAddress).clearInternalOrder(mFloor);
+            else SystemData.get().getElevator(mInetAddress).addInternalOrder(mFloor, mButton);
         }
         else{
-            SystemData.get().addGlobalOrder(getOrder());
+            if (mClearOrder) SystemData.get().clearGlobalOrder(mFloor, mButton.isUp());
+            else SystemData.get().addGlobalOrder(getOrder());
         }
     }
 }

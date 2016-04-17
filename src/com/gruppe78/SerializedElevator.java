@@ -10,7 +10,7 @@ import java.net.InetAddress;
 
 //getters not really required in current form.
 public class SerializedElevator implements java.io.Serializable {
-    private final InetAddress mInetAddress;
+    private InetAddress mInetAddress;
     private SerializedOrder[] internalOrders = null; //Use SerializedOrder for single orders?
     private Floor mFloor = null;
     private Direction mOrderDirection = null;
@@ -18,17 +18,35 @@ public class SerializedElevator implements java.io.Serializable {
     private Boolean mDoorOpen = null;
     private Boolean mConnected = null;
     private Boolean mOperable = null;
-    private Long lastConnect = null;
 
     public SerializedElevator(InetAddress InetAddress) {
         mInetAddress = InetAddress;
     }
+    public SerializedElevator(Elevator elevator){
+        mInetAddress = elevator.getAddress();
+        int i = 0;
+        internalOrders = new SerializedOrder[Floor.NUMBER_OF_FLOORS];
+        for (Order order : elevator.getAllInternalOrders()){
+            if (order != null) internalOrders[i] = new SerializedOrder(order, false);
+            else internalOrders[i] = null;
+            i++;
+        }
+        mFloor = elevator.getFloor();
+        mOrderDirection = elevator.getOrderDirection();
+        mMotorDirection = elevator.getMotorDirection();
+        mDoorOpen = new Boolean(elevator.isDoorOpen());
+        mConnected = new Boolean(elevator.isConnected());
+        mOperable = new Boolean(elevator.isOperable());
 
+    }
     public void updateElevator() {
         Elevator targetElevator = SystemData.get().getElevator(mInetAddress);
         if (internalOrders != null) {
+            Floor floor = Floor.FLOOR0;
             for (SerializedOrder order : internalOrders) {
-                targetElevator.addInternalOrder(order.getFloor(), order.getButton());
+                if (order.getInetAddress() != null) targetElevator.addInternalOrder(order.getFloor(), order.getButton());
+                else targetElevator.clearInternalOrder(floor);
+                floor = floor.getNextFloor(Direction.UP);
             }
         }
         if (mFloor != null) {
@@ -49,7 +67,7 @@ public class SerializedElevator implements java.io.Serializable {
         if (mOperable != null) {
             targetElevator.setOperable(mOperable);
         }
-
+        targetElevator.setUpToDate(true);
     }
 
     public Direction getmOrderDirection() {
@@ -90,14 +108,6 @@ public class SerializedElevator implements java.io.Serializable {
 
     public void setmOperable(boolean mOperable) {
         this.mOperable = mOperable;
-    }
-
-    public long getLastConnect() {
-        return lastConnect;
-    }
-
-    public void setLastConnect(long lastConnect) {
-        this.lastConnect = lastConnect;
     }
 
 

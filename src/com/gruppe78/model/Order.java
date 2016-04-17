@@ -25,9 +25,7 @@ public class Order {
     public Button getButton(){
         return mButton;
     }
-    public SerializedOrder serialize(){
-        return new SerializedOrder(mOrderElevator, mButton, mFloor);
-    }
+
 
     @Override
     public String toString(){

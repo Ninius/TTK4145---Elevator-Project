@@ -18,7 +18,7 @@ public class SerializedGlobalOrders implements java.io.Serializable {
                     globalOrders[i][j] = null;
                 }
                 else{
-                    globalOrders[i][j] = new SerializedOrder(order.getElevator(), order.getButton(), order.getFloor());
+                    globalOrders[i][j] = new SerializedOrder(order, false);
                 }
                 j++;
             }

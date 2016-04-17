@@ -147,6 +147,11 @@ public class Elevator {
         }
     }
 
+    public Order[] getAllInternalOrders(){
+        synchronized (internalOrders) {
+            return internalOrders;
+        }
+    }
     /*************************************************
      * Status - Connection and Operability
      *************************************************/
@@ -178,7 +183,10 @@ public class Elevator {
             listener.onOperableChanged(this, operable);
         }
     }
+    public void setUpToDate(boolean upToDate){
+        mUpToDate.set(upToDate);
 
+    }
     /************************************************************
      * Identifiers:
      ************************************************************/
