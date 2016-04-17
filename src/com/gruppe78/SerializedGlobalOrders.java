@@ -36,6 +36,6 @@ public class SerializedGlobalOrders implements java.io.Serializable {
             }
             i++;
         }
-        data.setAllGlobalOrders(newGlobalOrders);
+        //data.setAllGlobalOrders(newGlobalOrders);
     }
 }

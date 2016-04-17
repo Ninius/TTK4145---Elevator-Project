@@ -9,7 +9,7 @@ import java.net.InetAddress;
  */
 
 //getters not really required in current form.
-public class SerializedElevator implements java.io.Serializable {
+public class SerializedElevator{} /*implements java.io.Serializable {
     private InetAddress mInetAddress;
     private SerializedOrder[] internalOrders = null; //Use SerializedOrder for single orders?
     private Floor mFloor = null;
@@ -111,4 +111,4 @@ public class SerializedElevator implements java.io.Serializable {
     }
 
 
-}
+}*/

@@ -117,31 +117,4 @@ public class SystemData {
             listener.onOrderRemoved(order);
         }
     }
-
-
-
-
-
-    public Order[][] getAllGlobalOrders(){ //TODO: MUST COPY ARRAY!
-        synchronized (globalOrders){
-            for (int i = 0; i < globalOrders.length; i++){
-                globalOrdersCopy[i] = globalOrders[i].clone();
-            }
-        }
-        return globalOrdersCopy;
-    }
-    public void setAllGlobalOrders(Order[][] orders){
-        synchronized (globalOrders){
-            //TODO: Avoids repeated locking through calls to addGlobalOrder. Modify if needed, only called by SerializedGlobalOrders.
-            int i = 0; int j = 0;
-            for (Order[] floor: orders){
-                for (Order order : floor){
-                    globalOrders[i][j] = order;
-                    j++;
-                }
-                i++;
-            }
-        }
-    }
-
 }

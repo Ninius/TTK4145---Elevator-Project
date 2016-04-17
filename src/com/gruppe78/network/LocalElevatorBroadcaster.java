@@ -47,11 +47,11 @@ public class LocalElevatorBroadcaster implements ElevatorPositionListener, Eleva
                 return;
             case "OrderAdded":
                 NetworkOrder networkOrder = (NetworkOrder) message.getData();
-                data.addOrder(networkOrder.getOrder(data), sender);
+                data.addOrder(networkOrder.getOrder(data));
                 return;
             case "OrderRemoved":
                 networkOrder = (NetworkOrder) message.getData();
-                data.clearOrder(networkOrder.getOrder(data), sender);
+                data.clearOrder(networkOrder.getOrder(data));
                 return;
         }
     }
@@ -93,13 +93,11 @@ public class LocalElevatorBroadcaster implements ElevatorPositionListener, Eleva
 
     @Override
     public void onOrderAdded(Order order){
-        if(addingElevator != localElevator) return; //Only broadcast if this elevator created the order.
         sendMessage(new NetworkMessage("OrderAdded", new NetworkOrder(order)));
     }
 
     @Override
     public void onOrderRemoved(Order order){
-        if(removingElevator != localElevator) return; //Only broadcast if this elevator removed the order.
         sendMessage(new NetworkMessage("OrderRemoved", new NetworkOrder(order)));
     }
 }
