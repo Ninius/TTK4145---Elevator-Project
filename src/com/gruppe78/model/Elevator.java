@@ -146,8 +146,8 @@ public class Elevator {
         }
     }
     public Order[] getAllInternalOrders(){
-        Order[] internalOrdersCopy = internalOrders.clone();
         synchronized (internalOrders) {
+            Order[] internalOrdersCopy = internalOrders.clone();
             return internalOrdersCopy;
         }
     }

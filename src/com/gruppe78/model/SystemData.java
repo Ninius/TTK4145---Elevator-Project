@@ -1,7 +1,5 @@
 package com.gruppe78.model;
 
-import com.gruppe78.utilities.Log;
-
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -115,6 +113,11 @@ public class SystemData {
 
         for(OrderListener listener : orderListeners){
             listener.onOrderRemoved(order);
+        }
+    }
+    public Order[][] getAllGlobalOrders(){
+        synchronized (globalOrders){
+            return globalOrders.clone();
         }
     }
 }

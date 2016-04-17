@@ -87,9 +87,23 @@ public class LocalElevatorBroadcaster implements ElevatorPositionListener, Eleva
     @Override
     public void onConnectionChanged(Elevator elevator, boolean connected) {
         if (elevator != SystemData.get().getLocalElevator() && connected){
+            //Sending internal orders to the elevator:
             for (Order order : elevator.getAllInternalOrders()){
                 if (order == null) continue;
                 sendMessage(new NetworkMessage("OrderAdded", new NetworkOrder(order)));
+            }
+
+            //Sending info about local elevator.
+            Elevator localElevator = SystemData.get().getLocalElevator();
+            sendMessage(new NetworkMessage("FloorChanged", localElevator.getFloor()));
+            sendMessage(new NetworkMessage("MotorDirectionChanged", localElevator.getMotorDirection()));
+            sendMessage(new NetworkMessage("OperableChanged", localElevator.isOperable()));
+            sendMessage(new NetworkMessage("DoorOpenChanged", localElevator.isDoorOpen()));
+            for(Order[] orderList : SystemData.get().getAllGlobalOrders()){
+                for(Order order : orderList){
+                    if(order == null) continue;
+                    sendMessage(new NetworkMessage("OrderAdded", new NetworkOrder(order)));
+                }
             }
         }
     }
