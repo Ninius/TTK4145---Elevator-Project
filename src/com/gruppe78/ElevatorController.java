@@ -38,7 +38,7 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
     public void onFloorChanged(Floor newFloor) {
         Order nextOrder = OrderHandler.getNextOrder(localElevator);
         if (nextOrder == null) return;
-        if (nextOrder.getFloor() == newFloor || OrderHandler.getMatchingOrder(localElevator, newFloor, localElevator.getOrderDirection()) != null || newFloor.isTop() || newFloor.isBottom()){
+        if (nextOrder.getFloor() == newFloor || OrderHandler.getMatchingOrder(localElevator, newFloor, localElevator.getMotorDirection()) != null || newFloor.isTop() || newFloor.isBottom()){
             localElevator.setMotorDirection(Direction.NONE);
             openDoorAndClearOrders();
         }
@@ -46,7 +46,6 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
 
     @Override
     public void onDoorOpenChanged(boolean open){
-        Log.d(this, "Door open changed:"+open);
         if(!open) moveElevator();
     }
 
@@ -54,23 +53,19 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
 
     @Override
     public void onOrderAdded(Order order){
-        Log.d(this, "OrderAdded");
         moveElevator();
     }
 
     public void openDoorAndClearOrders(){
-        Log.d(this, "openDoorAndClearOrders() called");
         localElevator.setDoor(true);
         mDoorTimer.start();
         SystemData.get().clearAllOrders(localElevator.getFloor(), localElevator);
     }
 
     public void moveElevator(){
-        Log.d(this,"MoveElevator called");
         if (localElevator.getMotorDirection() != Direction.NONE) return;
 
         Order nextOrder = OrderHandler.getNextOrder(localElevator);
-        Log.d(this, "Next Order: "+nextOrder);
         if (nextOrder == null) return;
 
         Direction orderDirection = localElevator.getFloor().directionTo(nextOrder.getFloor());
