@@ -23,8 +23,8 @@ public class Main {
 
     //System settings:
     private static final String[] ELEVATOR_IP_LIST = new String[]{"127.0.0.1"};
-    private static final int PORT = 5000;
-    private static final int CONNECT_TIMEOUT = 1000;
+    private static final int PORT = 1000;
+    private static final int CONNECT_TIMEOUT = 5000;
 
     //References to components to prevent them from being garbage collected.
     private static SystemData systemData;
@@ -76,8 +76,8 @@ public class Main {
             driverLocalElevatorBridge = DriverLocalElevatorBridge.get();
             driverLocalElevatorBridge.start();
 
-            //operativeManager = OperativeManager.get();
-            //operativeManager.start();
+            operativeManager = OperativeManager.get();
+            operativeManager.start();
 
             initiateLocalElevatorPosition(localElevator);
         } catch (Exception e) {
