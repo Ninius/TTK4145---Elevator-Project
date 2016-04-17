@@ -9,8 +9,8 @@ import com.gruppe78.utilities.LoopThread;
  *
  * //TODO: Separate into two classes?
  */
-public class DriverLocalElevatorBridge {
-    private static DriverLocalElevatorBridge sDriverLocalElevatorBridge;
+public class DriverToLocalElevator {
+    private static DriverToLocalElevator sDriverToLocalElevator;
     private Elevator mElevator;
     private ButtonCheck buttonCheck;
     private FloorCheck floorCheck;
@@ -24,14 +24,14 @@ public class DriverLocalElevatorBridge {
      * Constructing, initializing and referencing
      ******************************************************************************************************/
 
-    private DriverLocalElevatorBridge(){
+    private DriverToLocalElevator(){
         mElevator = SystemData.get().getLocalElevator();
     }
-    public static DriverLocalElevatorBridge get(){
-        if(sDriverLocalElevatorBridge == null){
-            sDriverLocalElevatorBridge = new DriverLocalElevatorBridge();
+    public static DriverToLocalElevator get(){
+        if(sDriverToLocalElevator == null){
+            sDriverToLocalElevator = new DriverToLocalElevator();
         }
-        return sDriverLocalElevatorBridge;
+        return sDriverToLocalElevator;
     }
     public void start(){
         buttonCheck = new ButtonCheck();

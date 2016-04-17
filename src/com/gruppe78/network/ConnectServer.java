@@ -1,6 +1,5 @@
 package com.gruppe78.network;
 
-import com.gruppe78.network.ElevatorConnection;
 import com.gruppe78.utilities.Log;
 
 import java.io.IOException;
@@ -25,7 +24,7 @@ class ConnectServer extends Thread{
             while(!isInterrupted()){
                 Socket clientSocket = serverSocket.accept();
                 InetAddress clientAddress = clientSocket.getInetAddress();
-                ElevatorConnection connection = Networker.get().getConnection(clientAddress);
+                ElevatorConnection connection = NetworkStarter.get().getConnection(clientAddress);
 
                 if(connection == null){
                     Log.i(this, "Socket for: "+clientAddress + " created. Accepted: NO. No matching ElevatorConnection. Closing the socket.");

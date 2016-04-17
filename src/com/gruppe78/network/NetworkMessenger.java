@@ -5,17 +5,17 @@ import com.gruppe78.model.*;
 /**
  * Created by jespe on 14.04.2016.
  */
-public class LocalElevatorBroadcaster implements ElevatorPositionListener, ElevatorStatusListener, OrderListener{
-    private static LocalElevatorBroadcaster sNetworkMessager = new LocalElevatorBroadcaster();
+public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatusListener, OrderListener{
+    private static NetworkMessenger sNetworkMessager = new NetworkMessenger();
     private Elevator localElevator;
     private SystemData data;
-    private Networker networker;
+    private NetworkStarter networkStarter;
 
-    private LocalElevatorBroadcaster(){
+    private NetworkMessenger(){
         data = SystemData.get();
 
     }
-    public static LocalElevatorBroadcaster get(){
+    public static NetworkMessenger get(){
         return sNetworkMessager;
     }
 
@@ -24,7 +24,7 @@ public class LocalElevatorBroadcaster implements ElevatorPositionListener, Eleva
         localElevator.addElevatorPositionListener(this);
         localElevator.addOrderEventListener(this);
         data.addOrderEventListener(this);
-        networker = Networker.get();
+        networkStarter = NetworkStarter.get();
 
         for(Elevator elevator : SystemData.get().getElevatorList()){
             elevator.addElevatorStatusListener(this);
@@ -62,7 +62,7 @@ public class LocalElevatorBroadcaster implements ElevatorPositionListener, Eleva
     public synchronized void sendMessage(NetworkMessage message){ //TODO: Create thread.
         for(Elevator elevator : data.getElevatorList()){
             if(elevator == localElevator) continue;
-            ElevatorConnection connection = networker.getConnection(elevator);
+            ElevatorConnection connection = networkStarter.getConnection(elevator);
             connection.sendMessage(message);
         }
     }

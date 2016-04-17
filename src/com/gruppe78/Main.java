@@ -1,11 +1,11 @@
 package com.gruppe78;
 
-import com.gruppe78.driver.DriverLocalElevatorBridge;
-import com.gruppe78.driver.LocalElevatorDriverBridge;
+import com.gruppe78.driver.DriverToLocalElevator;
+import com.gruppe78.driver.LocalElevatorToDriver;
 import com.gruppe78.driver.DriverHelper;
 import com.gruppe78.model.*;
-import com.gruppe78.network.LocalElevatorBroadcaster;
-import com.gruppe78.network.Networker;
+import com.gruppe78.network.NetworkMessenger;
+import com.gruppe78.network.NetworkStarter;
 import com.gruppe78.utilities.Log;
 import com.gruppe78.utilities.Utilities;
 
@@ -28,9 +28,9 @@ public class Main {
     private static final int CONNECT_TIMEOUT = 5000;
 
     //References to components to prevent them from being garbage collected.
-    private static Networker networker;
-    private static LocalElevatorDriverBridge localElevatorDriverBridge;
-    private static DriverLocalElevatorBridge driverLocalElevatorBridge;
+    private static NetworkStarter networkStarter;
+    private static LocalElevatorToDriver localElevatorToDriver;
+    private static DriverToLocalElevator driverToLocalElevator;
     private static ElevatorController elevatorController;
     private static OperativeManager operativeManager;
     private static OrderHandler orderHandler;
@@ -38,9 +38,9 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         Log.i(NAME, "System started");
 
-        //Initializing driver
         try {
-            DriverHelper.init(DriverHelper.SIMULATOR_DRIVER);
+            //Initializing driver
+            DriverHelper.init(DriverHelper.ELEVATOR_DRIVER);
             Log.i(NAME, "Driver initialized.");
 
             //Creating elevator objects from IP-list:
@@ -66,30 +66,29 @@ public class Main {
             Log.i(NAME, "System Data initialized, elevators in the system: "+SystemData.get().getElevatorList());
 
             //Establishing connections:
-            networker = Networker.get();
-            networker.createConnections(CONNECT_TIMEOUT, PORT);
+            networkStarter = NetworkStarter.get();
+            networkStarter.createElevatorConnections(CONNECT_TIMEOUT, PORT);
 
             //Connecting system model of the elevator to the physical elevator.
-            localElevatorDriverBridge = LocalElevatorDriverBridge.get();
-            localElevatorDriverBridge.init();
+            localElevatorToDriver = LocalElevatorToDriver.get();
+            localElevatorToDriver.init();
 
-            driverLocalElevatorBridge = DriverLocalElevatorBridge.get();
-            driverLocalElevatorBridge.start();
+            driverToLocalElevator = DriverToLocalElevator.get();
+            driverToLocalElevator.start();
 
             //Monitoring that the physical elevator is responding
             operativeManager = OperativeManager.get();
             operativeManager.start();
 
-            //Sending data to other elevators:
-            LocalElevatorBroadcaster.get().initBroadcasting();
+            //Sending data to other elevators when states changes:
+            NetworkMessenger.get().initBroadcasting();
 
-            //Monitoring state of elevators and reassigning orders.
+            //Monitoring status of elevators and reassigning orders.
             OrderHandler.get().init();
 
             initiateLocalElevatorPosition(localElevator);
         } catch (Exception e) {
             Log.s(NAME, e);
-            return;
         }
     }
 
@@ -112,8 +111,6 @@ public class Main {
     }
 
     private static void onLocalElevatorPositionInitialized(){
-        orderHandler = OrderHandler.get();
-
         elevatorController = ElevatorController.get();
         elevatorController.init();
     }

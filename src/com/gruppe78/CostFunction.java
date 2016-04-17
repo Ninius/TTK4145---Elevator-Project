@@ -29,13 +29,14 @@ public class CostFunction {//TODO: Test
     }
 
     public static Elevator getMinCostElevator(Button button, Floor floor){
-        Elevator minCostElevator = SystemData.get().getLocalElevator();
-        if(!minCostElevator.isConnected()) return minCostElevator;
-        
-        int minCost = Integer.MAX_VALUE; int cost;
+        Elevator localElevator = SystemData.get().getLocalElevator();
+        if(!localElevator.isConnected()) return localElevator;
+
+        Elevator minCostElevator = localElevator;
+        int minCost = Integer.MAX_VALUE;
         for (Elevator elevator : SystemData.get().getElevatorList()) {
-            if (elevator.isOperable() && (elevator.isConnected() || elevator.isLocal())) {
-                cost = costFunction(elevator, button, floor);
+            if (elevator.isOperable() && elevator.isConnected()) {
+                int cost = costFunction(elevator, button, floor);
                 if (cost < minCost) {
                     minCost = cost;
                     minCostElevator = elevator;

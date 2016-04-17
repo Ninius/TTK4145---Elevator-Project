@@ -112,7 +112,7 @@ public class ElevatorConnection {
         @Override public void loopRun() {
             NetworkMessage message = readMessage();
             if(message == null || message.equals(CHECK_MESSAGE)) return;
-            LocalElevatorBroadcaster.get().decodeMessage(message, mElevator);
+            NetworkMessenger.get().decodeMessage(message, mElevator);
         }
 
         @Override public int getInterval() {

@@ -28,7 +28,7 @@ class ConnectClient extends Thread{
             try {
                 socket.connect(mConnectPoint, mSocketConnectTimeout);
                 Log.i(this, "Socket for: "+mElevator+" created. Thread stopping.");
-                Networker.get().getConnection(mElevator).setConnectedSocket(socket);
+                NetworkStarter.get().getConnection(mElevator).setConnectedSocket(socket);
                 return;
             } catch (SocketTimeoutException e) {
                 socket = new Socket();

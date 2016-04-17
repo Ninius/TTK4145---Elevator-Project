@@ -9,11 +9,11 @@ import java.net.*;
 import java.util.HashMap;
 
 
-public class Networker {
+public class NetworkStarter {
     private final InetAddress LOCAL_ADDRESS;
     private SystemData data;
 
-    private static Networker sNetworker;
+    private static NetworkStarter sNetworkStarter;
 
     private HashMap<InetAddress, ElevatorConnection> connections = new HashMap<>();
     private ConnectServer connectionServer;
@@ -23,7 +23,7 @@ public class Networker {
      * Initialization
      *****************************************/
 
-    private Networker(){
+    private NetworkStarter(){
         data = SystemData.get();
         LOCAL_ADDRESS = data.getLocalElevator().getAddress();
         Elevator localElevator = data.getLocalElevator();
@@ -39,14 +39,14 @@ public class Networker {
             }
         }
     }
-    public static Networker get(){
-        if(sNetworker == null){
-            sNetworker = new Networker();
+    public static NetworkStarter get(){
+        if(sNetworkStarter == null){
+            sNetworkStarter = new NetworkStarter();
         }
-        return sNetworker;
+        return sNetworkStarter;
     }
 
-    public void createConnections(int connectTimeout, int port) throws NetworkException {
+    public void createElevatorConnections(int connectTimeout, int port) throws NetworkException {
         try {
             //Starting clients:
             Elevator localElevator = data.getLocalElevator();

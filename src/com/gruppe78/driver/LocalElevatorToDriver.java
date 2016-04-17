@@ -5,16 +5,16 @@ import com.gruppe78.model.*;
 /**
  * Controls all lights of the local system.
  */
-public class LocalElevatorDriverBridge implements ElevatorPositionListener, OrderListener {
-    private static LocalElevatorDriverBridge sLocalElevatorDriverBridge;
+public class LocalElevatorToDriver implements ElevatorPositionListener, OrderListener {
+    private static LocalElevatorToDriver sLocalElevatorToDriver;
 
-    private LocalElevatorDriverBridge(){}
+    private LocalElevatorToDriver(){}
 
-    public static LocalElevatorDriverBridge get(){
-        if(sLocalElevatorDriverBridge == null){
-            sLocalElevatorDriverBridge = new LocalElevatorDriverBridge();
+    public static LocalElevatorToDriver get(){
+        if(sLocalElevatorToDriver == null){
+            sLocalElevatorToDriver = new LocalElevatorToDriver();
         }
-        return sLocalElevatorDriverBridge;
+        return sLocalElevatorToDriver;
     }
 
     public void init(){
