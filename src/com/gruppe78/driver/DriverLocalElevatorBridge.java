@@ -16,8 +16,8 @@ public class DriverLocalElevatorBridge {
     private FloorCheck floorCheck;
 
     //Settings:
-    private static final int FLOOR_SLEEP_TIME = 200;
-    private static final int BUTTON_SLEEP_TIME = 100;
+    private static final int FLOOR_SLEEP_TIME = 100;
+    private static final int BUTTON_SLEEP_TIME = 50;
 
 
     /******************************************************************************************************

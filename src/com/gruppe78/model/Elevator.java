@@ -79,10 +79,10 @@ public class Elevator {
         }
     }
 
-    //TODO: Needed?
     public synchronized void setOrderDirection(Direction direction){
         if(mOrderDirection == direction) return;
         mOrderDirection = direction;
+
         for(ElevatorPositionListener listener : positionListeners){
             listener.onOrderDirectionChanged(direction);
         }
@@ -91,19 +91,19 @@ public class Elevator {
         return mOrderDirection;
     }
 
-    public void setMotorDirection(Direction direction) {
-        synchronized (positionListeners){
-            mMotorDirection =  direction;
-        }
+    public synchronized void setMotorDirection(Direction direction) {
+        if(direction == mMotorDirection) return;
+        mMotorDirection =  direction;
+
         for(ElevatorPositionListener listener : positionListeners){
             listener.onMotorDirectionChanged(direction);
         }
     }
-    public synchronized Direction getMotorDirection() {
+    public Direction getMotorDirection() {
         return mMotorDirection;
     }
 
-    public void setDoor(boolean open){
+    public synchronized void setDoor(boolean open){
         if(mDoorOpen.get() == open) return;
         mDoorOpen.set(open);
 
@@ -111,6 +111,7 @@ public class Elevator {
             listener.onDoorOpenChanged(open);
         }
     }
+
     public boolean isDoorOpen(){
         return mDoorOpen.get();
     }

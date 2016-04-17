@@ -1,5 +1,7 @@
 package com.gruppe78.utilities;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Created by student on 01.04.16.
  */
@@ -29,10 +31,11 @@ public class Log {
     private static String lastClassThreadName = "";
 
     private static StringBuilder builder = new StringBuilder();
+    private static AtomicInteger count = new AtomicInteger(0);
 
     private static void print(String prefix, String className, String msg, boolean newline){
         prefix = String.format("%-7s", prefix);
         String classNameThread = String.format("%25s", className + "("+Thread.currentThread().getName()+")");
-        System.out.print(prefix + " - " + classNameThread+" - "+msg + (newline ? "\n" : ""));
+        System.out.print(count.getAndIncrement()+":"+prefix + " - " + classNameThread+" - "+msg + (newline ? "\n" : ""));
     }
 }

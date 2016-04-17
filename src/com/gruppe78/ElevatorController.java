@@ -3,12 +3,8 @@ package com.gruppe78;
 import com.gruppe78.model.*;
 import com.gruppe78.utilities.Log;
 
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Controls the localElevator based on changes in model.
@@ -44,41 +40,47 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
         if (nextOrder == null) return;
         if (nextOrder.getFloor() == newFloor || OrderHandler.isOrderOnFloor(newFloor, localElevator) || newFloor.isTop() || newFloor.isBottom()){
             localElevator.setMotorDirection(Direction.NONE);
-            localElevator.setDoor(true);
+            openDoorAndClearOrders();
         }
     }
-
-    @Override
-    public void onMotorDirectionChanged(Direction newDirection){
-        if (newDirection == Direction.NONE) OrderHandler.clearOrder(systemData.getLocalElevator().getFloor());
-    };
 
     @Override
     public void onDoorOpenChanged(boolean open){
-        if(open){
-            mDoorTimer.start();
-        }else{
-            moveElevator();
-        }
-
+        Log.d(this, "Door open changed:"+open);
+        if(!open) moveElevator();
     }
+
+
 
     @Override
     public void onOrderAdded(Order order){
+        Log.d(this, "OrderAdded");
         moveElevator();
     }
 
+    public void openDoorAndClearOrders(){
+        Log.d(this, "openDoorAndClearOrders() called");
+        localElevator.setDoor(true);
+        mDoorTimer.start();
+        OrderHandler.clearOrder(localElevator.getFloor());
+    }
+
     public void moveElevator(){
-        if (mDoorTimer.isRunning() || localElevator.getMotorDirection() != Direction.NONE) return;
+        Log.d(this,"MoveElevator called");
+        if (localElevator.getMotorDirection() != Direction.NONE) return;
 
         Order nextOrder = OrderHandler.getNextOrder(localElevator);
+        Log.d(this, "Next Order: "+nextOrder);
         if (nextOrder == null) return;
 
         Direction orderDirection = localElevator.getFloor().directionTo(nextOrder.getFloor());
-        localElevator.setMotorDirection(orderDirection);
-        localElevator.setOrderDirection(nextOrder.getButton().getDirection());
 
-        if (orderDirection== Direction.NONE) mDoorTimer.start();
+        if(orderDirection == Direction.NONE){
+            openDoorAndClearOrders();
+        }else if(!localElevator.isDoorOpen()){
+            localElevator.setMotorDirection(orderDirection);
+            localElevator.setOrderDirection(nextOrder.getButton().getDirection());
+        }
     }
 
     private void onDoorTimerFinished(){
@@ -86,23 +88,18 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
     }
 
     private class DoorTimer implements Runnable {
-        private ExecutorService mThread = Executors.newFixedThreadPool(1);
-        private volatile boolean running = false;
+        private ScheduledExecutorService mThread = Executors.newSingleThreadScheduledExecutor();
+        private AtomicInteger count = new AtomicInteger(0);
         @Override public void run() {
-            running = true;
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            running = false;
-            onDoorTimerFinished();
+            Log.i(this, "count: "+count.get());
+            if(count.decrementAndGet() == 0) onDoorTimerFinished();
         }
         boolean isRunning(){
-            return running;
+            return count.get() == 0;
         }
         void start(){
-            mThread.execute(this);
+            count.incrementAndGet();
+            mThread.schedule(this,DOOR_OPEN_TIME, TimeUnit.MILLISECONDS);
         }
     }
 }
