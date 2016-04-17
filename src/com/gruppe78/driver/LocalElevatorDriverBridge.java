@@ -19,7 +19,7 @@ public class LocalElevatorDriverBridge implements ElevatorPositionListener, Orde
 
     public void init(){
         Elevator elevator = SystemData.get().getLocalElevator();
-        elevator.addElevatorMovementListener(this);
+        elevator.addElevatorPositionListener(this);
         elevator.addOrderEventListener(this);
         SystemData.get().addOrderEventListener(this);
     }

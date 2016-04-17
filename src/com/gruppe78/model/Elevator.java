@@ -3,7 +3,6 @@ package com.gruppe78.model;
 import com.gruppe78.utilities.Log;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -18,12 +17,11 @@ public class Elevator {
     private Floor mFloor;
     private Direction mOrderDirection = Direction.UP;
     private Direction mMotorDirection;
-    private final AtomicBoolean mDoorOpen = new AtomicBoolean(false);
+    private AtomicBoolean mDoorOpen = new AtomicBoolean(false);
 
     //Status:
-    private final AtomicBoolean mConnected = new AtomicBoolean(false);
-    private final AtomicBoolean mOperable =  new AtomicBoolean(true);
-    private final AtomicBoolean mUpToDate = new AtomicBoolean(true); //TODO: Check initial value.
+    private AtomicBoolean mConnected = new AtomicBoolean(false);
+    private AtomicBoolean mOperable =  new AtomicBoolean(true);
 
     //Listeners:
     private final CopyOnWriteArrayList<ElevatorPositionListener> positionListeners = new CopyOnWriteArrayList<>();
@@ -42,7 +40,7 @@ public class Elevator {
      * Adding and removing of listeners.
      ****************************************************************************************************************/
 
-    public void addElevatorMovementListener(ElevatorPositionListener listener){
+    public void addElevatorPositionListener(ElevatorPositionListener listener){
         positionListeners.add(listener);
     }
     public void removeElevatorMovementListener(ElevatorPositionListener listener){
@@ -126,16 +124,16 @@ public class Elevator {
             return internalOrders[floor.index];
         }
     }
-    public void addInternalOrder(Floor floor, Button button){
+    void addInternalOrder(Floor floor){
         if(floor == null) return;
         synchronized (internalOrders){
-            internalOrders[floor.index] = new Order(this, button, floor);
+            internalOrders[floor.index] = new Order(this, Button.INTERNAL, floor);
         }
         for (OrderListener listener : orderListeners){
             listener.onOrderAdded(internalOrders[floor.index]);
         }
     }
-    public void clearInternalOrder(Floor floor){//TODO: Fix nullpointerexception in Driver
+    void clearInternalOrder(Floor floor){
         Order order;
         synchronized (internalOrders){
             order = internalOrders[floor.index];
@@ -147,19 +145,13 @@ public class Elevator {
         }
     }
 
-    public Order[] getAllInternalOrders(){
-        synchronized (internalOrders) {
-            return internalOrders;
-        }
-    }
     /*************************************************
-     * Status - Connection and Operability
+     * Status - Connection, Operable
      *************************************************/
 
-    public InetAddress getAddress(){
-        return mInetAddress;
+    public boolean isConnected(){
+        return mConnected.get();
     }
-
     public void setConnected(boolean connected){
         if(connected == mConnected.get()) return;
         mConnected.set(connected);
@@ -167,9 +159,6 @@ public class Elevator {
         for(ElevatorStatusListener listener : statusListeners){
             listener.onConnectionChanged(this, connected);
         }
-    }
-    public boolean isConnected(){
-        return mConnected.get();
     }
 
     public boolean isOperable() {
@@ -183,14 +172,13 @@ public class Elevator {
             listener.onOperableChanged(this, operable);
         }
     }
-    public void setUpToDate(boolean upToDate){
-        mUpToDate.set(upToDate);
 
-    }
     /************************************************************
      * Identifiers:
      ************************************************************/
-
+    public InetAddress getAddress(){
+        return mInetAddress;
+    }
     public boolean isLocal(){
         return this == SystemData.get().getLocalElevator();
     }

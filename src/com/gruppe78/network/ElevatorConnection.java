@@ -12,12 +12,12 @@ import java.net.Socket;
  */
 public class ElevatorConnection {
     private static final int CONNECTION_CHECK_INTERVAL = 5000;
-    private static final String CHECK_MESSAGE = "group123";
+    private static final NetworkMessage CHECK_MESSAGE = new NetworkMessage("check","check");
 
     private final Elevator mElevator;
     private Socket mSocket;
-    private BufferedReader mReader;
-    private OutputStreamWriter mWriter;
+    private ObjectInputStream mReader;
+    private ObjectOutputStream mWriter;
 
     private ConnectionChecker mConnectionChecker = new ConnectionChecker();
     private ConnectionReader mMessageReader = new ConnectionReader();
@@ -38,8 +38,8 @@ public class ElevatorConnection {
         }else{
             try {
                 mSocket = socket;
-                mReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                mWriter = new OutputStreamWriter(socket.getOutputStream());
+                mReader = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+                mWriter = new ObjectOutputStream(socket.getOutputStream());
                 Log.i(this, mElevator + ":Socket successfully set up to.");
                 mConnectionChecker.start();
                 mMessageReader.start();
@@ -53,9 +53,9 @@ public class ElevatorConnection {
         mElevator.setConnected(status);
     }
 
-    public synchronized boolean sendPrimitive(String message) {
+    public synchronized boolean sendMessage(NetworkMessage message) {
         try {
-            mWriter.write(message + "\n");
+            mWriter.writeObject(message);
             mWriter.flush();
             setConnectionStatus(true);
             return true;
@@ -67,10 +67,13 @@ public class ElevatorConnection {
         }
     }
 
-    private String readPrimitive(){
+    private NetworkMessage readMessage(){
         try {
-            return mReader.readLine(); //Blocking.
+            return (NetworkMessage) mReader.readObject(); //Blocking.
         } catch (IOException e) {
+            Log.e(this, e);
+            return null;
+        } catch (ClassNotFoundException e) {
             Log.e(this, e);
             return null;
         }
@@ -79,7 +82,7 @@ public class ElevatorConnection {
     private class ConnectionChecker extends LoopThread{
         @Override public void loopRun() {
             Log.d(this, "Sending connection message to "+mElevator);
-            sendPrimitive(CHECK_MESSAGE);
+            sendMessage(CHECK_MESSAGE);
         }
 
         @Override public int getInterval() {
@@ -89,9 +92,9 @@ public class ElevatorConnection {
 
     private class ConnectionReader extends LoopThread{
         @Override public void loopRun() {
-            String message = readPrimitive();
+            NetworkMessage message = readMessage();
             if(message == null || message.equals(CHECK_MESSAGE)) return;
-            NetworkMessager.get().decodeMessage(message, mElevator);
+            LocalElevatorBroadcaster.get().decodeMessage(message, mElevator);
         }
 
         @Override public int getInterval() {

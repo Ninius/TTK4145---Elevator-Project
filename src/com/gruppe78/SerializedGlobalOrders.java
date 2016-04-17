@@ -3,14 +3,15 @@ package com.gruppe78;
 import com.gruppe78.model.Floor;
 import com.gruppe78.model.Order;
 import com.gruppe78.model.SystemData;
+import com.gruppe78.network.NetworkOrder;
 
 /**
  * Created by oysteikh on 4/13/16.
  */
 public class SerializedGlobalOrders implements java.io.Serializable {
-    private SerializedOrder[][] globalOrders;
+    private NetworkOrder[][] globalOrders;
     public SerializedGlobalOrders(Order[][] orders){
-        globalOrders = new SerializedOrder[Floor.NUMBER_OF_FLOORS][2];
+        globalOrders = new NetworkOrder[Floor.NUMBER_OF_FLOORS][2];
         int i = 0; int j = 0;
         for (Order floor[] : orders){
             for (Order order : floor){
@@ -18,23 +19,23 @@ public class SerializedGlobalOrders implements java.io.Serializable {
                     globalOrders[i][j] = null;
                 }
                 else{
-                    globalOrders[i][j] = new SerializedOrder(order, false);
+                    globalOrders[i][j] = new NetworkOrder(order);
                 }
                 j++;
             }
             i++;
         }
     }
-    public void updateGlobalOrders(){
+    public void updateGlobalOrders(SystemData data){
         Order newGlobalOrders[][] = new Order[Floor.NUMBER_OF_FLOORS][2];
         int i = 0; int j = 0;
-        for (SerializedOrder[] floor : globalOrders){
-            for (SerializedOrder order : floor){
-                newGlobalOrders[i][j] = order.getOrder();
+        for (NetworkOrder[] floor : globalOrders){
+            for (NetworkOrder order : floor){
+                newGlobalOrders[i][j] = order.getOrder(data);
                 j++;
             }
             i++;
         }
-        SystemData.get().setAllGlobalOrders(newGlobalOrders);
+        data.setAllGlobalOrders(newGlobalOrders);
     }
 }

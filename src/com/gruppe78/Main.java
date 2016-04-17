@@ -99,7 +99,7 @@ public class Main {
                     Main.onLocalElevatorPositionInitialized();
                 }
             };
-            localElevator.addElevatorMovementListener(elevatorFloorListener);
+            localElevator.addElevatorPositionListener(elevatorFloorListener);
             localElevator.setMotorDirection(Direction.DOWN);
         }
     }

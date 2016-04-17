@@ -29,7 +29,7 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
     public void init(){
         systemData = SystemData.get();
         localElevator = systemData.getLocalElevator();
-        localElevator.addElevatorMovementListener(this);
+        localElevator.addElevatorPositionListener(this);
         localElevator.addOrderEventListener(this);
         systemData.addOrderEventListener(this);
     }
@@ -38,7 +38,7 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
     public void onFloorChanged(Floor newFloor) {
         Order nextOrder = OrderHandler.getNextOrder(localElevator);
         if (nextOrder == null) return;
-        if (nextOrder.getFloor() == newFloor || OrderHandler.isOrderOnFloor(newFloor, localElevator) || newFloor.isTop() || newFloor.isBottom()){
+        if (nextOrder.getFloor() == newFloor || OrderHandler.getMatchingOrder(localElevator, newFloor, localElevator.getOrderDirection()) != null || newFloor.isTop() || newFloor.isBottom()){
             localElevator.setMotorDirection(Direction.NONE);
             openDoorAndClearOrders();
         }
@@ -62,7 +62,7 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
         Log.d(this, "openDoorAndClearOrders() called");
         localElevator.setDoor(true);
         mDoorTimer.start();
-        OrderHandler.clearOrder(localElevator.getFloor());
+        SystemData.get().clearAllOrders(localElevator.getFloor(), localElevator);
     }
 
     public void moveElevator(){
@@ -91,12 +91,11 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
         private ScheduledExecutorService mThread = Executors.newSingleThreadScheduledExecutor();
         private AtomicInteger count = new AtomicInteger(0);
         @Override public void run() {
-            Log.i(this, "count: "+count.get());
             if(count.decrementAndGet() == 0) onDoorTimerFinished();
         }
         boolean isRunning(){
             return count.get() == 0;
-        }
+        } //Todo: Maybe remove.
         void start(){
             count.incrementAndGet();
             mThread.schedule(this,DOOR_OPEN_TIME, TimeUnit.MILLISECONDS);

@@ -14,17 +14,22 @@ public enum Floor {
     Floor(int index){
         this.index = index;
     }
+
     public boolean isBottom(){
         return index == 0;
     }
     public boolean isTop(){
         return index + 1 == NUMBER_OF_FLOORS;
     }
-    public static Floor getLastFloor(){
-        return Floor.values()[Floor.NUMBER_OF_FLOORS-1];
-    }
-    public Direction directionTo(Floor floor){
 
+    public static Floor getTopFloor(){
+        return Floor.values()[NUMBER_OF_FLOORS-1];
+    }
+    public static Floor getBottomFloor(){
+        return Floor.values()[0];
+    }
+
+    public Direction directionTo(Floor floor){
         if(floor == null) {
             Log.i(this, "Null floor");
             return Direction.NONE;

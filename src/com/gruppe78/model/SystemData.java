@@ -70,34 +70,19 @@ public class SystemData {
     /***************************************************************************************************************
      * Orders - Add/Clear/Replace returns true if they were successful and listeners is called.
      ***************************************************************************************************************/
-
-    public boolean addGlobalOrder(Order order){
-        if(order.getButton() == Button.INTERNAL) return false;
-        if(order.getFloor().isBottom() && order.getButton().isDown()) return false;
-        if(order.getFloor().isTop() && order.getButton().isUp()) return false;
-
-        synchronized (globalOrders){
-            if(globalOrders[order.getFloor().index][order.getButton().isUp() ? 0 : 1] != null) return false;
-            globalOrders[order.getFloor().index][order.getButton().isUp() ? 0 : 1] = order;
-        }
-        for(OrderListener listener : orderListeners){
-            listener.onOrderAdded(order);
-        }
-        return true;
+    public void addOrder(Order order){
+        if(order.getButton() == Button.INTERNAL) order.getElevator().addInternalOrder(order.getFloor());
+        else addGlobalOrder(order);
+    }
+    public void clearOrder(Order order){
+        if(order.getButton() == Button.INTERNAL) order.getElevator().clearInternalOrder(order.getFloor());
+        else clearGlobalOrder(order.getFloor(), order.getButton().isUp());
     }
 
-    public boolean clearGlobalOrder(Floor floor, boolean buttonUp){
-        Order order;
-        synchronized (globalOrders){
-            order = globalOrders[floor.index][buttonUp ? 0 : 1];
-            globalOrders[floor.index][buttonUp ? 0 : 1] = null;
-        }
-        if(order == null) return false;
-
-        for(OrderListener listener : orderListeners){
-            listener.onOrderRemoved(order);
-        }
-        return true;
+    public void clearAllOrders(Floor floor, Elevator elevator){
+        clearGlobalOrder(floor, true);
+        clearGlobalOrder(floor, false);
+        elevator.clearInternalOrder(floor);
     }
 
     public Order getGlobalOrder(Floor floor, boolean buttonUp){
@@ -106,8 +91,38 @@ public class SystemData {
             return globalOrders[floor.index][buttonUp ? 0 : 1];
         }
     }
-    public Order[][] getAllGlobalOrders(){
-        Order[][] globalOrdersCopy = new Order[Floor.NUMBER_OF_FLOORS][2];
+
+    void addGlobalOrder(Order order){
+        if(order.getFloor().isBottom() && order.getButton().isDown()) return;
+        if(order.getFloor().isTop() && order.getButton().isUp()) return;
+
+        synchronized (globalOrders){
+            if(globalOrders[order.getFloor().index][order.getButton().isUp() ? 0 : 1] != null) return;
+            globalOrders[order.getFloor().index][order.getButton().isUp() ? 0 : 1] = order;
+        }
+        for(OrderListener listener : orderListeners){
+            listener.onOrderAdded(order);
+        }
+    }
+
+    void clearGlobalOrder(Floor floor, boolean buttonUp){
+        Order order;
+        synchronized (globalOrders){
+            order = globalOrders[floor.index][buttonUp ? 0 : 1];
+            if(order == null) return;
+            globalOrders[floor.index][buttonUp ? 0 : 1] = null;
+        }
+
+        for(OrderListener listener : orderListeners){
+            listener.onOrderRemoved(order);
+        }
+    }
+
+
+
+
+
+    public Order[][] getAllGlobalOrders(){ //TODO: MUST COPY ARRAY!
         synchronized (globalOrders){
             for (int i = 0; i < globalOrders.length; i++){
                 globalOrdersCopy[i] = globalOrders[i].clone();

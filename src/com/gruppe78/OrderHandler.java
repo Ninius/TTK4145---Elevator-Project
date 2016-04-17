@@ -1,8 +1,7 @@
 package com.gruppe78;
 
 import com.gruppe78.model.*;
-import com.gruppe78.network.Networker;
-import com.gruppe78.utilities.Log;
+
 import java.util.List;
 
 /**
@@ -13,7 +12,7 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
     private OrderHandler (){
         for (Elevator elevator : SystemData.get().getElevatorList()){
             elevator.addElevatorStatusListener(this);
-            elevator.addElevatorMovementListener(this);
+            elevator.addElevatorPositionListener(this);
         }
     }
     public static OrderHandler get(){
@@ -23,40 +22,12 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
         return mOrderHandler;
     }
 
-
     public static void onButtonPressed(Button button, Floor floor){
-        Order order = new Order(SystemData.get().getLocalElevator(), button, floor);
-        if (order.getButton() != Button.INTERNAL){
-            newGlobalOrder(order);
-        }
-        else{
-            SystemData.get().getLocalElevator().addInternalOrder(order.getFloor(), order.getButton());
-        }
+        Elevator localElevator = SystemData.get().getLocalElevator();
+        Elevator orderElevator = (button != Button.INTERNAL) ? CostFunction.getMinCostElevator(button, floor) : localElevator;
+        SystemData.get().addOrder(new Order(orderElevator, button, floor));
     }
-    public static void clearOrder(Floor floor){
-        SystemData.get().clearGlobalOrder(floor, true);
-        SystemData.get().clearGlobalOrder(floor, false);
-        SystemData.get().getLocalElevator().clearInternalOrder(floor);
 
-    }
-    private static void newGlobalOrder(Order order){//TODO: Implement/change to correct minCost function call. Refactoring might be needed depending on network
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                SystemData data = SystemData.get();
-                if (data.getGlobalOrder(order.getFloor(), order.getButton().isUp()) == null){
-                    Elevator minCostElevator = CostFunction.getMinCostElevator(order);
-                    data.addGlobalOrder(new Order(minCostElevator, order.getButton(), order.getFloor()));
-                }
-                else if(!data.getLocalElevator().isConnected()){
-                    data.addGlobalOrder(new Order(data.getLocalElevator(), order.getButton(), order.getFloor()));
-                }
-
-            }
-        });
-        thread.setName("Get minCostElevator thread");
-        thread.start();
-    }
     @Override
     public void onConnectionChanged(Elevator elevator, boolean connected){
         if (!connected){
@@ -78,71 +49,44 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
             reassignElevatorOrders(SystemData.get().getLocalElevator());
         }
     }
-    public static int getNumberOfGlobalOrders(Elevator elevator){
-        int orders = 0;
-        for (Floor floor : Floor.values()){
-            for (Button button : Button.values()){
-                if(button == Button.INTERNAL) continue;
-                if(SystemData.get().getGlobalOrder(floor, button.isUp()) != null && SystemData.get().getGlobalOrder(floor, button.isUp()).getElevator() == elevator){
-                    orders++;
-                }
-            }
-        }
-        return orders;
-    }
-
-    public static boolean isOrderOnFloor(Floor floor, Elevator elevator){
-        if (elevator.getInternalOrder(floor) != null) return true;
-        if (SystemData.get().getGlobalOrder(floor, true) != null && elevator.getMotorDirection() == Direction.UP && SystemData.get().getGlobalOrder(floor, true).getElevator() == elevator){
-            return true;
-        }
-        if (SystemData.get().getGlobalOrder(floor, false) != null && elevator.getMotorDirection() == Direction.DOWN && SystemData.get().getGlobalOrder(floor, false).getElevator() == elevator){
-            return true;
-        }
-        return false;
-    }
 
     public static void reassignElevatorOrders(Elevator elevator){
         SystemData data = SystemData.get();
+
         for (Floor floor : Floor.values()){
             for (Button button : Button.values()){
                 if(button == Button.INTERNAL) continue;
-                if (data.getGlobalOrder(floor, button.isUp()) != null && data.getGlobalOrder(floor, button.isUp()).getElevator() == elevator){
-                    Order tempOrder = data.getGlobalOrder(floor, button.isUp());
-                    data.clearGlobalOrder(floor, button.isUp());
-                    newGlobalOrder(tempOrder);
-                    //Reassign order
+                Order order = data.getGlobalOrder(floor, button.isUp());
+                if (order != null && order.getElevator() == elevator){
+                    Elevator lowestCostElevator = CostFunction.getMinCostElevator(button, floor);
+                    Order newOrder = new Order(lowestCostElevator, order.getButton(), order.getFloor());
+                    data.clearOrder(order);
+                    data.addOrder(newOrder);
                 }
             }
         }
     }
 
     public static Order getNextOrder(Elevator elevator){ //TODO: Check
-        SystemData data = SystemData.get();
-        Order order;
-        Floor floor = Floor.FLOOR0;
         Direction direction = elevator.getMotorDirection() != Direction.NONE ? elevator.getMotorDirection() : elevator.getOrderDirection();
-        floor = (direction == Direction.UP ? floor.getLastFloor() : Floor.FLOOR0);
+        Floor floor = (direction == Direction.UP ? Floor.getTopFloor() : Floor.getBottomFloor());
         if (direction == Direction.UP || direction == Direction.NONE) direction = Direction.DOWN;
         else direction = Direction.UP;
 
+        Order order;
         while(floor != null){
-            order = getAnyOrder(elevator, floor);
+            order = getMatchingOrder(elevator, floor, Direction.NONE);
             if(order != null) return order;
             floor = floor.getNextFloor(direction);
         }
         return null;
     }
-    private static Order getAnyOrder(Elevator elevator, Floor floor){
+
+    public static Order getMatchingOrder(Elevator elevator, Floor floor, Direction orderDirection){
         SystemData data = SystemData.get();
-        if (elevator.getInternalOrder(floor) != null){
-            return elevator.getInternalOrder(floor);
-        }
-        else if(data.getGlobalOrder(floor, false) != null && data.getGlobalOrder(floor, false).getElevator() == elevator){
-            return data.getGlobalOrder(floor, false);
-        }
-        else if(data.getGlobalOrder(floor, true) != null && data.getGlobalOrder(floor, true).getElevator() == elevator){
-            return data.getGlobalOrder(floor, true);
+        for(Button button : Button.values()){
+            Order order = (button == Button.INTERNAL) ? elevator.getInternalOrder(floor) : data.getGlobalOrder(floor, button.isUp());
+            if(order != null && order.getElevator() == elevator && button.matchDirection(orderDirection)) return order;
         }
         return null;
     }
@@ -150,8 +94,17 @@ public class OrderHandler implements ElevatorStatusListener, ElevatorPositionLis
     public static int getNumberOfInternalOrders(Elevator elevator){
         int orders = 0;
         for (Floor floor : Floor.values()){
-            if (elevator.getInternalOrder(floor) != null){
-                orders++;
+            if (elevator.getInternalOrder(floor) != null) orders++;
+        }
+        return orders;
+    }
+    public static int getNumberOfGlobalOrders(Elevator elevator){
+        int orders = 0;
+        for (Floor floor : Floor.values()){
+            for (Button button : Button.values()){
+                if(button == Button.INTERNAL) continue;
+                Order order = SystemData.get().getGlobalOrder(floor, button.isUp());
+                if(order != null && order.getElevator() == elevator) orders++;
             }
         }
         return orders;

@@ -19,7 +19,7 @@ public class OperativeManager implements ElevatorPositionListener{
     private AtomicBoolean active = new AtomicBoolean();
 
     private OperativeManager(){
-        SystemData.get().getLocalElevator().addElevatorMovementListener(this);
+        SystemData.get().getLocalElevator().addElevatorPositionListener(this);
     }
     public static OperativeManager get(){
         if(sOperativeManager == null){
