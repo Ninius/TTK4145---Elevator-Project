@@ -92,7 +92,6 @@ public class ElevatorConnection {
         } catch (IOException e) { //Todo, check different exception types. Test.
             setConnectionStatus(false);
             Log.i(this, mElevator+"Could not send msg. Setting connection status to false."+e.getMessage());
-            Log.e(this, e);
             return false;
         }
     }
