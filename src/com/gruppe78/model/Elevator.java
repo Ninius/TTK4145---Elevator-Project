@@ -162,7 +162,7 @@ public class Elevator {
     public void setConnected(boolean connected){
         if(connected == mConnected.get()) return;
         mConnected.set(connected);
-        Log.i(this, "Elevator connection status changed. " + this + " is now " + (connected? "connected" : "disconnected"));
+        Log.i(this, "Elevator connection status changed. " + this + " is now changed to" + (connected? "connected" : "disconnected"));
         for(ElevatorStatusListener listener : statusListeners){
             listener.onConnectionChanged(this, connected);
         }

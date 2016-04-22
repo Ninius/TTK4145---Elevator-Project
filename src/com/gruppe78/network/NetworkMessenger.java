@@ -64,6 +64,7 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
         for(Elevator elevator : data.getElevatorList()){
             if(elevator == localElevator) continue;
             ElevatorConnection connection = networkStarter.getConnection(elevator);
+            if(connection == null) continue;
             boolean success = connection.sendMessage(message);
             Log.i(this, "Sending msg to "+elevator+":"+message+". Success:"+success);
         }

@@ -66,6 +66,9 @@ public class Main {
             SystemData.init(elevators, localElevator);
             Log.i(NAME, "System Data initialized, elevators in the system: "+SystemData.get().getElevatorList());
 
+            //Sending data to other elevators when states changes:
+            NetworkMessenger.get().initBroadcasting();
+
             //Establishing connections:
             networkStarter = NetworkStarter.get();
             networkStarter.createElevatorConnections(CONNECT_TIMEOUT, PORT);
@@ -80,9 +83,6 @@ public class Main {
             //Monitoring that the physical elevator is responding
             operativeManager = OperativeManager.get();
             operativeManager.start();
-
-            //Sending data to other elevators when states changes:
-            NetworkMessenger.get().initBroadcasting();
 
             //Monitoring status of elevators and reassigning orders.
             OrderHandler.get().init();
