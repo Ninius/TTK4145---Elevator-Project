@@ -7,6 +7,7 @@ import com.gruppe78.utilities.LoopThread;
 import com.gruppe78.utilities.Utilities;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.Socket;
 
 /**
@@ -39,13 +40,7 @@ public class ElevatorConnection {
         mConnectionChecker.start();
         mConnectionChecker.setName(ConnectionChecker.class.getSimpleName());
 
-        if(mClient) restartConnectClient();
-    }
-    private void restartConnectClient(){
-        if(mClientConnect != null) mClientConnect.interrupt();
-        mClientConnect = new ConnectClient(mPort, mElevator, mSocketConnectTimeout);
-        mClientConnect.setName(ConnectClient.class.getSimpleName());
-        mClientConnect.start();
+        restartConnectClient();
     }
 
     private boolean isValid(Socket socket){
@@ -102,6 +97,13 @@ public class ElevatorConnection {
             return false;
         }
         try {
+            if(!mElevator.getAddress().isReachable(100)){
+                Log.e(this, "Not Reachable. Restarting connection.");
+                setConnectionStatus(false);
+                restartConnection();
+                return false;
+            }
+
             mWriter.writeObject(message);
             mWriter.flush();
             setConnectionStatus(true);
@@ -112,25 +114,35 @@ public class ElevatorConnection {
             return false;
         }
     }
-
     private NetworkMessage readMessage(){
         try {
             return (NetworkMessage) mReader.readObject(); //Blocking.
         } catch (IOException e) {
-            Log.e(this, "IOException. Closing socket. Stopping reader.  Starting connector.");
-            try {
-                mSocket.close();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            mSocket = null;
-            restartConnectClient();
-            mMessageReader.interrupt();
+            Log.e(this, "IOException. Closing socket. Restarting.");
+            restartConnection();
             return null;
         } catch (ClassNotFoundException e) {
             Log.e(this, e);
             return null;
         }
+    }
+
+    private synchronized void restartConnection(){
+        try {
+            if(mSocket != null) mSocket.close();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        mSocket = null;
+        restartConnectClient();
+        mMessageReader.interrupt();
+    }
+    private void restartConnectClient(){
+        if(!mClient) return;
+        if(mClientConnect != null) mClientConnect.interrupt();
+        mClientConnect = new ConnectClient(mPort, mElevator, mSocketConnectTimeout);
+        mClientConnect.setName(ConnectClient.class.getSimpleName());
+        mClientConnect.start();
     }
 
     private class ConnectionChecker extends LoopThread{
