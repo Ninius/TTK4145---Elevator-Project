@@ -13,17 +13,16 @@ public class CostFunction {//TODO: Test
             return Integer.MAX_VALUE;
         }
         int cost = 0;
-        Elevator localElevator = SystemData.get().getLocalElevator();
-        Direction directionToOrder = localElevator.getFloor().directionTo(floor);
-        if (directionToOrder != localElevator.getOrderDirection() && directionToOrder != Direction.NONE){
+        Direction directionToOrder = elevator.getFloor().directionTo(floor);
+        if (directionToOrder != elevator.getOrderDirection() && directionToOrder != Direction.NONE){
             cost += Floor.NUMBER_OF_FLOORS;
         }
-        if (!button.matchDirection(localElevator.getOrderDirection())){
+        if (!button.matchDirection(elevator.getOrderDirection())){
             cost += (Floor.NUMBER_OF_FLOORS-1);
         }
-        cost += localElevator.getFloor().lengthTo(floor);
-        cost += OrderHandler.getNumberOfInternalOrders(localElevator)*Floor.NUMBER_OF_FLOORS/2;
-        cost += OrderHandler.getNumberOfGlobalOrders(localElevator)*Floor.NUMBER_OF_FLOORS/2;
+        cost += elevator.getFloor().lengthTo(floor);
+        cost += OrderHandler.getNumberOfInternalOrders(elevator)*Floor.NUMBER_OF_FLOORS/2;
+        cost += OrderHandler.getNumberOfGlobalOrders(elevator)*Floor.NUMBER_OF_FLOORS/2;
         return cost;
 
     }
