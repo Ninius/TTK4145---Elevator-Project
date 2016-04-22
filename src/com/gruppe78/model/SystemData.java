@@ -69,15 +69,18 @@ public class SystemData {
      * Orders - Add/Clear/Replace returns true if they were successful and listeners is called.
      ***************************************************************************************************************/
     public void addOrder(Order order){
+        if (order == null) return;
         if(order.getButton() == Button.INTERNAL) order.getElevator().addInternalOrder(order.getFloor());
         else addGlobalOrder(order);
     }
     public void clearOrder(Order order){
+        if (order == null) return;
         if(order.getButton() == Button.INTERNAL) order.getElevator().clearInternalOrder(order.getFloor());
         else clearGlobalOrder(order.getFloor(), order.getButton().isUp());
     }
 
     public void clearAllOrders(Floor floor, Elevator elevator){
+        if (elevator == null || floor == null) return;
         clearGlobalOrder(floor, true);
         clearGlobalOrder(floor, false);
         elevator.clearInternalOrder(floor);
@@ -91,6 +94,7 @@ public class SystemData {
     }
 
     void addGlobalOrder(Order order){
+        if (order == null) return;
         if(order.getFloor().isBottom() && order.getButton().isDown()) return;
         if(order.getFloor().isTop() && order.getButton().isUp()) return;
 
@@ -117,7 +121,7 @@ public class SystemData {
     }
     public Order[][] getAllGlobalOrders(){
         synchronized (globalOrders){
-            return globalOrders.clone();
+            return globalOrders;
         }
     }
 }

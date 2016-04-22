@@ -78,7 +78,7 @@ public class Elevator {
     }
 
     public synchronized void setOrderDirection(Direction direction){
-        if(mOrderDirection == direction) return;
+        if(mOrderDirection == direction || direction == null) return;
         mOrderDirection = direction;
 
         for(ElevatorPositionListener listener : positionListeners){
@@ -90,7 +90,7 @@ public class Elevator {
     }
 
     public synchronized void setMotorDirection(Direction direction) {
-        if(direction == mMotorDirection) return;
+        if(direction == mMotorDirection || direction == null) return;
         mMotorDirection =  direction;
 
         for(ElevatorPositionListener listener : positionListeners){
@@ -135,6 +135,7 @@ public class Elevator {
         }
     }
     void clearInternalOrder(Floor floor){
+        if (floor == null) return;
         Order order;
         synchronized (internalOrders){
             order = internalOrders[floor.index];
