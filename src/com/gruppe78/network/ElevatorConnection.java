@@ -123,6 +123,7 @@ public class ElevatorConnection {
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
+            mSocket = null;
             restartConnectClient();
             mMessageReader.interrupt();
             return null;
