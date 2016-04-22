@@ -58,6 +58,8 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
                 networkOrder = (NetworkOrder) message.getData();
                 data.clearOrder(networkOrder.getOrder(data));
                 return;
+            case "check":
+                return;
             default:
                 Log.e(this, "Could not decode message.");
         }
