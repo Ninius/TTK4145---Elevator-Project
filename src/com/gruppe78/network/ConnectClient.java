@@ -41,8 +41,8 @@ class ConnectClient extends Thread{
                 lastException = e;
                 Log.i(this, "NoRouteToHostException for "+mElevator+". Probably due to connection loss to router. Trying again.");
             } catch (IOException e) {
-                Log.e(this, e);
-                return;
+                socket = new Socket();
+                //Log.e(this, e);
             }
         }
     }

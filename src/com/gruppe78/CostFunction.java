@@ -9,7 +9,7 @@ import com.gruppe78.model.*;
 //Move to Elevator class?
 public class CostFunction {//TODO: Test
     private static int costFunction(Elevator elevator, Button button, Floor floor){
-        if (!elevator.isOperable() || !elevator.isConnected()){
+        if (!elevator.isOperable() || !elevator.isConnected() || elevator.getFloor() == null){
             return Integer.MAX_VALUE;
         }
         int cost = 0;

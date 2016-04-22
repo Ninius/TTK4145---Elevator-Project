@@ -1,6 +1,7 @@
 package com.gruppe78.network;
 
 import com.gruppe78.model.*;
+import com.gruppe78.utilities.Log;
 
 /**
  * Created by jespe on 14.04.2016.
@@ -60,9 +61,10 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
     }
 
     public synchronized void sendMessage(NetworkMessage message){ //TODO: Create thread.
-        for(Elevator elevator : data.getElevatorList()){
+        for(Elevator elevator : SystemData.get().getElevatorList()){
             if(elevator == localElevator) continue;
             ElevatorConnection connection = networkStarter.getConnection(elevator);
+            if(connection == null) return;
             connection.sendMessage(message);
         }
     }
@@ -77,6 +79,7 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
     }
     @Override
     public void onOrderDirectionChanged(Direction newDirection){
+        Log.i(this, "Sending new Order Direction");
         sendMessage(new NetworkMessage("OrderDirectionChanged", newDirection));
     }
     @Override
@@ -88,11 +91,13 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
     public void onConnectionChanged(Elevator elevator, boolean connected) {
         if (elevator != SystemData.get().getLocalElevator() && connected){
             //Sending internal orders to the elevator:
+/*
             for (Order order : elevator.getAllInternalOrders()){
                 if (order == null) continue;
                 sendMessage(new NetworkMessage("OrderAdded", new NetworkOrder(order)));
             }
-
+*/
+            Log.i(this, "Connection changed, sending local info");
             //Sending info about local elevator.
             Elevator localElevator = SystemData.get().getLocalElevator();
             sendMessage(new NetworkMessage("FloorChanged", localElevator.getFloor()));
@@ -105,6 +110,7 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
                     sendMessage(new NetworkMessage("OrderAdded", new NetworkOrder(order)));
                 }
             }
+
         }
     }
 

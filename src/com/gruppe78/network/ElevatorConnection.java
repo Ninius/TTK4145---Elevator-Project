@@ -33,15 +33,10 @@ public class ElevatorConnection {
     }
 
     private boolean isValid(Socket socket){
-        return socket != null && (socket.isClosed() || !socket.isConnected());
+        return socket != null && !socket.isClosed() && socket.isConnected();
     }
 
     synchronized void setConnectedSocket(Socket socket){
-        if(isValid(socket)){
-            Log.e(this, mElevator + ":Tried to set socket. Socket was not valid!");
-        }else if(isValid(mSocket)){
-            Log.e(this, mElevator + ":Tried to set socket. Valid socket already set!");
-        }else{
             try {
                 mSocket = socket;
                 mReader = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
@@ -53,7 +48,7 @@ public class ElevatorConnection {
                 setConnectionStatus(false);
                 e.printStackTrace();
             }
-        }
+
     }
 
     //Only set false if

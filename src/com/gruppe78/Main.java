@@ -22,7 +22,7 @@ public class Main {
     private static final String NAME = Main.class.getSimpleName();
 
     //System settings:
-    private static String[] ELEVATOR_IP_LIST = new String[]{"127.0.0.1", "200.200.200.200"};
+    private static String[] ELEVATOR_IP_LIST;
     private static final int PORT = 6251;
     private static final int CONNECT_TIMEOUT = 5000;
 
