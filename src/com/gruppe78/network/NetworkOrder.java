@@ -22,4 +22,9 @@ public class NetworkOrder implements Serializable {
     public Order getOrder(SystemData data) {
         return new Order(data.getElevator(orderElevatorAddress), button, floor);
     }
+
+    @Override
+    public String toString(){
+        return "NetO("+orderElevatorAddress+":"+floor+":"+button+")";
+    }
 }
