@@ -22,8 +22,8 @@ public class Main {
     private static final String NAME = Main.class.getSimpleName();
 
     //System settings:
-    private static final String[] ELEVATOR_IP_LIST = new String[]{"127.0.0.1", "200.200.200.200"};
-    private static final int PORT = 1000;
+    private static String[] ELEVATOR_IP_LIST = new String[]{"127.0.0.1", "200.200.200.200"};
+    private static final int PORT = 6251;
     private static final int CONNECT_TIMEOUT = 5000;
 
     //References to components to prevent them from being garbage collected.
@@ -38,8 +38,11 @@ public class Main {
         Log.i(NAME, "System started");
 
         try {
+            if(args.length > 0) ELEVATOR_IP_LIST = args;
+            else return;
+
             //Initializing driver
-            DriverHelper.init(DriverHelper.SIMULATOR_DRIVER);
+            DriverHelper.init(DriverHelper.ELEVATOR_DRIVER);
             Log.i(NAME, "Driver initialized.");
 
             //Creating elevator objects from IP-list:
