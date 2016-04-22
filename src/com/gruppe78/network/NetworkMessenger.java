@@ -11,6 +11,8 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
     private Elevator localElevator;
     private SystemData data;
     private NetworkStarter networkStarter;
+    private Order lastOrderAddedReceived = null;
+    private Order lastOrderRemovedReceived = null;
 
     private NetworkMessenger(){
         data = SystemData.get();
@@ -32,7 +34,7 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
         }
     }
 
-    public void decodeMessage(NetworkMessage message, Elevator sender){
+    void decodeMessage(NetworkMessage message, Elevator sender){
         Log.i(this, "Receiving msg from "+sender+":"+message);
         switch (message.getMessage()){
             case "FloorChanged":
@@ -52,18 +54,20 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
                 return;
             case "OrderAdded":
                 NetworkOrder networkOrder = (NetworkOrder) message.getData();
-                data.addOrder(networkOrder.getOrder(data));
+                lastOrderAddedReceived = networkOrder.getOrder(data);
+                data.addOrder(lastOrderAddedReceived);
                 return;
             case "OrderRemoved":
                 networkOrder = (NetworkOrder) message.getData();
-                data.clearOrder(networkOrder.getOrder(data));
+                lastOrderRemovedReceived = networkOrder.getOrder(data);
+                data.clearOrder(lastOrderRemovedReceived);
                 return;
             default:
                 Log.e(this, "Could not decode message.");
         }
     }
 
-    public synchronized void sendMessage(NetworkMessage message){ //TODO: Create thread.
+    synchronized void sendMessage(NetworkMessage message){ //TODO: Create thread.
         for(Elevator elevator : data.getElevatorList()){
             if(elevator == localElevator) continue;
             ElevatorConnection connection = networkStarter.getConnection(elevator);
@@ -122,11 +126,13 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
 
     @Override
     public void onOrderAdded(Order order){
+        if(order == lastOrderAddedReceived) return;
         sendMessage(new NetworkMessage("OrderAdded", new NetworkOrder(order)));
     }
 
     @Override
     public void onOrderRemoved(Order order){
+        if(order == lastOrderRemovedReceived) return;
         sendMessage(new NetworkMessage("OrderRemoved", new NetworkOrder(order)));
     }
 }
