@@ -18,56 +18,67 @@ public class ElevatorConnection {
 
     private final Elevator mElevator;
     private final Elevator mLocalElevator;
-    private boolean mClient;
+    private final int mPort;
+    private final int mSocketConnectTimeout;
+    private final boolean mClient;
     private ConnectClient mClientConnect;
     private Socket mSocket;
     private ObjectInputStream mReader;
     private ObjectOutputStream mWriter;
 
     private ConnectionChecker mConnectionChecker = new ConnectionChecker();
-    private ConnectionReader mMessageReader = new ConnectionReader();
+    private ConnectionReader mMessageReader;
 
-    ElevatorConnection(Elevator elevator, boolean client){
+    ElevatorConnection(Elevator elevator, boolean client, int port, int socketConnectTimeout){
         mElevator = elevator;
         mLocalElevator = SystemData.get().getLocalElevator();
         mClient = client;
+        mPort = port;
+        mSocketConnectTimeout = socketConnectTimeout;
+
+        mConnectionChecker.start();
+        mConnectionChecker.setName(ConnectionChecker.class.getSimpleName());
+
+        if(mClient) restartConnectClient();
+    }
+    private void restartConnectClient(){
+        if(mClientConnect != null) mClientConnect.interrupt();
+        mClientConnect = new ConnectClient(mPort, mElevator, mSocketConnectTimeout);
+        mClientConnect.setName(ConnectClient.class.getSimpleName());
+        mClientConnect.start();
     }
 
     private boolean isValid(Socket socket){
         return (socket != null && !socket.isClosed() && socket.isConnected());
     }
 
-    void setConnectedSocket(Socket socket){
-        try {
-            synchronized (this){
-                if(!isValid(socket)){
-                    Log.e(this, mElevator + ":Tried to set socket. Socket was not valid!");
-                }else if(isValid(mSocket)){
-                    Log.e(this, mElevator + ":Tried to set socket. Valid socket already set!");
-                }else {
+    synchronized void setConnectedSocket(Socket socket){
+        if(!isValid(socket)){
+            Log.e(this, mElevator + ":Tried to set socket. Socket was not valid!");
+        }else if(isValid(mSocket)){
+            Log.e(this, mElevator + ":Tried to set socket. Valid socket already set!");
+        }else{
+            try {
+                mSocket = socket;
+                Log.i(this, mElevator + ":Socket set: Closed:"+mSocket.isClosed()+" Connected:"+mSocket.isConnected());
 
-                    mSocket = socket;
-                    Log.i(this, mElevator + ":Socket set: Closed:" + mSocket.isClosed() + " Connected:" + mSocket.isConnected());
-
-                    if (mClient) {
-                        mReader = new ObjectInputStream(mSocket.getInputStream());
-                        mWriter = new ObjectOutputStream(mSocket.getOutputStream());
-                    } else {
-                        mWriter = new ObjectOutputStream(mSocket.getOutputStream());
-                        mReader = new ObjectInputStream(mSocket.getInputStream());
-                    }
-                    Log.i(this, mElevator + ": Reader and writer created! Starting ConnectionChecker and ConnectionReader...");
+                if(mClient){
+                    mReader = new ObjectInputStream(mSocket.getInputStream());
+                    mWriter = new ObjectOutputStream(mSocket.getOutputStream());
+                }else{
+                    mWriter = new ObjectOutputStream(mSocket.getOutputStream());
+                    mReader = new ObjectInputStream(mSocket.getInputStream());
                 }
+                Log.i(this, mElevator + ": Reader and writer created! Starting ConnectionChecker and ConnectionReader...");
+                mMessageReader = new ConnectionReader();
+                mMessageReader.start();
+                mMessageReader.setName(ConnectionReader.class.getSimpleName());
+            } catch (IOException e) {
+                setConnectionStatus(false);
+                Log.e(this, e);
+            }catch (Exception e){
+                Log.e(this, e);
             }
-            mConnectionChecker.start();
-            mConnectionChecker.setName(ConnectionChecker.class.getSimpleName());
-            mMessageReader.start();
-            mMessageReader.setName(ConnectionReader.class.getSimpleName());
-        } catch (IOException e) {
-            setConnectionStatus(false);
-            Log.e(this, e);
-        }catch (Exception e){
-            Log.e(this, e);
         }
     }
 
@@ -94,7 +105,7 @@ public class ElevatorConnection {
             return true;
         } catch (IOException e) { //Todo, check different exception types. Test.
             setConnectionStatus(false);
-            Log.i(this, mElevator+"Could not send msg. Setting connection status to false."+e.getMessage());
+            //Log.e(this, mElevator+"Could not send msg. Setting connection status to false."+e.getMessage());
             return false;
         }
     }
@@ -103,7 +114,14 @@ public class ElevatorConnection {
         try {
             return (NetworkMessage) mReader.readObject(); //Blocking.
         } catch (IOException e) {
-            Log.e(this, e);
+            Log.e(this, "IOException. Closing socket. Stopping reader.  Starting connector.");
+            try {
+                mSocket.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            restartConnectClient();
+            mMessageReader.interrupt();
             return null;
         } catch (ClassNotFoundException e) {
             Log.e(this, e);
