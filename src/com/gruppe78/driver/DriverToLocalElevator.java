@@ -33,14 +33,15 @@ public class DriverToLocalElevator {
         }
         return sDriverToLocalElevator;
     }
-    public void start(){
-        buttonCheck = new ButtonCheck();
-        buttonCheck.setName(ButtonCheck.class.getSimpleName());
-        buttonCheck.start();
-
+    public void startFloorCheck(){
         floorCheck = new FloorCheck();
         floorCheck.setName(FloorCheck.class.getSimpleName());
         floorCheck.start();
+    }
+    public void startButtonCheck(){
+        buttonCheck = new ButtonCheck();
+        buttonCheck.setName(ButtonCheck.class.getSimpleName());
+        buttonCheck.start();
     }
 
     /**************************************************************

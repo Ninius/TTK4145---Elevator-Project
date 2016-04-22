@@ -18,7 +18,6 @@ import java.util.ArrayList;
  * - The backbone of the system is the data objects, which
  *
  ***************************************************************************************************/
-
 public class Main {
     private static final String NAME = Main.class.getSimpleName();
 
@@ -40,7 +39,7 @@ public class Main {
 
         try {
             //Initializing driver
-            DriverHelper.init(DriverHelper.ELEVATOR_DRIVER);
+            DriverHelper.init(DriverHelper.SIMULATOR_DRIVER);
             Log.i(NAME, "Driver initialized.");
 
             //Creating elevator objects from IP-list:
@@ -74,7 +73,7 @@ public class Main {
             localElevatorToDriver.init();
 
             driverToLocalElevator = DriverToLocalElevator.get();
-            driverToLocalElevator.start();
+            driverToLocalElevator.startFloorCheck();
 
             //Monitoring that the physical elevator is responding
             operativeManager = OperativeManager.get();
@@ -113,6 +112,7 @@ public class Main {
     private static void onLocalElevatorPositionInitialized(){
         elevatorController = ElevatorController.get();
         elevatorController.init();
+        driverToLocalElevator.startButtonCheck();
     }
 
 }

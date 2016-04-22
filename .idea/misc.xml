@@ -9,4 +9,18 @@
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" assert-keyword="true" jdk-15="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
+  <component name="UMLDiagramComponent">
+    <diagram name="gruppe78">
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.gruppe78.Main" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.gruppe78.CostFunction" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.gruppe78.OrderHandler" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.gruppe78.OperativeManager" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.gruppe78.ElevatorController" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.gruppe78.SerializedGlobalOrders" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.gruppe78.utilities.Log" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.gruppe78.utilities.Utilities" />
+      <command command-class="de.frag.umlplugin.uml.command.AddClassCommand" psi-class="com.gruppe78.utilities.LoopThread" />
+      <compartment-visibility />
+    </diagram>
+  </component>
 </project>
