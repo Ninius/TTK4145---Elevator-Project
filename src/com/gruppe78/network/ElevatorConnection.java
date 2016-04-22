@@ -70,15 +70,15 @@ public class ElevatorConnection {
 
     //Only set false if
     private void setConnectionStatus(boolean connected){
-        if(!connected){
+        if (connected) {
+            mElevator.setConnected(true);
+            mLocalElevator.setConnected(true);
+        } else {
             if(Utilities.isElevatorLocalConnected(mLocalElevator)){
                 mElevator.setConnected(connected);
             }else{
                 mLocalElevator.setConnected(connected);
             }
-        }else{
-            mElevator.setConnected(true);
-            mLocalElevator.setConnected(true);
         }
     }
 
