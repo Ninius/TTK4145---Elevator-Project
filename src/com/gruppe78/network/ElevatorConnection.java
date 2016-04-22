@@ -37,34 +37,37 @@ public class ElevatorConnection {
         return (socket != null && !socket.isClosed() && socket.isConnected());
     }
 
-    synchronized void setConnectedSocket(Socket socket){
-        if(!isValid(socket)){
-            Log.e(this, mElevator + ":Tried to set socket. Socket was not valid!");
-        }else if(isValid(mSocket)){
-            Log.e(this, mElevator + ":Tried to set socket. Valid socket already set!");
-        }else{
-            try {
-                mSocket = socket;
-                Log.i(this, mElevator + ":Socket set: Closed:"+mSocket.isClosed()+" Connected:"+mSocket.isConnected());
+    void setConnectedSocket(Socket socket){
+        try {
+            synchronized (this){
+                if(!isValid(socket)){
+                    Log.e(this, mElevator + ":Tried to set socket. Socket was not valid!");
+                }else if(isValid(mSocket)){
+                    Log.e(this, mElevator + ":Tried to set socket. Valid socket already set!");
+                }else {
 
-                if(mClient){
-                    mReader = new ObjectInputStream(mSocket.getInputStream());
-                    mWriter = new ObjectOutputStream(mSocket.getOutputStream());
-                }else{
-                    mWriter = new ObjectOutputStream(mSocket.getOutputStream());
-                    mReader = new ObjectInputStream(mSocket.getInputStream());
+                    mSocket = socket;
+                    Log.i(this, mElevator + ":Socket set: Closed:" + mSocket.isClosed() + " Connected:" + mSocket.isConnected());
+
+                    if (mClient) {
+                        mReader = new ObjectInputStream(mSocket.getInputStream());
+                        mWriter = new ObjectOutputStream(mSocket.getOutputStream());
+                    } else {
+                        mWriter = new ObjectOutputStream(mSocket.getOutputStream());
+                        mReader = new ObjectInputStream(mSocket.getInputStream());
+                    }
+                    Log.i(this, mElevator + ": Reader and writer created! Starting ConnectionChecker and ConnectionReader...");
                 }
-                Log.i(this, mElevator + ": Reader and writer created! Starting ConnectionChecker and ConnectionReader...");
-                mConnectionChecker.start();
-                mConnectionChecker.setName(ConnectionChecker.class.getSimpleName());
-                mMessageReader.start();
-                mMessageReader.setName(ConnectionReader.class.getSimpleName());
-            } catch (IOException e) {
-                setConnectionStatus(false);
-                Log.e(this, e);
-            }catch (Exception e){
-                Log.e(this, e);
             }
+            mConnectionChecker.start();
+            mConnectionChecker.setName(ConnectionChecker.class.getSimpleName());
+            mMessageReader.start();
+            mMessageReader.setName(ConnectionReader.class.getSimpleName());
+        } catch (IOException e) {
+            setConnectionStatus(false);
+            Log.e(this, e);
+        }catch (Exception e){
+            Log.e(this, e);
         }
     }
 

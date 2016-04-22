@@ -1,6 +1,7 @@
 package com.gruppe78;
 
 import com.gruppe78.model.*;
+import com.gruppe78.utilities.Log;
 
 /**
  * Created by oysteikh on 3/4/16.
@@ -23,6 +24,7 @@ public class CostFunction {//TODO: Test
         cost += elevator.getFloor().lengthTo(floor);
         cost += OrderHandler.getNumberOfInternalOrders(elevator)*Floor.NUMBER_OF_FLOORS/2;
         cost += OrderHandler.getNumberOfGlobalOrders(elevator)*Floor.NUMBER_OF_FLOORS/2;
+        //Log.i(this, elevator + "Cost function: " + cost);
         return cost;
 
     }
