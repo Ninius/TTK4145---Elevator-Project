@@ -33,6 +33,7 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
     }
 
     public void decodeMessage(NetworkMessage message, Elevator sender){
+        Log.i(this, "Receiving msg from "+sender+":"+message);
         switch (message.getMessage()){
             case "FloorChanged":
                 sender.setFloor((Floor) message.getData());
@@ -57,6 +58,8 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
                 networkOrder = (NetworkOrder) message.getData();
                 data.clearOrder(networkOrder.getOrder(data));
                 return;
+            default:
+                Log.e(this, "Could not decode message.");
         }
     }
 
