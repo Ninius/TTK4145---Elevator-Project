@@ -123,7 +123,7 @@ public class ElevatorConnection {
     private class ConnectionReader extends LoopThread{
         @Override public void loopRun() {
             NetworkMessage message = readMessage();
-            if(message == null || message.equals(CHECK_MESSAGE)) return;
+            if(message == null || message.getMessage().equals(CHECK_MESSAGE)) return;
             NetworkMessenger.get().decodeMessage(message, mElevator);
         }
 
