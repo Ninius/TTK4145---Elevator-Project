@@ -21,4 +21,9 @@ public class NetworkMessage implements Serializable {
     public Object getData(){
         return data;
     }
+
+    @Override
+    public String toString(){
+        return "NetMsg("+message+": data:" +data+")";
+    }
 }

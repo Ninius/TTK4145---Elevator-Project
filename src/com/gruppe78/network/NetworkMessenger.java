@@ -1,6 +1,7 @@
 package com.gruppe78.network;
 
 import com.gruppe78.model.*;
+import com.gruppe78.utilities.Log;
 
 /**
  * Created by jespe on 14.04.2016.
@@ -63,7 +64,8 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
         for(Elevator elevator : data.getElevatorList()){
             if(elevator == localElevator) continue;
             ElevatorConnection connection = networkStarter.getConnection(elevator);
-            connection.sendMessage(message);
+            boolean success = connection.sendMessage(message);
+            Log.i(this, "Sending msg to "+elevator+":"+message+". Success:"+success);
         }
     }
 
@@ -81,7 +83,7 @@ public class NetworkMessenger implements ElevatorPositionListener, ElevatorStatu
     }
     @Override
     public void onDoorOpenChanged(boolean newOpen){
-        sendMessage(new NetworkMessage("DoorOpenChanged", newOpen));
+        //sendMessage(new NetworkMessage("DoorOpenChanged", newOpen));
     }
 
     @Override

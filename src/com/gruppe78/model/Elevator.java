@@ -186,12 +186,12 @@ public class Elevator {
         return mInetAddress;
     }
     public boolean isLocal(){
-        return this == SystemData.get().getLocalElevator();
+        return SystemData.get() != null && this == SystemData.get().getLocalElevator();
     }
     public int getID(){ return mID;}
 
     @Override
     public String toString(){
-        return "E"+mID+"("+ getAddress().getHostAddress()+")";
+        return isLocal() ? "E(Local)" : "E"+mID+"("+ getAddress().getHostAddress()+")";
     }
 }

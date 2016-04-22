@@ -34,13 +34,19 @@ class ConnectClient extends Thread{
                 socket = new Socket();
                 if(lastException instanceof SocketTimeoutException) continue;
                 lastException = e;
-                Log.i(this, "Socket Timed out for "+mElevator+ ". Elevator is reachable, but is not responding.");
+                Log.i(this, "Socket Timed out for "+mElevator+ ". Elevator is reachable, but is not responding. Trying again.");
             } catch (NoRouteToHostException e){
                 socket = new Socket();
                 if(lastException instanceof NoRouteToHostException) continue;
                 lastException = e;
                 Log.i(this, "NoRouteToHostException for "+mElevator+". Probably due to connection loss to router. Trying again.");
-            } catch (IOException e) {
+            } catch (ConnectException e) {
+                socket = new Socket();
+                if(lastException instanceof ConnectException) continue;
+                lastException = e;
+                Log.i(this, "ConnectException for "+mElevator+". Reaching, but no server responding. Trying again.");
+            } catch (IOException e){
+                Log.e(this, "Unknown IOException for "+mElevator+". Stopping ConnectClient...");
                 Log.e(this, e);
                 return;
             }

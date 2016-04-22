@@ -22,7 +22,7 @@ public class Main {
     private static final String NAME = Main.class.getSimpleName();
 
     //System settings:
-    private static String[] ELEVATOR_IP_LIST = new String[]{"127.0.0.1", "200.200.200.200"};
+    private static String[] ELEVATOR_IP_LIST = new String[]{"129.241.187.142", "129.241.187.144"};
     private static final int PORT = 6251;
     private static final int CONNECT_TIMEOUT = 5000;
 
@@ -39,7 +39,6 @@ public class Main {
 
         try {
             if(args.length > 0) ELEVATOR_IP_LIST = args;
-            else return;
 
             //Initializing driver
             DriverHelper.init(DriverHelper.ELEVATOR_DRIVER);
@@ -97,15 +96,19 @@ public class Main {
     private static void initiateLocalElevatorPosition(Elevator localElevator){
         Log.i(NAME, "Initializing elevator to a floor.");
         if(localElevator.getFloor() != null){
+            localElevator.setMotorDirection(Direction.NONE);
             Main.onLocalElevatorPositionInitialized();
         }else{
             ElevatorPositionListener elevatorFloorListener = new ElevatorPositionListener() {
                 @Override public void onFloorChanged(Floor newFloor) {
                     SystemData.get().getLocalElevator().removeElevatorMovementListener(this);
                     SystemData.get().getLocalElevator().setMotorDirection(Direction.NONE);
-                    Log.i(NAME, "Elevator is initialized to a floor.");
                     Main.onLocalElevatorPositionInitialized();
                 }
+
+                @Override public void onMotorDirectionChanged(Direction newDirection) {}
+                @Override public void onOrderDirectionChanged(Direction newDirection) {}
+                @Override public void onDoorOpenChanged(boolean newOpen) {}
             };
             localElevator.addElevatorPositionListener(elevatorFloorListener);
             localElevator.setMotorDirection(Direction.DOWN);
@@ -113,6 +116,7 @@ public class Main {
     }
 
     private static void onLocalElevatorPositionInitialized(){
+        Log.i(NAME, "Elevator is initialized to a floor.");
         elevatorController = ElevatorController.get();
         elevatorController.init();
         driverToLocalElevator.startButtonCheck();
