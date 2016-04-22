@@ -14,7 +14,7 @@ public class CostFunction {//TODO: Test
         }
         int cost = 0;
         Direction directionToOrder = elevator.getFloor().directionTo(floor);
-        if (directionToOrder != elevator.getOrderDirection() && directionToOrder != Direction.NONE){
+        if (directionToOrder != elevator.getOrderDirection() && directionToOrder != Direction.NONE && elevator.getOrderDirection() != Direction.NONE){
             cost += Floor.NUMBER_OF_FLOORS;
         }
         if (!button.matchDirection(elevator.getOrderDirection())){
