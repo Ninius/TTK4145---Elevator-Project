@@ -37,8 +37,14 @@ public class ElevatorController implements ElevatorPositionListener, OrderListen
     @Override
     public void onFloorChanged(Floor newFloor) {
         Order nextOrder = OrderHandler.getNextOrder(localElevator);
-        if (nextOrder == null) return;
-        if (nextOrder.getFloor() == newFloor || OrderHandler.getMatchingOrder(localElevator, newFloor, localElevator.getMotorDirection()) != null || newFloor.isTop() || newFloor.isBottom()){
+        if(newFloor.isTop() || newFloor.isBottom()){
+            localElevator.setMotorDirection(Direction.NONE);
+        }
+        if (nextOrder == null){
+            localElevator.setMotorDirection(Direction.NONE);
+            return;
+        }
+        if (nextOrder.getFloor() == newFloor || OrderHandler.getMatchingOrder(localElevator, newFloor, localElevator.getMotorDirection()) != null){
             localElevator.setMotorDirection(Direction.NONE);
             openDoorAndClearOrders();
         }

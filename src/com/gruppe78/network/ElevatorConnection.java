@@ -97,7 +97,7 @@ public class ElevatorConnection {
     }
 
     public synchronized boolean sendMessage(NetworkMessage message) {
-        if(mSocket == null || message == null) return false;
+        if(mSocket == null || mWriter == null || message == null) return false;
         try {
             mWriter.writeObject(message);
             mWriter.flush();
